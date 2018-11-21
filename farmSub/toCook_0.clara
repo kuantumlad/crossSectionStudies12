@@ -1,0 +1,10 @@
+set inputDir /lustre/expphy/volatile/clas12/bclary/simulation_out/elastic/beam2/
+set outputDir /work/clas12/bclary/CLAS12/electron_studies/elastic/sim/recon/
+set description clary
+set farm.track reconstruction
+set farm.scaling 15
+set farm.cpu 70
+set farm.memory 60
+set threads 64
+set fileList file_list.list
+run farm
