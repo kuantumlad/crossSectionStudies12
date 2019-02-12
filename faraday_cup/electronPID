@@ -1,0 +1,3 @@
+#!/bin/sh -f
+SCRIPT_DIR=`dirname $0`
+java -Xms1024m -cp "$COATJAVA/lib/clas/*:$SCRIPT_DIR/target/*" org.jlab.clas.analysis.clary.phiAnalysis $*
