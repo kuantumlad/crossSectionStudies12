@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/work/clas12/bclary/CLAS12/validation/validationBrandon/coat/coatjava-5b.7.4/bin/hipo-utils -merge -o
