@@ -427,7 +427,7 @@ std::vector<double> p1_sigma;
   TLorentzVector p4_phot[BUFFER];
 
 
-
+  int eventNumber[BUFFER];
   float e_vx[BUFFER], e_vy[BUFFER], e_vz[BUFFER], e_beta[BUFFER], e_FTOF_sec[BUFFER], e_PCAL_sec[BUFFER];
   float p_vx[BUFFER], p_vy[BUFFER], p_vz[BUFFER], p_beta[BUFFER], p_FTOF_sec[BUFFER], p_PCAL_sec[BUFFER];
   float n_vx[BUFFER], n_vy[BUFFER], n_vz[BUFFER], n_beta[BUFFER];
@@ -473,6 +473,7 @@ int select_eta;
   int helicity;
   float fcup;
   vector<int> sectorE;
+  vector<int> electron_event_number;
   vector<double> p4_ele_px;
   vector<double> p4_ele_py;
   vector<double> p4_ele_pz;
@@ -512,7 +513,7 @@ int select_eta;
   vector<double> p4_phot_pz;
   vector<double> p4_phot_E;
 
-
+int event;
 // cut statistics:
 
 long neg_part_count;
@@ -1328,8 +1329,10 @@ int main(int argc, char** argv){
 
     TTree out_tree("out_tree","out_tree");
     out_tree.Branch("helicity", &helicity);
+    out_tree.Branch("eventNumber",&eventNumber);
     out_tree.Branch("fcup", &fcup);
     out_tree.Branch("sectorE", &sectorE);
+    out_tree.Branch("eventNumber",&electron_event_number);
     out_tree.Branch("p4_ele_px", &p4_ele_px);
     out_tree.Branch("p4_ele_py", &p4_ele_py);
     out_tree.Branch("p4_ele_pz", &p4_ele_pz);
@@ -4459,6 +4462,7 @@ out->cd ("sampling_fraction");
 neg_part_count = 0;
 pos_part_count = 0;
 neut_part_count = 0;
+ event = 0;
 
 cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
@@ -4470,9 +4474,10 @@ cout << endl;
 
  cout <<"ana tree " <<anaTree->GetEntriesFast()<<endl;
 
- for(Int_t k=0;k < anaTree->GetEntriesFast();k++){    
+ for(Int_t k=0; k < anaTree->GetEntriesFast(); k++){    
 
   anaTree->GetEntry(k);
+  event = k;
   if(process_Events > 0 && k == process_Events) break;
 
 
@@ -4505,7 +4510,7 @@ p4_ele_px.clear(); p4_prot_px.clear(); p4_neutr_px.clear(); p4_pip_px.clear(); p
 p4_ele_py.clear(); p4_prot_py.clear(); p4_neutr_py.clear(); p4_pip_py.clear(); p4_pim_py.clear(); p4_Kp_py.clear(); p4_Km_py.clear(); p4_phot_py.clear();
 p4_ele_pz.clear(); p4_prot_pz.clear(); p4_neutr_pz.clear(); p4_pip_pz.clear(); p4_pim_pz.clear(); p4_Kp_pz.clear(); p4_Km_pz.clear(); p4_phot_pz.clear();
 p4_ele_E.clear(); p4_prot_E.clear(); p4_neutr_E.clear(); p4_pip_E.clear(); p4_pim_E.clear(); p4_Kp_E.clear(); p4_Km_E.clear(); p4_phot_E.clear();
- sectorE.clear();
+ sectorE.clear(); electron_event_number.clear();
  p4_ele_vx.clear(); p4_ele_vy.clear(); p4_ele_vz.clear();
  p4_prot_vx.clear(); p4_prot_vy.clear(); p4_prot_vz.clear();
 
@@ -4530,7 +4535,7 @@ for(Int_t i = 0; i < BUFFER; i++){
 
   e_ind[i] = -1;  p_ind[i] = -1;  n_ind[i] = -1;  pip_ind[i] = -1;  pim_ind[i] = -1;  Kp_ind[i] = -1;  Km_ind[i] = -1;  g_ind[i] = -1;
 
-  e_vx[i] = 0;  e_vy[i] = 0;  e_vz[i] = 0;  e_beta[i] = 0, e_FTOF_sec[i] = -1, e_PCAL_sec[i] = -1;
+  e_vx[i] = 0;  e_vy[i] = 0;  e_vz[i] = 0;  e_beta[i] = 0, e_FTOF_sec[i] = -1, e_PCAL_sec[i] = -1; eventNumber[i]=-1;
   p_vx[i] = 0;  p_vy[i] = 0;  p_vz[i] = 0;  p_beta[i] = 0, p_FTOF_sec[i] = -1, p_PCAL_sec[i] = -1; 
   n_vx[i] = 0;  n_vy[i] = 0;  n_vz[i] = 0;  n_beta[i] = 0; 
   pip_vx[i] = 0;  pip_vy[i] = 0;  pip_vz[i] = 0;  pip_beta[i] = 0, pip_FTOF_sec[i] = -1; 
@@ -9297,6 +9302,7 @@ void select_electron(int run){
       e_beta[i] = vpart_beta->at(e_ind[i]);
       double p = sqrt(vpart_px->at(e_ind[i])*vpart_px->at(e_ind[i]) + vpart_py->at(e_ind[i])*vpart_py->at(e_ind[i]) + vpart_pz->at(e_ind[i])*vpart_pz->at(e_ind[i]));
       p4_ele[i].SetPxPyPzE(vpart_px->at(e_ind[i]), vpart_py->at(e_ind[i]), vpart_pz->at(e_ind[i]), sqrt(p*p + m_e*m_e));
+      eventNumber[i] =  event;
       e_FTOF_sec[i] = part_FTOF_sector_layer2[e_ind[i]];
       e_PCAL_sec[i] = part_Cal_PCAL_sector[e_ind[i]];
     }
@@ -12240,6 +12246,7 @@ void fill_output_vector_electron(void){
       p4_ele_pz.push_back(p4_ele[i].Pz());
       p4_ele_E.push_back(p4_ele[i].E()); 
       sectorE.push_back(e_PCAL_sec[i]);
+      electron_event_number.push_back(eventNumber[i]);
       p4_ele_vx.push_back(e_vx[i]);
       p4_ele_vy.push_back(e_vy[i]);
       p4_ele_vz.push_back(e_vz[i]);

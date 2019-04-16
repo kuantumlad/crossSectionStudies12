@@ -61,6 +61,14 @@ Float_t m_Km = 0.4937;
 Float_t c = 299792458;
 
 // vectors with components of the Lorentzvector to fill into the tree
+vector<int> *p4_mc_pid = 0;
+vector<double> *p4_mc_px  = 0;
+vector<double> *p4_mc_py = 0;
+vector<double> *p4_mc_pz = 0;
+vector<double> *p4_mc_vx = 0;
+vector<double> *p4_mc_vy = 0;
+vector<double> *p4_mc_vz = 0;
+
 
 int helicity;
 float fcup;
@@ -101,9 +109,11 @@ vector<double> *prot_beta_final = 0;
 vector<double> *Kp_beta_final = 0;
 vector<double> *Km_beta_final = 0;
 vector<double> *el_sector = 0;
+vector<int> *eventNumber = 0;
 vector<double> *prot_sector = 0;
 vector<double> *Kp_sector = 0;
 vector<double> *Km_sector = 0;
+
 
 /// varibales for particles:
 
@@ -118,7 +128,8 @@ TLorentzVector pim[BUFFER];
 TLorentzVector Kp[BUFFER]; 
 TLorentzVector Km[BUFFER]; 
 TLorentzVector phot[BUFFER];
-
+TLorentzVector mc_ele[BUFFER];
+TLorentzVector mc_prot[BUFFER];
 
 //added for beta vs p
 double prot_beta[BUFFER];
@@ -129,6 +140,7 @@ int sect_el[BUFFER];
 int sect_pr[BUFFER];
 int sect_kp[BUFFER];
 int sect_km[BUFFER];
+int event[BUFFER];
 
 ///  counting variables:
 
@@ -141,7 +153,10 @@ double Kp_count;
 double Km_count;
 double phot_count;
 
+double mc_count;
+
 // kinematic variables
+
 double W, Q2, nu, x, y;
 double t1, cmphi1, cmcostheta1, pt1, eta1, z1;
 double M_e_p_X_miss, M_e_p_X_miss2;
@@ -168,6 +183,11 @@ Double_t E_kaonM_1; Double_t px_kaonM_1; Double_t py_kaonM_1; Double_t pz_kaonM_
 
 Double_t prot_beta_out; Double_t kaonP_beta_out; Double_t kaonM_beta_out;
 Int_t el_sect; Int_t pr_sect; Int_t kp_sect; Int_t km_sect;
+
+
+// Monte Carlo Particles for elastic events 
+Double_t E_ele_mc; Double_t px_ele_mc; Double_t py_ele_mc; Double_t pz_ele_mc;
+Double_t E_prot_1_mc; Double_t px_prot_1_mc; Double_t py_prot_1_mc; Double_t pz_prot_1_mc;
 
 
 /// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +248,7 @@ double kin_epKpKmXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp, 
 /// main
 ///
 
-Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
+Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string data_type = "DATA")
 {
 		
   Char_t *inTree="out_tree";
@@ -252,6 +272,28 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
 
   cout << "Reading from File: " << inFile << endl;
 
+
+  Char_t *mcTreeName="mc_tree";
+  TTree *mcTree=(TTree *) f->Get(mcTreeName);
+  std::string analysis_sim = "SIM";
+  if(mcTree==0){  // Check if TTree exists!
+    cout << " MC Tree doesn't exist!!!" << endl;
+    cout <<"Exit program" << endl;
+    return 0;
+  }
+
+  //if( data_type == analysis_sim ){    
+  std::cout << " SETTING MC VARIABLES " << std::endl;
+  mcTree->SetBranchAddress("p4_mc_pid",&p4_mc_pid);
+  mcTree->SetBranchAddress("p4_mc_px",&p4_mc_px);
+  mcTree->SetBranchAddress("p4_mc_py",&p4_mc_py);
+  mcTree->SetBranchAddress("p4_mc_pz",&p4_mc_pz);
+  mcTree->SetBranchAddress("p4_mc_vx",&p4_mc_vx);
+  mcTree->SetBranchAddress("p4_mc_vy",&p4_mc_vy);
+  mcTree->SetBranchAddress("p4_mc_vz",&p4_mc_vz);
+  
+
+
   TTree *anaTree=(TTree *) f->Get(inTree);
 
   if(anaTree==0){  // Check if TTree exists!
@@ -259,7 +301,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
     cout <<"Exit program" << endl;
     return 0;
   }
+ 
     
+
     
   /// /////////////////////////////////////////////////////////////////////////////    
   ///  get branches from input file:
@@ -268,6 +312,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
   anaTree->SetBranchAddress("helicity", &helicity);
   anaTree->SetBranchAddress("fcup", &fcup);
   anaTree->SetBranchAddress("sectorE",&sectorE);
+  anaTree->SetBranchAddress("eventNumber",&eventNumber);
   anaTree->SetBranchAddress("p4_ele_px", &p4_ele_px);
   anaTree->SetBranchAddress("p4_ele_py", &p4_ele_py);
   anaTree->SetBranchAddress("p4_ele_pz", &p4_ele_pz);
@@ -301,10 +346,16 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
   anaTree->SetBranchAddress("p4_phot_pz", &p4_phot_pz);
   anaTree->SetBranchAddress("p4_phot_E", &p4_phot_E);  
 
+  // }
+  
   /// /////////////////////////////////////////////////////////////////////////////    
-  ///  Set Histograms
+  ///  SET OUTPUT FILE 
   /// ///////////////////////////////////////////////////////////////////////////// 
   out = new TFile(outputfile, "RECREATE");
+  
+  /// /////////////////////////////////////////////////////////////////////////////    
+  ///  SET histograms
+  /// ///////////////////////////////////////////////////////////////////////////// 
 
   double el_theta_max = 30.0;
   double pr_theta_max = 50.0;
@@ -477,6 +528,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
   out_tree1.Branch("missmass2", &M_e_p_X_miss2);
   out_tree1.Branch("helicity", &helicity);
   out_tree1.Branch("E_ele", &E_ele);
+  //out_tree1.Branch("eventNumber",&eventNumber);
   out_tree1.Branch("px_ele", &px_ele);
   out_tree1.Branch("py_ele", &py_ele);
   out_tree1.Branch("pz_ele", &pz_ele);
@@ -484,6 +536,17 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
   out_tree1.Branch("px_prot", &px_prot_1);
   out_tree1.Branch("py_prot", &py_prot_1);
   out_tree1.Branch("pz_prot", &pz_prot_1);
+ 
+  out_tree1.Branch("E_ele_mc", &E_ele_mc);
+  out_tree1.Branch("px_ele_mc", &px_ele_mc);
+  out_tree1.Branch("py_ele_mc", &py_ele_mc);
+  out_tree1.Branch("pz_ele_mc", &pz_ele_mc);
+  out_tree1.Branch("E_prot_mc", &E_prot_1_mc);
+  out_tree1.Branch("px_prot_mc", &px_prot_1_mc);
+  out_tree1.Branch("py_prot_mc", &py_prot_1_mc);
+  out_tree1.Branch("pz_prot_mc", &pz_prot_1_mc);
+
+  
 
   /// /////////////////////////////////////////////////////////////////////////////    
   ///  Set cut limits on W and other variables
@@ -519,7 +582,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
   cout << "Event Loop starting ... " << endl;
   cout << endl;
         
-  for(Int_t k=0; k < anaTree->GetEntriesFast();k++){    
+
+  std::cout << " Number of MC events " << mcTree->GetEntriesFast() << std::endl;
+  for(Int_t k=0; k < anaTree->GetEntriesFast(); k++){    
       
     anaTree->GetEntry(k);
 
@@ -574,6 +639,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
     E_kaonP_1 = 0; px_kaonP_1 = 0; py_kaonP_1 = 0; pz_kaonP_1 = 0;
     E_kaonM_1 = 0; px_kaonM_1 = 0; py_kaonM_1 = 0; pz_kaonM_1 = 0;
 
+    //Moncte carlo variables (GEN)
+    E_ele_mc = 0; px_ele_mc = 0; py_ele_mc = 0; pz_ele_mc = 0;
+    E_prot_1_mc = 0; px_prot_1_mc = 0; py_prot_1_mc = 0; pz_prot_1_mc = 0;
+
     W = 0; Q2 = 0; nu = 0; x = 0; y = 0;
     t1 = 0; cmphi1 = 0; cmcostheta1 = 0; pt1 = 0; eta1 = 0; z1 = 0;
 
@@ -586,7 +655,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
     /// //////////////////////////////////////////////////////////////////
 
     for(Int_t i = 0; i < BUFFER; i++){ 
-      if(ele_count > i){ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); ele_sector[i]=sectorE->at(i);}
+      if(ele_count > i){ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); ele_sector[i]=sectorE->at(i); event[i]=eventNumber->at(i);}
       else{ele[i].SetPxPyPzE(0, 0, 0, 0); ele_sector[i] = -1;}
       if(prot_count > i){prot[i].SetPxPyPzE(p4_prot_px->at(i),p4_prot_py->at(i),p4_prot_pz->at(i),p4_prot_E->at(i));}
       else{prot[i].SetPxPyPzE(0, 0, 0, 0);}
@@ -604,7 +673,23 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
       else{phot[i].SetPxPyPzE(0, 0, 0, 0);}      
     }
 
+    double mass_el = 0.000511;
 
+      
+    mcTree->GetEntry(event[0]);
+    	  
+    for( int i = 0; i < p4_mc_pid->size(); i++ ){
+      if( p4_mc_pid->at(i) == 11 ){
+	int ii = i;
+	double mc_ele_e = sqrt( p4_mc_px->at(ii)*p4_mc_px->at(ii) + 
+				p4_mc_py->at(ii)*p4_mc_py->at(ii) +
+				p4_mc_pz->at(ii)*p4_mc_pz->at(ii) + 
+				mass_el * mass_el );
+	mc_ele[ii].SetPxPyPzE(p4_mc_px->at(ii), p4_mc_py->at(ii), p4_mc_pz->at(ii), mc_ele_e );
+      }
+    }
+    				 
+    
     // Assign beta from tree to array
     for( Int_t i = 0; i < BUFFER; i++ ){
       //if( prot_count > i ){ prot_beta[i]=prot_beta_final->at(i); }
@@ -625,11 +710,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
     //  Build event:
     /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     if(ele_count == 1){    // one detected electron is the basic trigger condition for all topologies 
 
       select_ele = 0;   // if more than one electron is detected (< 0.2 percent of the events), take the one with the hihest momentum
-          
+
       W  = kin_W(ele[select_ele]);
       Q2 = kin_Q2(ele[select_ele]);
       x  = kin_x(ele[select_ele]);
@@ -671,7 +755,23 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
 	  if( (ele[select_ele].Theta()*180/Pival) > 5.0 ){
 
 	    // Fill best electron
+	    W  = kin_W(ele[select_ele]);
+	    Q2 = kin_Q2(ele[select_ele]);
+	    x  = kin_x(ele[select_ele]);
+	    y  = kin_y(ele[select_ele]);
+	    nu = kin_nu(ele[select_ele]);
 
+	    E_ele  = ele[select_ele].E();
+	    px_ele = ele[select_ele].Px();
+	    py_ele = ele[select_ele].Py();
+	    pz_ele = ele[select_ele].Pz();
+
+	    E_ele_mc  = mc_ele[0].E();
+	    px_ele_mc = mc_ele[0].Px();
+	    py_ele_mc = mc_ele[0].Py();
+	    pz_ele_mc = mc_ele[0].Pz();
+	    out_tree1.Fill();
+	   
 	    if(ele[select_ele].P() > 0) hist_electron_p->Fill(ele[select_ele].P());
 	    if(ele[select_ele].Theta() > 0) hist_electron_theta->Fill(ele[select_ele].Theta()*180/Pival);
 	    if(ele[select_ele].Phi() != 0) hist_electron_phi->Fill(ele[select_ele].Phi()*180/Pival);
@@ -688,20 +788,28 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run)
 	    h_el_ptheta_sect_final[el_sect]->Fill( ele[select_ele].P(), ele[select_ele].Theta()*180/Pival );   
 	    h_el_phitheta_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
 	    h_el_phitheta_final->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 
+	    //
+
 	  }
+
+	  //}
+  
+	  
+
 	}
       }
 
  
     }
+
   }
   
-
 
   cout << endl;
   cout << "Tree successfully analysed!" << endl;
   cout << "Writing the output file ... " << endl;
   out->Write(); // Saving Histograms
+  out_tree1.Write();
   cout << "Histograms saved in File: " << outputfile << endl;
   out->Close(); // Closing Output File
   f->Close();   // Closing Input File

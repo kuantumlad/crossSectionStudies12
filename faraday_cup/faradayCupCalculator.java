@@ -20,7 +20,9 @@ public class faradayCupCalculator{
 
 	double tot_beam_charge = 0.0;
 	int global_event = 0;
-	double offset = 243.0;
+	//double offset = 243.0;
+	double offset = 209.0;
+	double atten=9.8088;
 
 	//tot_lum = tot_lum + delta_beam_charge
 	//delta_beam_charge = beam_charge2 - beam_charge1
@@ -44,7 +46,7 @@ public class faradayCupCalculator{
 	double test_fc_charge=0.0;
 
 	while( file_counter <= f_max ){
-	    String file_in = dir_in + "out_clas_00"+s_run+".evio."+Integer.toString(file_counter)+".hipo";
+	    String file_in = dir_in + "clas_00"+s_run+".evio."+Integer.toString(file_counter)+".hipo";
 	    File fin_temp = new File(file_in);
 
 	    if( !fin_temp.exists() ) continue;
@@ -79,9 +81,9 @@ public class faradayCupCalculator{
 		//DataEvent event = (DataEvent)hiporeader.getNextEvent();
 
 		boolean runConfig_pres = event.hasBank("RUN::config");
-		boolean recBank_pres  = event.hasBank("REC::Particle");
+		//boolean recBank_pres  = event.hasBank("REC::Particle");
 		boolean rawScalerBank_pres = event.hasBank("RAW::scaler");
-		boolean eventBank_pres = event.hasBank("REC::Event");
+		//boolean eventBank_pres = event.hasBank("REC::Event");
 		boolean configBank_pres = event.hasBank("RUN::config");
 
 		if ( configBank_pres ){
@@ -111,55 +113,60 @@ public class faradayCupCalculator{
 		    for(int i=0; i<rawBank.rows(); i++){
 			int slot = rawBank.getByte("slot",i);
 			int chan = rawBank.getShort("channel",i);			
-			if(slot==1 && chan==32){
+			offset=0;
+			if(slot==0 && chan==32){
 			    int fc_scaler = rawBank.getInt("value",i);
 			    double true_freq = fc_scaler/(0.03333 - 0.0005);
-			    double beam_current = (true_freq - offset)/906.2;
+			    double beam_current = (true_freq - offset)*atten/906.2;
+			    //System.out.println(" >> true freeq " + true_freq);
 			    beam_current_ungated = beam_current;
 			    beam_charge1 = (0.03283*((fc_scaler/0.03283)-offset))/906.2;// beam_current * (0.03333f - 0.0005);			    
 			    //System.out.println(" >> UNGATED INFO " );
 			    //System.out.println(" >> Slot " + slot + " Channel " + chan + " fc scaler value " + fc_scaler);
-			    //System.out.println(">> current " + beam_current);			    
-			    //System.out.println( " >> " + fc_scaler + " " + true_freq + " " + beam_current + " " + beam_charge+ " " +tot_beam_charge);
+			    //System.out.println(">> current " + beam_current*atten);			    
+			    //System.out.println( " >> " + fc_scaler + " " + true_freq + " " + beam_current + " " + beam_charge1+ " " +tot_beam_charge);
 			}
+			//exclude for runs after feb 5th
 			if( slot==0 && chan == 0 ){
 			    int fc_scaler = rawBank.getInt("value",i);
 			    double true_freq = fc_scaler/(0.03333 - 0.0005);
-			    double beam_current = (true_freq - offset)/906.2;
-			    beam_charge0 = (0.03283*((fc_scaler/0.03283)-offset))/906.2;// beam_current * (0.03333f - 0.0005);			    
+			    double beam_current = (true_freq - offset)*atten/906.2;
+			    beam_charge0 = (0.03283*((fc_scaler/0.03283)-offset)*atten)/906.2;// beam_current * (0.03333f - 0.0005);			    
 			    //System.out.println(" >> GATED INFO " );
 			    //System.out.println(" >> Slot " + slot + " Channel " + chan + " fc scaler value " + fc_scaler);
 			    //System.out.println(">> current " + beam_current);			    
-			    //System.out.println( " >> " + fc_scaler + " " + true_freq + " " + beam_current + " " + beam_charge + " " + tot_beam_charge);
+			    //System.out.println( " >> " + fc_scaler + " " + true_freq + " " + beam_current + " " + beam_charge0 + " " + tot_beam_charge);
 
 			}
+			
 		    }
 		
 		    double gated_diff = beam_charge1 - beam_charge0;
 		    //System.out.println(" >> gated diff " + gated_diff );
-		    //tot_beam_charge=tot_beam_charge+beam_charge; // commented out when looking at runs before feb 5th ish		    		    
-		    tot_beam_charge=tot_beam_charge+gated_diff;
+		    tot_beam_charge=tot_beam_charge+beam_charge0; // commented out when looking at runs before feb 5th ish		    		    
+		    
+		    //tot_beam_charge=tot_beam_charge+gated_diff;
 		    //System.out.println(" tot beam charge " + tot_beam_charge );
 
-		    accum_charge.add(tot_beam_charge);
-		    accum_charge_er.add(0.0);
-		    charge_ev.add(global_event);
-		    charge_ev_er.add(0.0);
+		    //accum_charge.add(tot_beam_charge);
+		    //////accum_charge_er.add(0.0);
+		    //////charge_ev.add(global_event);
+		    //////charge_ev_er.add(0.0);
 		    if( beam_current_ungated > 0.0 ){
-			current_evnt.add(global_event);
-			current_ev.add(beam_current_ungated);
-			current_evnt_err.add(0.0);
-			current_ev_err.add(0.0);
+			///////current_evnt.add(global_event);
+			///////current_ev.add(beam_current_ungated);
+			///////current_evnt_err.add(0.0);
+			////////current_ev_err.add(0.0);
 		    }
 		    //System.out.println(" >> " + tot_beam_charge );
 		}
-		if( eventBank_pres ){
-		    DataBank eventBank = event.getBank("REC::Event");
-		    double bcg = eventBank.getFloat("BCG",0);
+		//if( eventBank_pres ){
+		//  DataBank eventBank = event.getBank("REC::Event");
+		//  double bcg = eventBank.getFloat("BCG",0);
 		    //int run = eventBank.getInt("NRUN",0);
 		    //System.out.println(">> " + bcg );
-		    h_bcg.fill(bcg);
-		}
+		    /////////h_bcg.fill(bcg);
+		///}
 	    }
 	    file_counter++;
 	    System.out.println(" >> end " + end_unix_time + " start " + start_unix_time );
@@ -220,6 +227,31 @@ public class faradayCupCalculator{
 	double tot_lum = lum_factor;
 	System.out.println(" >> TOTAL LUMINOSITY " + tot_lum);
 
+	
+	System.out.println(" >> Writing FC txt file  now " );	
+
+
+	Writer writer = null;
+	try {
+	    writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream("lum_out_r"+s_run+"_"+input[2]+"_"+input[2]+".txt"), "utf-8"));
+ 	    writer.write( " >> Number of electron " + n_el ); 
+	    writer.write(" >> Number of protons  " + n_pr );
+	    writer.write( " >> Luminosity factor  " + lum_factor );    
+	    writer.write(" >> elapsed time " + elapsed_time );  
+	    writer.write(" >> time stamp time " + elapsed_ts); 
+	    writer.write(" >> charge from time " + charge_from_time ); 
+	    writer.write(" >> nel from time " + nel_from_time );   
+	    writer.write(" >> TOTAL ACCUMULATED CHARGE " + tot_beam_charge );
+	    writer.write(" >> TARGET DENSITY " + target_density );
+	    writer.write(" >> TOTAL LUMINOSITY " + tot_lum);
+	} catch (IOException ex) {
+	    // Report
+	} finally {
+	    try {writer.close();} catch (Exception ex) {/*ignore*/}
+	}
+
+
+
 	System.out.println(" >> Plotting FC charge now " );	
 	EmbeddedCanvas c_fc = new EmbeddedCanvas();
 	c_fc.divide(1,1);
@@ -229,7 +261,7 @@ public class faradayCupCalculator{
 	fc_graph.setTitleX("Nth Readout");
 	fc_graph.setTitleY("Tot. Acc. Charge");
 	c_fc.draw(fc_graph);
-	c_fc.save("fc_graph.png");
+	c_fc.save("fc_graph_r"+s_run+".png");
 
 	EmbeddedCanvas c_bcg = new EmbeddedCanvas();
 	c_bcg.divide(1,1);
@@ -237,7 +269,7 @@ public class faradayCupCalculator{
 	c_bcg.setSize(800,800);
 	h_bcg.setTitleX("BCG");
 	c_bcg.draw(h_bcg);
-	c_bcg.save("hist_bcg.png");
+	c_bcg.save("hist_bcg_r"+s_run+".png");
 
 	EmbeddedCanvas c_current = new EmbeddedCanvas();
 	c_current.divide(1,1);
@@ -247,7 +279,7 @@ public class faradayCupCalculator{
 	g_current.setTitleX("Nth Readout");
 	g_current.setTitleY("Current [nA]");
 	c_current.draw(g_current);
-	c_current.save("g_current.png");	
+	c_current.save("g_current_r"+s_run+".png");	
 	
 	double bcg_min = h_bcg.getMin();
 	double bcg_max = h_bcg.getMax();

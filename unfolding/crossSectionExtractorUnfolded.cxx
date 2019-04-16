@@ -3,40 +3,29 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
+#include <TH1D.h>
 #include <TMath.h>
 #include <TH2F.h>
 #include <vector>
 #include <map>
 #include <TLine.h>
 
-TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<double> > accp_corr, std::map<int, std::vector<double> > accp_corr_err ){
+TH1D* getSectorCrossSection(TH1D *h_in, TH1D *h_in_unfolded, std::map<int, std::vector<double> > accp_corr, std::map<int, std::vector<double> > accp_corr_err ){
 
-  int phi_bins = h_in->GetNbinsX();
-  std::cout << " Number of phi bins: " << phi_bins << std::endl;
-  std::cout << " Finding phi bin with most events " << std::endl;
-  int temp_entries=-1;
-  int temp_bin = -1;
-  for( int b = 0; b <= phi_bins; b++ ){
-    int b_entries = h_in->GetBinContent(b);
-    std::cout << " bin entries " << b_entries << std::endl;
-
-    if( b_entries > temp_entries ){
-      temp_entries=b_entries;
-      temp_bin = b;
-    }   
-  }
+  int phi_bins = 72;//h_in->GetNbinsX();
 
 
-  std::cout << " Bin with max entries: " << temp_bin << " with entries: " << temp_entries << std::endl;
+  //std::cout << " Bin with max entries: " << temp_bin << " with entries: " << temp_entries << std::endl;
   int delta_bin = 0;
-  int bin_min = temp_bin;// - delta_bin;
-  int bin_max = temp_bin + delta_bin;
+  int bin_min = 1.0;//temp_bin;// - delta_bin;
+  int bin_max = 1.0;//temp_bin + delta_bin;
   
   std::cout << " Extending bins by " << delta_bin << " bins on each side; bin min: " << bin_min << " bin max: " << bin_max << std::endl;
   
-  TH1D *h_theta_proj = h2_in->ProjectionY(Form("proj_%s",h2_in->GetTitle()),bin_min, bin_max);
-  std::vector<double> accp_corr_phibin = accp_corr[bin_min-1];
-  std::vector<double> accp_corr_phibin_err = accp_corr_err[bin_min-1];
+  TH1D *h_theta_proj = h_in_unfolded; //h2_in->ProjectionY(Form("proj_%s",h2_in->GetTitle()),bin_min, bin_max);
+  
+  std::vector<double> accp_corr_phibin = accp_corr[37];//bin_min-1];
+  std::vector<double> accp_corr_phibin_err = accp_corr_err[37];//bin_min-1];
 
   //h_theta_proj->Rebin(5);
   
@@ -44,24 +33,24 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
   //double lum_run2391 = 6091588.274652874; //609158.862236702; //6.0915886E6;
   double lum_run2587 = 10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
   double lum_sim = 1.0;
-  double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h_in->GetNbinsX();
+  double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)phi_bins; //h_in->GetNbinsX();
   double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
   double theta_max = h_theta_proj->GetBinCenter(h_theta_proj->GetNbinsX()) + (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1))/2.0;
 
   std::cout << " >> Bin info " << std::endl;
-  std::cout << " Number of Phi Bins " << h2_in->GetNbinsX() << std::endl;
+  std::cout << " Number of Phi Bins " << phi_bins << std::endl;//h_in_unfolded->GetNbinsX() << std::endl;
   std::cout << " Number of Theta Bins " << h_theta_proj->GetNbinsX() << std::endl;  
   std::cout << " >> theta max " << theta_max << std::endl;
   std::cout << " >> phi bin size " <<bin_phi_size << " theta bin size " << bin_theta_size << std::endl;
   std::cout << " new theta bin count " << h_theta_proj->GetNbinsX() << std::endl;
-  TH1D *h_temp = new TH1D(Form("h_cs_%s",h_in->GetTitle()), Form("h_cs_%s",h_in->GetTitle()), h_theta_proj->GetNbinsX(), 0.0, 30.0);
+  TH1D *h_temp = new TH1D(Form("h_cs_%s",h_in->GetTitle()), Form("h_cs_%s",h_in->GetTitle()), h_theta_proj->GetNbinsX(), 0.0, theta_max);
   h_temp->GetXaxis()->SetTitle("#theta [deg]");
   h_temp->GetYaxis()->SetTitle("mb/sr");
 
   std::cout << " creating CS histogram with " << h_theta_proj->GetNbinsX() << std::endl;
   for( int b = 1; b <= h_theta_proj->GetNbinsX(); b++ ){
     double accp_theta_bin = accp_corr_phibin[b];
-    double accp_theta_bin_err = accp_corr_phibin_err[b];
+    double accp_theta_bin_err =  accp_corr_phibin_err[b];
     if( accp_theta_bin <= 0.001 || accp_theta_bin == 0 ) accp_theta_bin = 1.0; // prevent division by 0   
     std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " accp corr " <<  accp_theta_bin << std::endl;
     double sin_angle = TMath::Sin( h_theta_proj->GetBinCenter(b) * 3.1415/180.0 );
@@ -124,11 +113,11 @@ std::map<int, std::vector<double> > GetAcceptanceFactors(const char* fileName ){
 }
 
 
-int crossSectionExtractor(const char* infile, int run){
+int crossSectionExtractorUnfolded(const char* infile, int run){
 
 
   TFile *fIn = new TFile(infile,"");
-  TFile *fOut = new TFile(Form("cs_test_run%d.root",run),"RECREATE");
+  TFile *fOut = new TFile(Form("final_elastic_cs_unfolded_run%d.root",run),"RECREATE");
   
   if( fIn->IsZombie() ){
     std::cout << " Input file "<< fIn << " doesn't exist" << std::endl;
@@ -160,156 +149,31 @@ int crossSectionExtractor(const char* infile, int run){
     
     }
   }
-  
+
   //get acceptance correction map first
   std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
   std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
 
-  std::vector< TH1F* > h_el_p_sect_final;
-  std::vector< TH1F* > h_el_theta_sect_final;
-  std::vector< TH1F* > h_el_phi_sect_final;
-  std::vector< TH2F* > h_el_ptheta_sect_final;
-  std::vector< TH2F* > h_el_phitheta_sect_final;
-
-  TH2F *h_el_phitheta_final = (TH2F*)fIn->Get(Form("/kinematics/h_el_phitheta_final_run%d",run));
+  std::vector< TH1D* > h_el_phi_sect_final;
+  std::vector< TH1D* > h_el_phi_sect_final2;
   
-  for( int s = 1; s <= 6; s++ ){
-    h_el_p_sect_final.push_back( (TH1F*)fIn->Get(Form("/kinematics/h_el_p_s%d_final",s) ) );
-    h_el_theta_sect_final.push_back( (TH1F*)fIn->Get(Form("/kinematics/h_el_theta_s%d_final",s) ) );
-    h_el_phi_sect_final.push_back( (TH1F*)fIn->Get(Form("/kinematics/h_el_phi_s%d_final",s) ) );
-
-    h_el_ptheta_sect_final.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_ptheta_s%d_final",s) ) );
-    h_el_phitheta_sect_final.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_phitheta_s%d_final",s) ) );
-  }
-  
-
-  int phi_bins = h_el_phi_sect_final[0]->GetNbinsX();
-  std::cout << " Number of phi bins: " << phi_bins << std::endl;
-
-  int temp_entries=-1;
-  int temp_bin = -1;
-  for( int b = 0; b <= phi_bins; b++ ){
-    int b_entries = h_el_phi_sect_final[0]->GetBinContent(b);
-    std::cout << " bin entries " << b_entries << std::endl;
-
-    if( b_entries > temp_entries ){
-      temp_entries=b_entries;
-      temp_bin = b;
-    }   
+  for( int s = 0; s < 6; s++ ){
+    std::cout << " Sector " << s <<std::endl;
+    h_el_phi_sect_final.push_back( (TH1D*)fIn->Get(Form("h_elastic_cs_unfolded_s%d",s+1) ) );
+    h_el_phi_sect_final2.push_back( (TH1D*)fIn->Get(Form("h_elastic_cs_unfolded_s%d",s+1) ) );
+    //std::cout << " Title of input histgram " << h_el_phi_sect_final[s]->GetTitle() << std::endl;
   }
 
-  std::cout << " Bin with max entries: " << temp_bin << " with entries: " << temp_entries << std::endl;
-  int delta_bin = 0;
-  int bin_min = temp_bin - delta_bin;
-  int bin_max = temp_bin + delta_bin;
-  std::cout << " min x " << h_el_phi_sect_final[0]->GetBinCenter(bin_min)  << std::endl;
-
-  std::cout << " Extending bins by 2 bins on each side; bin min: " << bin_min << " bin max: " << bin_max << std::endl;
-  
-  TH1D *h_theta_proj = h_el_phitheta_sect_final[0]->ProjectionY("proj_s1_2391",39,39);//bin_min, bin_max);
-  std::vector<double> accp_corr_phibin = accp_corr[38]; //38 because starts at 39 -1 
-  std::vector<double> accp_corr_phibin_err = accp_corr_err[38]; //38 because starts at 38 = 39 -1 
-
-  TCanvas *c0 = new TCanvas("c0","c0",800,800);
-  gStyle->SetOptStat(0);
-  c0->cd(1);
-  h_el_phitheta_sect_final[0]->SetTitle("#phi vs #theta (S1)");
-  h_el_phitheta_sect_final[0]->GetXaxis()->SetTitle("#phi [deg]");
-  h_el_phitheta_sect_final[0]->GetXaxis()->CenterTitle();
-  h_el_phitheta_sect_final[0]->GetYaxis()->SetTitle("#theta [deg]");
-  h_el_phitheta_sect_final[0]->GetYaxis()->CenterTitle();
-  h_el_phitheta_sect_final[0]->Draw("colz");
-  c0->Update();
-  double phi_center = h_el_phi_sect_final[0]->GetBinCenter(bin_min);
-  double phi_min_center = phi_center - (h_el_phi_sect_final[0]->GetBinCenter(bin_min-1) - phi_center)/2.0;
-  double phi_max_center = phi_center + (h_el_phi_sect_final[0]->GetBinCenter(bin_min-1) - phi_center)/2.0;
-  std::cout << " phi min " << phi_min_center << " phi max " << phi_max_center << std::endl;
-
-  TLine *phi_min = new TLine(phi_min_center, 0.0, phi_min_center, 30.0);
-  TLine *phi_max = new TLine(phi_max_center, 0.0, phi_max_center, 30.0);
-  phi_min->SetLineColor(kRed);
-  phi_min->Draw();
-  phi_max->SetLineColor(kRed);
-  phi_max->Draw();
-  c0->SaveAs(Form("h_phitheta_s1_%d.pdf",run));
-
-  TCanvas *c1 = new TCanvas("c1","c1",1600,800);
-  gStyle->SetOptStat(0);
-  c1->Divide(2,1);
-  c1->cd(1);
-  h_el_phitheta_sect_final[0]->SetTitle("#phi vs #theta (S1)");
-  h_el_phitheta_sect_final[0]->GetXaxis()->SetTitle("#phi [deg]");
-  h_el_phitheta_sect_final[0]->GetXaxis()->CenterTitle();
-  h_el_phitheta_sect_final[0]->GetYaxis()->SetTitle("#theta [deg]");
-  h_el_phitheta_sect_final[0]->GetYaxis()->CenterTitle();
-  h_el_phitheta_sect_final[0]->Draw("colz");
-  c1->Update();
-
-  phi_min->SetLineColor(kRed);
-  phi_min->Draw();
-  phi_max->SetLineColor(kRed);
-  phi_max->Draw();
-  
-  c1->cd(2);
-  //h_theta_proj->Rebin(10);
-
-  double lum_run2391 = 6091588.62236702; //6.0915886E6;
-  double lum_run2587 = 10469161.819;//4762209.0;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;// 824013.67435; //713825.6009;//897613.632;//47362.916709528225;// 1711378.663359962;// this value is for 2476run //211835.29;// 16663.43;
-  double bin_phi_size = (h_el_phi_sect_final[0]->GetBinCenter(bin_max) - h_el_phi_sect_final[0]->GetBinCenter(bin_max-1)) * 3.1415/180.0;
-  double bin_theta_size = (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * (3.1415/180.0);
-  double theta_max = h_theta_proj->GetBinCenter(h_theta_proj->GetNbinsX()) +  (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1))/2.0;
-
-  std::cout << " >> theta max " << theta_max << std::endl;
-  std::cout << " >> phi bin size " <<bin_phi_size << " theta bin size " << bin_theta_size << std::endl;
-  std::cout << " new theta bin count " << h_theta_proj->GetNbinsX() << std::endl;
-  TH1D *h_temp = new TH1D("h_Temp","h_Temp", h_theta_proj->GetNbinsX(), 0.0, 30.0);
-
-  for( int b = 1; b <= h_theta_proj->GetNbinsX(); b++ ){
-    double accp_theta_bin = accp_corr_phibin[b];
-    double accp_theta_bin_err = accp_corr_phibin_err[b];
-    if( accp_theta_bin <= 0.001 || accp_theta_bin == 0 ) accp_theta_bin = 1.0; // prevent division by 0
-    std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " acceptance correction " << accp_theta_bin << std::endl;
-    double sin_angle = TMath::Sin( h_theta_proj->GetBinCenter(b) * 3.1415/180.0 );
-    delta_bin=1.0;
-    double newbincontent= h_theta_proj->GetBinContent(b) / (accp_theta_bin * lum_run2587 * (bin_phi_size*(delta_bin*1.0)) * bin_theta_size * sin_angle );
-
-    double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
-    double acc_err = pow( sqrt(accp_theta_bin_err) * ( (1.0/accp_theta_bin)*newbincontent ),2);
-    double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
-
-    std::cout << " cross section " << newbincontent << std::endl;
-    h_temp->SetBinContent(b,newbincontent);
-    //h_temp->SetBinContentError(b, newbincontent_error);
-    
-  }
-
-  h_model->SetLineColor(kRed);
-  h_model->SetTitle("Cross Section (S1)");
-  h_model->GetXaxis()->SetTitle("#theta [deg]");
-  h_model->GetXaxis()->CenterTitle();
-  h_model->Draw();
-  h_temp->Draw("same");
-  c1->SaveAs(Form("h_phitheta_csresult_s1_%d.pdf",run));
-  
   std::vector<TH1D*> cs_results;
-  for( int s=0; s<6; s++ ){
-    TH1D *h_temp_cs = getSectorCrossSection( h_el_phi_sect_final[s], h_el_phitheta_sect_final[s], accp_corr, accp_corr_err );
-    cs_results.push_back(h_temp_cs);
-
+  for( int s=0; s < 5; s++ ){
+    TH1D *h_temp_cs = getSectorCrossSection( h_el_phi_sect_final2[s], h_el_phi_sect_final[s], accp_corr, accp_corr_err );
+    cs_results.push_back(h_temp_cs);    
   }
 
-  TCanvas *c_raw = new TCanvas("c_raw","c_raw",800,800);
-  c_raw->cd(1);
-  gStyle->SetOptStat(0);
-  h_theta_proj->GetXaxis()->SetTitle("#theta [deg]");
-  h_theta_proj->GetXaxis()->CenterTitle();
-  h_theta_proj->SetTitle("Raw #theta Counts");
-  h_theta_proj->Draw();
-  c_raw->SaveAs(Form("h_theta_proj_raw_%d.pdf",run));
 
   TCanvas *cs_out = new TCanvas("cs_out","cs_out",800,1200);
   cs_out->Divide(2,3);
-  for( int s = 0; s < 6; s++ ){
+  for( int s = 0; s < 5; s++ ){
     cs_out->cd(s+1);
     //gPad->SetLogy();
     h_model->SetLineColor(kRed);
@@ -429,59 +293,9 @@ int crossSectionExtractor(const char* infile, int run){
   }
   c_result->SaveAs(Form("g_cs_result_r%d.pdf",run));
 
-  std::vector<TMultiGraph*> v_mg_cs_logy;
-
-  TCanvas *c_result_log = new TCanvas("c_result_log","c_result_log",400,600);
-  c_result_log->Divide(2,3);
-
-  for( int s = 0; s < g_cs_result.size(); s++ ){    
-    c_result_log->cd(s+1);
-    gPad->SetLogy();
-    c_result_log->SetGrid();
-    v_mg_cs_logy.push_back( new TMultiGraph() );
-    g_cs_result[s]->SetTitle(Form("Elastic Model Cross Section Sector %d",s+1));
-    g_cs_result[s]->GetXaxis()->SetTitle("#theta [deg]");
-    g_cs_result[s]->GetXaxis()->CenterTitle();
-    g_cs_result[s]->SetMarkerStyle(20);
-    g_cs_model[s]->SetMarkerStyle(22);
-    //g_result_diff[s]->SetMarkerSize(3);
-    //g_cs_result[s]->Draw("AP");
-
-    //g_cs_model[s]->Draw("AP");
-    g_cs_result[s]->SetMarkerSize(0.5);
-    g_cs_model[s]->SetMarkerSize(0.5);
-    g_cs_model[s]->SetMarkerColor(kRed);
-    v_mg_cs_logy[s]->Add(g_cs_result[s]);
-    //v_mg_cs_logy[s]->Add(g_cs_model[s]);
-    v_mg_cs_logy[s]->SetTitle(Form("Cross Section Sector %d",s+1));
-    v_mg_cs_logy[s]->GetXaxis()->SetTitle("#theta [deg]");
-    v_mg_cs_logy[s]->GetXaxis()->CenterTitle();
-    v_mg_cs_logy[s]->GetYaxis()->SetTitle("log( #sigma ) [mb/sr]");
-    v_mg_cs_logy[s]->GetYaxis()->CenterTitle();
-    v_mg_cs_logy[s]->Draw("APE");
-    v_mg_cs_logy[s]->GetXaxis()->SetLimits(13.0, 22.0);
-    v_mg_cs_logy[s]->GetHistogram()->SetMaximum(1.9); 
-    v_mg_cs_logy[s]->GetHistogram()->SetMinimum(0.1); 
-    v_mg_cs_logy[s]->Draw("APE");
-    h_model->Draw("SAME C");
-  
-    TLegend *legend = new TLegend(0.6, 0.7, 0.89, 0.89);
-    legend->AddEntry(g_cs_result[s],"Data");
-    //legend->AddEntry(g_cs_model[s],"Model");
-    legend->AddEntry(h_model,"Model");
-    legend->SetBorderSize(0);
-    legend->Draw();
-
-  }
-  c_result_log->SaveAs(Form("g_cs_result_log_r%d.pdf",run));
-  
-  
-
-
   readFromEModel.close();
   fOut->Write();
 
-
-
   return 0;
+
 }

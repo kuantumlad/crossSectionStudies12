@@ -260,6 +260,7 @@ int selector_mc(const char* inFile, const char* outputfile, int run ){
   
   TTree out_tree1("events_epX","events_epX");
   out_tree1.Branch("E_ele", &E_ele);
+  out_tree1.Branch("eventNumber",&eventNumber);
   out_tree1.Branch("px_ele", &px_ele);
   out_tree1.Branch("py_ele", &py_ele);
   out_tree1.Branch("pz_ele", &pz_ele);
