@@ -1,0 +1,10 @@
+# Compile model. 
+
+import os, glob 
+
+# Compline the Fortran Code
+fort_env = Environment(ENV = {'PATH':os.environ['PATH']})
+fort_env.Append(FLAGS = ['-ffree-form','-fno-leading-underscore','-fno-second-underscore'])
+
+fortranSources = glob.glob('*.f')
+fort_env.SharedLibrary('libFortranModel',fortranSources)
