@@ -10,39 +10,37 @@
 #include <TF1.h>
 #include <TGraphErrors.h>
 #include <TRandom.h>
+#include <TRandom3.h>
+#include <TCanvas.h>
 
-#include "BostedElasticWrapper.h"
-#include m"../odel/Bosted
+TH1D* GetHistoModel(std::string model, int n_bins, double min, double max, int n_bin_start, double min_start, double temp_delta_theta){
 
+  int model_theta_bin=n_bin_start;
+  double model_theta=min_start;
+  double delta_theta=temp_delta_theta;
+  double in_model_cs;
+  double in_model_theta;
+  string line;
+  ifstream readFromEModel(model);//parentDirectory+"w_cut_limits_run"+std::to_string(run)+".txt");
 
-double testFunction1(double x){
-  return 1.0/pow(x,4);
-}
+  TH1D *h_model = new TH1D(Form("h_model_%d",n_bins),Form("h_model_%d",n_bins),n_bins,min,max);
 
-TH1D* GetHistoSim(int n_bins, double min, double max){
-
-  TRandom3 *gRandom = new TRandom3();
-  
-
-  TH1D *h_sim = new TH1D(Form("h_sim_%d",n_bins),Form("h_sim_%d",n_bins),n_bins,min,max);
-  for( int b = 1; b < n_bins; b++ ){
-    h_sim->SetBinContent(b, testFunction1(h_sim->GetBinCenter(b)) + gRandom->Gaus(0.0,0.000001) );
+  if( readFromEModel.is_open() ){
+    std::cout << " OPENED FILES " << std::endl;	
+    while(readFromEModel >> in_model_theta >> in_model_cs ) {
+      if ( in_model_theta < 9 && in_model_theta < 40 ) {
+	//std::cout << " dont plot model theta " << std::endl;
+      }
+      else{
+	h_model->SetBinContent(model_theta_bin+1,in_model_cs);
+      }
+      //std::cout << " MODEL BIN " << model_theta_bin << " CALC THETA " << model_theta << " MODEL THETA " << in_model_theta << " HISTOGRAM THETA CENTER " << h_model->GetBinCenter(model_theta_bin+1) <<  " >> MODEL VALUE " << in_model_cs << std::endl;
+      model_theta+=delta_theta;
+      model_theta_bin+=1;
+    
+    }
   }
-
-  return h_sim;
-
-}
-
-TH1D* GetHistoGen(int n_bins, double min, double max){
-
-  TH1D *h_gen = new TH1D(Form("h_gen_%d",n_bins),Form("h_gen_%d",n_bins),n_bins,min,max);
-  //bin 0 is underflow
-  for( int b = 1; b < n_bins; b++ ){
-    h_gen->SetBinContent(b, testFunction1(h_gen->GetBinCenter(b)));
-  }
-
-  return h_gen;
-
+  return h_model;
 }
 
 TGraphErrors *ConvertHisto(TH1D* h_temp){
@@ -65,7 +63,7 @@ TGraphErrors *ConvertHisto(TH1D* h_temp){
 
 }
 
-TGraphErrors* GetBinCorrection( TH1D* h_temp, TH1D* h_temp_coarse, int n_bin_group, int n_bins_per_group, double min, double max){
+TGraphErrors* GetBinCorrection( TH1D *h_model,  TH1D* h_temp, int n_bin_group, int n_bins_per_group, double min, double max, double min_coarse, double max_coarse){
 
   // h_temp is finely made histograms
   std::vector<double> v_x;
@@ -73,24 +71,37 @@ TGraphErrors* GetBinCorrection( TH1D* h_temp, TH1D* h_temp_coarse, int n_bin_gro
   std::vector<double> v_x_err;
   std::vector<double> v_y_err;
 
-  int start=1;
-  int end=n_bins_per_group+1;
+  int start=min;
+  int end=start+n_bins_per_group;
+  ///std::cout << " GET BIN CORR FOR " << h_model->GetTitle() << " coarse " << h_temp->GetTitle() << " n bin group " << n_bin_group << " n bins per group " << n_bins_per_group << " min " <<  min << " max " << max << std::endl;
     
-  for( int bg = 1; bg < n_bin_group; bg++ ){
-    std::cout << " start " << start << " start bin center  " << h_temp->GetBinCenter(start) << " end " << end << " end bin center " <<h_temp->GetBinCenter(end) << std::endl;
+  int global_sub_bin_counter=0; //count the number of small bins
+  for( int bg = min_coarse; bg < n_bin_group-10; bg++ ){
+    // std::cout << " start " << start << " start bin center  " << h_temp->GetBinCenter(start) << " end " << end << " end bin center " <<h_temp->GetBinCenter(end) << std::endl;
     double sum=0;
     double avg=0;
     for( int bi = start; bi < end; bi++ ){
       double bin_center_content=h_temp->GetBinContent(bi);
       sum=sum+bin_center_content;
-      std::cout <<" bin " << bi << " bin cnter " << h_temp->GetBinCenter(bi) << " bin center value " <<  bin_center_content << std::endl;    
+      
+      //std::cout <<" bin " << bi << " bin cnter " << h_temp->GetBinCenter(bi) << " bin center value " <<  bin_center_content << std::endl;    
+      //std::cout << global_sub_bin_counter << " & " << h_temp->GetBinCenter(bi) << " & " <<  bin_center_content << " \\\\ "  << std::endl;    
+      global_sub_bin_counter++;
     }
-    double bin_x = h_temp_coarse->GetBinCenter(bg);
+
+    int to_center_shift = TMath::Floor(((double)n_bins_per_group - 1.0)/2.0); 
+    int center_bin = bg;
+    double bin_center_cs = h_model->GetBinContent(bg+1);
+    //std::cout << " start_bin " << start << " center bin  " <<  center_bin << " coarse model value " << bin_center_cs <<std::endl;
+    avg=sum/(double)n_bins_per_group;
+    double bin_corr = bin_center_cs/avg;
+    double bin_x = h_model->GetBinCenter(bg+1);
+
+    //std::cout << " bin group index " << bg << " x " << bin_x << " bin_corr " << bin_corr << std::endl;
+    std::cout << bin_x << " & " << bin_corr << " \\\\" << std::endl;
+
     start+=n_bins_per_group;
     end+=n_bins_per_group;
-
-    double bin_corr = sum/n_bins_per_group;
-    std::cout << " bin group index " << bg << " x " << bin_x << " bin_corr " << bin_corr << std::endl;
     
     v_x.push_back( bin_x );
     v_y.push_back( bin_corr);
@@ -98,106 +109,88 @@ TGraphErrors* GetBinCorrection( TH1D* h_temp, TH1D* h_temp_coarse, int n_bin_gro
     v_y_err.push_back(0.0);
 
     double thetaStep=1.0;
-    double model_value=getRadiatedValue(5.498,(bg-1)*thetaStep+min, 5.0/865.0, 1.1);
-    std::cout << " elastic model value: " << model_value << std::endl;
+    //double model_value=elas_(5.498,(bg-1)*thetaStep+min);//, 5.0/865.0, 1.1);
+    //std::cout << " elastic model value: " << model_value << std::endl;
     
   }
+  
   TGraphErrors *g_bin_corr = new TGraphErrors(v_x.size(), &(v_x[0]), &(v_y[0]), &(v_x_err[0]), &(v_y_err[0]) );
   g_bin_corr->SetTitle(Form("g_bin_corr_nbins%d",(int)v_x.size()));
   return g_bin_corr;
-
-
 }
-  
 
-int binCenter(){
+int binCenter(const char* inModel, const char* inModelCoarse, const char* fOutName){
 
-  
-  double bin_min = 8.0;
-  double bin_max = 28.0;
-  double n_bin_size = 1.0;
-  double n_bin_size_fine = 0.10;// * 10;
-  int n_bins = (bin_max - bin_min )/n_bin_size;
-  int n_bins_fine = (bin_max - bin_min )/n_bin_size_fine;
+  TFile *fOut = new TFile(fOutName,"RECREATE");
 
-  TH1D *h_sim = GetHistoSim(n_bin_size,bin_min, bin_max);
-  TH1D *h_gen_coarse = GetHistoGen(n_bins, bin_min, bin_max);     
-  
-  TH1D *h_gen_fine = GetHistoGen(n_bins_fine, bin_min, bin_max);
-  
+  std::string model = inModel;
+  std::string modelCoarse = inModelCoarse;
 
-  //GetBinCorrection( TH1D* h_temp, TH1D* h_temp_coarse, int n_bin_groups, int n_bins_per_group, double min, double max){   
-  TGraphErrors *g_b_corr = GetBinCorrection(h_gen_fine, h_gen_coarse, n_bins, 10, bin_min, bin_max);
-  g_b_corr->SetMarkerStyle(21);
-  g_b_corr->SetMarkerSize(0.5);
-
-  TGraphErrors *g_gen = ConvertHisto(h_gen_coarse);
-  g_gen->SetMarkerStyle(20);
-  g_gen->SetMarkerSize(0.50);
-  g_gen->SetMarkerColor(kBlue);
+  TH1D *h_model_coarse = GetHistoModel(inModelCoarse, 47, 0.0, 47.0, 5, 5.5, 1.0 );
+  TH1D *h_model = GetHistoModel(model, 402, 0.0, 40.2, 50, 5.1, 0.1);
   
-  TCanvas *c1 = new TCanvas("C1","C1",900,900);
+  int n_bin_group= h_model_coarse->GetNbinsX();
+  int n_bins_per_group = 10;
+  int min = 91;
+  int max = 500;
+  int min_coarse = 9;
+  int max_coarse = 50;
+  TGraphErrors *g_corr = GetBinCorrection( h_model_coarse, h_model, n_bin_group, n_bins_per_group, min, max, min_coarse, max_coarse);
+
+  TCanvas *c1 = new TCanvas("c1","c1",900,900);
   c1->cd(0);
-  gPad->SetLogy();
-  g_b_corr->SetMarkerColor(kRed);
-  g_b_corr->Draw("AP");
-  h_gen_coarse->SetMarkerStyle(20);
-  h_gen_coarse->SetMarkerSize(0.5);
-  h_gen_coarse->Draw("AP+SAME");
-
-  TH1D *h_simulated = GetHistoSim(n_bins, bin_min, bin_max);
-  std::vector<double> cs_bin_corr;  
-  std::vector<double> cs_bin_corr_err;  
-  // get the ratio of the corr to nom value
-  std::vector<double> v_x;
-  std::vector<double> v_y;
-  std::vector<double> v_x_err;
-  std::vector<double> v_y_err;
-  TH1D *h_b_corr = (TH1D*)g_b_corr->GetHistogram();
-  
-  for(int b = 0; b < n_bins-1; b++ ){
-    double y_corr;
-    double x_corr;
-    g_b_corr->GetPoint(b,x_corr,y_corr);
-
-    std::cout << " x_crr " << x_corr << "y " << y_corr <<std::endl;
-
-    double y_nom = h_gen_coarse->GetBinContent(b+1);
-    double cross_section = h_simulated->GetBinContent(b+1);
-    double ratio = y_nom/y_corr;
-    std::cout << "bin " << b << " ratio " << ratio << " center " << h_gen_coarse->GetBinCenter(b+1) <<std::endl;
-
-    v_x.push_back(h_gen_coarse->GetBinCenter(b+1));
-    v_y.push_back(ratio);
-    cs_bin_corr.push_back( (1.0/ratio) * cross_section);
-    v_x_err.push_back(0.0);
-    v_y_err.push_back(0.0);  
-    cs_bin_corr_err.push_back(0.0);
-  }
-
-
-  TGraphErrors *g_ratio = new TGraphErrors(v_x.size(),&(v_x[0]), &(v_y[0]), &(v_x_err[0]), &(v_y_err[0]) ); 
-  g_ratio->SetTitle("Ratio of NOM to CORRECTED");
+  h_model->Draw();
   
   TCanvas *c2 = new TCanvas("c2","c2",900,900);
   c2->cd(0);
-  g_ratio->SetMarkerStyle(21);
-  g_ratio->SetMarkerSize(0.5);
-  g_ratio->SetMarkerColor(kBlue);
-  g_ratio->GetHistogram()->SetMinimum(0.95);
-  g_ratio->GetHistogram()->SetMaximum(1.03);
-  g_ratio->Draw("AP");
+  g_corr->SetMarkerStyle(21);
+  g_corr->SetMarkerSize(0.6);
+  g_corr->SetTitle("Bin Correction");
+  g_corr->GetXaxis()->SetTitle("#theta (deg)");
+  g_corr->GetYaxis()->SetTitle("Bin Corr.");
+  g_corr->Draw("AP");
 
-  TGraphErrors *g_bin_corr_cross_section = new TGraphErrors(v_x.size(),&(v_x[0]), &(cs_bin_corr[0]), &(v_x_err[0]), &(cs_bin_corr_err[0]) ); 
+
   TCanvas *c3 = new TCanvas("c3","c3",900,900);
   c3->cd(0);
-  gPad->SetLogy();
-  g_bin_corr_cross_section->SetTitle("Bin Corrected Cross Section");
-  g_bin_corr_cross_section->SetMarkerStyle(21);
-  g_bin_corr_cross_section->SetMarkerSize(0.5);
-  g_bin_corr_cross_section->SetMarkerColor(kBlack);
-  g_bin_corr_cross_section->Draw("AP");
- 
+  gStyle->SetOptStat(0);
+  h_model_coarse->SetLineColor(kBlue+2);
+  h_model->SetLineColor(kRed);
+  //h_model->SetLineStyle(10);
+  h_model->SetLineWidth(2);
+  h_model_coarse->SetLineWidth(2);
+  h_model->SetAxisRange(5.0,9.0,"Y");
+  h_model_coarse->SetAxisRange(5.0,9.0,"Y");
+  h_model->SetAxisRange(9.9,11.1,"X");
+  h_model_coarse->SetAxisRange(9.9,11.1,"X");
+  h_model->GetXaxis()->SetTitle("#theta (deg)");
+  h_model->GetYaxis()->SetTitle("#sigma (mb)");
+  h_model->SetTitleOffset(1.4);
+  h_model->SetTitle("");
+  h_model->Draw("same");
+  h_model_coarse->Draw("same");
+
+  TPad *grid = new TPad("grid","",0,0,1,1); 
+  grid->Draw();
+  grid->cd();
+  grid->SetGrid();
+  grid->SetFillStyle(4000); 
+  grid->SetFrameFillStyle(0);
+
   
+  TH2 *hgrid = new TH2C("hgrid","",12, 9.9, 11.1, 4, 5.0, 9.0);   
+  hgrid->Draw();
+  hgrid->GetXaxis()->SetNdivisions(12);
+  hgrid->GetYaxis()->SetNdivisions(16);
+  hgrid->GetYaxis()->SetLabelOffset(999.); 
+  hgrid->GetXaxis()->SetLabelOffset(999.); 
+
+
+  c3->SaveAs("coarse_fine_bin_corr_elastic_10bptheta.pdf");
+
+
+
+  fOut->Write();
+
   return 0;
 }

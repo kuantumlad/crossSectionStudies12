@@ -487,7 +487,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH2F* > h_el_ptheta_sect_final;
   std::vector< TH2F* > h_el_phitheta_sect_final;
 
-  TH2F *h_el_phitheta_final = new TH2F(Form("h_el_phitheta_final_run%d",run), Form("h_el_phitheta_final_run%d",run), 300, -180.0, 180.0, 200, 0.0, el_theta_max );
+  TH2F *h_el_phitheta_final = new TH2F(Form("h_el_phitheta_final_run%d",run), Form("h_el_phitheta_final_run%d",run), 73, -180.0, 180.0, 30, 0.0, el_theta_max );
 
   for( int s = 0; s < 7; s++ ){
     h_el_w_sect.push_back( new TH1F(Form("h_el_w_s%d",s),Form("h_el_w_s%d",s), 100, 0.9, 1.2) );
@@ -655,7 +655,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     /// //////////////////////////////////////////////////////////////////
 
     for(Int_t i = 0; i < BUFFER; i++){ 
-      if(ele_count > i){ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); ele_sector[i]=sectorE->at(i); event[i]=eventNumber->at(i);}
+      if(ele_count > i){ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); ele_sector[i]=sectorE->at(i); }//event[i]=eventNumber->at(i);}
       else{ele[i].SetPxPyPzE(0, 0, 0, 0); ele_sector[i] = -1;}
       if(prot_count > i){prot[i].SetPxPyPzE(p4_prot_px->at(i),p4_prot_py->at(i),p4_prot_pz->at(i),p4_prot_E->at(i));}
       else{prot[i].SetPxPyPzE(0, 0, 0, 0);}

@@ -9219,8 +9219,9 @@ void select_electron(int run){
       if(FD_eid_DC_z_vertex_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			        		FD_eid_DC_z_vertex_pass += 1;
 
       //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] 
-      if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_DC_z_vertex_check[i] && FD_eid_EC_hit_position_fiducial_check[i] ){ //&& FD_eid_DC_hit_position_region1_fiducial_check[i] ){ //&&  &&  && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i]){ //&& FD_eid_DC_z_vertex_check[i]){
+      //if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] ){// && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_DC_z_vertex_check[i] && FD_eid_EC_hit_position_fiducial_check[i] ){ //&& FD_eid_DC_hit_position_region1_fiducial_check[i] ){ //&&  &&  && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i]){ //&& FD_eid_DC_z_vertex_check[i]){
 	//std::cout << " el pass " << std::endl;
+      if (FD_eid_charge_check[i] ){
         FD_eid_all_pass += 1;
         FD_eid_all_check[i] = true;
       }

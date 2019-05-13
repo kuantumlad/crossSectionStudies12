@@ -27,10 +27,10 @@ public class genCheck{
 	
 	int num_ev = 0;
 
-	H1F h_el_p = new H1F("h_el_p","h_el_p",200,0.0,3.0);
+	H1F h_el_p = new H1F("h_el_p","h_el_p",200,0.0,13.0);
 	H1F h_el_theta = new H1F("h_el_theta","h_el_theta",200,0.0,30.0);
 	H1F h_el_phi = new H1F("h_el_phi","h_el_phi",300,-200.0,200.0);
-	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,3.0, 100, 0.0, 30.0);
+	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,13.0, 100, 0.0, 30.0);
 
 	H1F h_pr_p = new H1F("h_pr_p","h_pr_p",200,0.0,2.0);
 	H1F h_pr_theta = new H1F("h_pr_theta","h_pr_theta",200,0.0,80.0);
@@ -41,13 +41,13 @@ public class genCheck{
 	while( num_ev < max_event ){
 	    event = (DataEvent)hiporeader.gotoEvent(num_ev);
 	    boolean runConfig_pres = event.hasBank("RUN::config");
-	    boolean mcBank_pres  = event.hasBank("MC::Particle");
+	    boolean mcBank_pres  = event.hasBank("REC::Particle");
 	    boolean rawScalerBank_pres = event.hasBank("RAW::scaler");
 	    num_ev++;
 
 
 	    if( mcBank_pres ){
-		DataBank mcBank = event.getBank("MC::Particle");
+		DataBank mcBank = event.getBank("REC::Particle");
 		for( int i = 0; i < mcBank.rows(); i++ ){
 		    int pid = mcBank.getInt("pid",i);
 

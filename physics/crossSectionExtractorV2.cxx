@@ -9,6 +9,67 @@
 #include <map>
 #include <TLine.h>
 
+std::vector<TH1D*> getPhiBinCrossSection(TH2F *h2_in, std::map<int, std::vector<double> > accp_corr, std::map<int, std::vector<double> > accp_corr_err){
+
+  int n_phi_bins = h2_in->GetNbinsX();
+  std::vector<TH1D*> h_cs_per_phi_bin;
+    
+
+
+  for( int phib = 1; phib < n_phi_bins; phib++ ){
+
+    TH1D *h_theta_proj = h2_in->ProjectionY(Form("proj_%s",h2_in->GetTitle()),phib, phib);
+    std::vector<double> accp_corr_phibin = accp_corr[phib-1];
+    std::vector<double> accp_corr_phibin_err = accp_corr_err[phib-1];
+    
+    double lum_run2587 = 10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
+    double lum_sim = 1.0;
+    double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h2_in->GetNbinsX();
+    double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
+    double theta_max = h_theta_proj->GetBinCenter(h_theta_proj->GetNbinsX()) + (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1))/2.0;
+
+    std::cout << " >> Bin info " << std::endl;
+    std::cout << " Number of Phi Bins " << h2_in->GetNbinsX() << std::endl;
+    std::cout << " Number of Theta Bins " << h_theta_proj->GetNbinsX() << std::endl;  
+    std::cout << " >> theta max " << theta_max << std::endl;
+    std::cout << " >> phi bin size " <<bin_phi_size << " theta bin size " << bin_theta_size << std::endl;
+    std::cout << " new theta bin count " << h_theta_proj->GetNbinsX() << std::endl;
+    TH1D *h_temp = new TH1D(Form("h_cs_%d",phib), Form("h_cs_%d",phib), 30, 0.0, 30.0);
+    h_temp->GetXaxis()->SetTitle("#theta [deg]");
+    h_temp->GetYaxis()->SetTitle("mb/sr");
+
+    
+    std::cout << " creating CS histogram with " << h_theta_proj->GetNbinsX() << std::endl;
+    for( int b = 1; b <= h_theta_proj->GetNbinsX(); b++ ){
+      double accp_theta_bin = accp_corr_phibin[b];
+      double accp_theta_bin_err = accp_corr_phibin_err[b];
+      if( accp_theta_bin <= 0.001 || accp_theta_bin == 0 ) accp_theta_bin = 1.0; // prevent division by 0   
+      std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " accp corr " <<  accp_theta_bin << std::endl;
+      double sin_angle = TMath::Sin( h_theta_proj->GetBinCenter(b) * 3.1415/180.0 );
+      double delta_bin = 1.0;
+      double newbincontent= h_theta_proj->GetBinContent(b) / ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
+      int bincontent = h_theta_proj->GetBinContent(b);
+
+      //double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
+      double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
+      double acc_err = pow( accp_theta_bin_err/accp_theta_bin, 2) * pow(newbincontent, 2) * (1.0/accp_theta_bin);
+      //double acc_err = pow( accp_theta_bin_err * ( (1.0/accp_theta_bin)*newbincontent ), 2);
+      double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
+
+      //double newbincontent_error = newbincontent * (sqrt(bincontent)/bincontent);    
+      std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " cross section value " << newbincontent << " error " << newbincontent_error << " acceptance value " << accp_theta_bin << std::endl;
+      h_temp->SetBinContent(b,newbincontent);
+      h_temp->SetBinError(b,newbincontent_error);
+    }
+
+    h_cs_per_phi_bin.push_back(h_temp);
+  }
+  
+  return h_cs_per_phi_bin;
+}
+
+
+
 TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<double> > accp_corr, std::map<int, std::vector<double> > accp_corr_err ){
 
   int phi_bins = h_in->GetNbinsX();
@@ -39,8 +100,9 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
   std::vector<double> accp_corr_phibin_err = accp_corr_err[bin_min-1];
 
   //h_theta_proj->Rebin(5);
-  
-  double lum_run2587 = 10469161.819;
+ 
+  //double lum_run2391 = 6091588.274652874; //609158.862236702; //6.0915886E6;
+  double lum_run2587 = 10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
   double lum_sim = 1.0;
   double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h_in->GetNbinsX();
   double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
@@ -122,11 +184,71 @@ std::map<int, std::vector<double> > GetAcceptanceFactors(const char* fileName ){
 }
 
 
-int crossSectionExtractor(const char* infile, int run){
+std::vector<double> GetBinCenteringCorr(const char* fileName){
 
+  std::vector< double > bin_center_corr;
+  double model_theta = 9.5;
+  int model_theta_bin = 0;
+  double bin_corr;
+  double bin_center;
+  
+  std::string parentDir = "/work/clas12/bclary/CLAS12/electron_studies/bin_centering/";
+  string line;
+  ifstream readFromBinCorr(parentDir+fileName);
+  if( readFromBinCorr.is_open() ){
+    std::cout << " OPENED FILES " << std::endl;	
+    while(readFromBinCorr >> bin_center >> bin_corr ) {
+      //if ( model_theta < 9 ) {/
+      //std::cout << " dont plot model theta " << std::endl;
+      //}
+      //else{
+      bin_center_corr.push_back(bin_corr);
+      //}
+      std::cout << " MODEL THETA " << model_theta <<  " >> BIN CORRECTION " << bin_corr << std::endl;
+      model_theta+=1.0;
+      model_theta_bin+=1;    
+    }
+  }
+
+  return bin_center_corr;
+}
+
+
+std::vector<double> GetRadiativeCorr(const char* fileName){
+  //theta range is from 5 to 30
+  std::cout << " getting radiative corrections " << std::endl;
+  std::vector< double > v_rad_corr;
+  double model_theta = 5.5;
+  int model_theta_bin = 6;
+  double rad_corr;
+  double bin_center;
+  
+  std::string parentDir = "/work/clas12/bclary/CLAS12/electron_studies/rad_corr/";
+  string line;
+  ifstream readFromRadCorr(parentDir+fileName);
+  if( readFromRadCorr.is_open() ){
+    std::cout << " OPENED FILES " << std::endl;	
+    while(readFromRadCorr >> rad_corr ) {
+      //if ( model_theta < 9 ) {/
+      //std::cout << " dont plot model theta " << std::endl;
+      //}
+      //else{
+      v_rad_corr.push_back(rad_corr);
+      //}
+      std::cout << " MODEL THETA " << model_theta <<  " >> BIN CORRECTION " << rad_corr << std::endl;
+      model_theta+=1.0;
+      model_theta_bin+=1;    
+    }
+  }
+
+  return v_rad_corr;
+}
+
+
+int crossSectionExtractorV2(const char* infile, int run){
 
   TFile *fIn = new TFile(infile,"");
-  TFile *fOut = new TFile(Form("cs_test_run%d.root",run),"RECREATE");
+  TFile *fOut = new TFile(Form("cs_test_run%dV2.root",run),"RECREATE");
   
   if( fIn->IsZombie() ){
     std::cout << " Input file "<< fIn << " doesn't exist" << std::endl;
@@ -154,14 +276,20 @@ int crossSectionExtractor(const char* infile, int run){
       }
       std::cout << " MODEL BIN " << model_theta_bin << " MODEL THETA " << model_theta <<  " >> MODEL VALUE " << model_value << std::endl;
       model_theta+=1.0;
-      model_theta_bin+=1;
-    
+      model_theta_bin+=1;   
     }
   }
   
   //get acceptance correction map first
   std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
   std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
+
+  //get bin centering corrections
+  std::vector<double> bin_center_corr = GetBinCenteringCorr("bin_corr_values.txt");
+
+  // get radiative corrections 
+  std::vector<double> rad_corr = GetRadiativeCorr("elastrc.dat");
+  
 
   std::vector< TH1F* > h_el_p_sect_final;
   std::vector< TH1F* > h_el_theta_sect_final;
@@ -288,13 +416,21 @@ int crossSectionExtractor(const char* infile, int run){
   h_model->Draw();
   h_temp->Draw("same");
   c1->SaveAs(Form("h_phitheta_csresult_s1_%d.pdf",run));
-  
+
+
+  //////////////////////////////////////////////////////////////////
+  // cross section at phi bin with most events / sector  
   std::vector<TH1D*> cs_results;
   for( int s=0; s<6; s++ ){
     TH1D *h_temp_cs = getSectorCrossSection( h_el_phi_sect_final[s], h_el_phitheta_sect_final[s], accp_corr, accp_corr_err );
     cs_results.push_back(h_temp_cs);
-
   }
+
+  //////////////////////////////////////////////////////////////////
+  // cross section for each bin in phi
+  std::vector<TH1D*> cs_results_per_phi_bin = getPhiBinCrossSection(h_el_phitheta_final, accp_corr, accp_corr_err);
+
+
 
   TCanvas *c_raw = new TCanvas("c_raw","c_raw",800,800);
   c_raw->cd(1);
@@ -347,18 +483,28 @@ int crossSectionExtractor(const char* infile, int run){
       double data_err_x = 1.0;
       double data_ratio = data_result/model_result;
       double data_ratio_err = data_ratio * data_err_y;
+
+      //corrections
+      double bin_center_correction = bin_center_corr[b-10]; // minus 14 + 6 because start histogram with bin center of 15.5 
+      double radiative_correction = rad_corr[b-6];
+
       std::cout << " model result " << model_result << " data result " << data_result << " data error " << data_err_y << std::endl;
+      std::cout << " center bin " << bin_center_data << "  bin centering corection  " << bin_center_correction << std::endl;
+      std::cout << " center bin " << bin_center_data << " radiative correction " << radiative_correction << std::endl;
+
+      double final_data_result = data_result/(bin_center_correction*radiative_correction);
+
       bins.push_back(bin_center_data);
       bin_error_x.push_back(0.0);
       bin_error_y.push_back(data_err_y);
       model_error.push_back(0.0);
       if ( model_result == 0.0 ) continue;
       model.push_back((model_result));
-      data.push_back((data_result));
+      data.push_back((final_data_result));
       data_diff.push_back( data_ratio );
       data_diff_err_y.push_back( data_ratio_err );			  
       data_diff_err_x.push_back( 0.0 );			        
-      std::cout << " bin " << b << " bin center " << bin_center_model << " bin center data " << bin_center_data << " diff " << data_result/model_result << std::endl;
+      std::cout << " bin " << b << " bin center " << bin_center_model << " bin center data " << bin_center_data << " diff " << final_data_result/model_result << std::endl;
     }
     g_result_diff.push_back( new TGraphErrors(bins.size(), &(bins[0]), &(data_diff[0]), &(data_diff_err_x[0]), &(data_diff_err_y[0]) ) );
     g_cs_result.push_back( new TGraphErrors(bins.size(), &(bins[0]), &(data[0]), &(bin_error_x[0]), &(bin_error_y[0]) ) );
@@ -474,7 +620,142 @@ int crossSectionExtractor(const char* infile, int run){
   c_result_log->SaveAs(Form("g_cs_result_log_r%d.pdf",run));
   
   
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // elastic cross section per phi bin 
+  TCanvas *ca = new TCanvas("ca","ca",900,900);
+  ca->Divide(12,6);
+  for( int s = 0; s < cs_results_per_phi_bin.size(); s++ ){
+    ca->cd(s+1);    
+    h_model->SetLineColor(kRed);
+    h_model->GetXaxis()->SetTitle("#theta [deg]");
+    h_model->GetXaxis()->CenterTitle();    
+    h_model->Draw();
+    h_model->SetAxisRange(14,26,"X");
+    h_model->Draw();
+    cs_results_per_phi_bin[s]->Draw("same");
+    cs_results_per_phi_bin[s]->SetAxisRange(14,26,"X");
+    cs_results_per_phi_bin[s]->Draw("same");
+  }
+  ca->SaveAs(Form("cs_results_per_phi_bin_r%d.pdf",run));
 
+  // get difference in model and measured
+  std::vector<TGraphErrors*> g_result_diff_per_phi_bin;
+  std::vector<TGraphErrors*> g_cs_result_per_phi_bin;
+  std::vector<TGraphErrors*> g_cs_model_per_phi_bin;
+  for( int pb = 0; pb<cs_results_per_phi_bin.size(); pb++ ){
+    std::vector<double> bins;
+    std::vector<double> bin_error_x;
+    std::vector<double> bin_error_y;
+    std::vector<double> model;
+    std::vector<double> model_error;
+    std::vector<double> data;
+    std::vector<double> data_diff;
+    std::vector<double> data_diff_err_x;   
+    std::vector<double> data_diff_err_y;   
+    std::cout << " comparing model and data for phi bin " << pb << std::endl;
+    for( int b=1; b<=h_model->GetNbinsX(); b++){
+      if ( b <= 14 || b >= 24 ) continue;
+      double bin_center_model = h_model->GetBinCenter(b);
+      double bin_center_data = cs_results_per_phi_bin[pb]->GetBinCenter(b);
+      double model_result = h_model->GetBinContent(b);
+      double data_result = cs_results_per_phi_bin[pb]->GetBinContent(b);
+      double data_err_y = cs_results_per_phi_bin[pb]->GetBinError(b);
+      double data_err_x = 1.0;
+      double data_ratio = data_result/model_result;
+      double data_ratio_err = data_ratio * data_err_y;
+
+      // corrections
+      double bin_center_correction = bin_center_corr[b-10]; // minus 14 + 6 because start histogram with bin center of 15.5 
+      double radiative_correction = rad_corr[b-6]; //shift to the get the correct index 
+
+      std::cout << " model result " << model_result << " data result " << data_result << " data error " << data_err_y << std::endl;
+      std::cout << " center bin " << bin_center_data << "  bin centering corection  " << bin_center_correction << std::endl;
+      std::cout << " center bin " << bin_center_data << " radiative correction " << radiative_correction << std::endl;
+
+      double final_data_result = data_result/(bin_center_correction*radiative_correction);
+
+      bins.push_back(bin_center_data);
+      bin_error_x.push_back(0.0);
+      bin_error_y.push_back(data_err_y);
+      model_error.push_back(0.0);
+      if ( model_result == 0.0 ) continue;
+      model.push_back((model_result));
+      data.push_back((final_data_result));
+      data_diff.push_back( data_ratio );
+      data_diff_err_y.push_back( data_ratio_err );			  
+      data_diff_err_x.push_back( 0.0 );			        
+      std::cout << " bin " << b << " bin center " << bin_center_model << " bin center data " << bin_center_data << " diff " << data_result/model_result << std::endl;
+    }
+    g_result_diff_per_phi_bin.push_back( new TGraphErrors(bins.size(), &(bins[0]), &(data_diff[0]), &(data_diff_err_x[0]), &(data_diff_err_y[0]) ) );
+    g_cs_result_per_phi_bin.push_back( new TGraphErrors(bins.size(), &(bins[0]), &(data[0]), &(bin_error_x[0]), &(bin_error_y[0]) ) );
+    g_cs_model_per_phi_bin.push_back( new TGraphErrors(bins.size(), &(bins[0]), &(model[0]), &(model_error[0]) ) );
+  }
+
+  TCanvas *c_diff_per_phi_bin = new TCanvas("c_diff_per_phi_bin","c_diff_per_phi_bin",400,600);
+  c_diff_per_phi_bin->Divide(12,6);
+  for( int pb = 0; pb < g_result_diff.size(); pb++ ){
+    c_diff->cd(pb+1);
+    g_result_diff_per_phi_bin[pb]->SetTitle(Form("Ratio of Cross Section Model to Data #phi Bin %d",pb+1));
+    g_result_diff_per_phi_bin[pb]->GetXaxis()->SetTitle("#theta [deg]");
+    g_result_diff_per_phi_bin[pb]->GetXaxis()->CenterTitle();
+    g_result_diff_per_phi_bin[pb]->SetMarkerStyle(20);
+    g_result_diff_per_phi_bin[pb]->SetMarkerSize(0.5);
+    g_result_diff_per_phi_bin[pb]->Draw("AP");
+    g_result_diff_per_phi_bin[pb]->GetXaxis()->SetLimits(10.0, 26.5);//SetRangeUser(0.0,26.5);
+    g_result_diff_per_phi_bin[pb]->GetHistogram()->SetMaximum(1.5);   // along          
+    g_result_diff_per_phi_bin[pb]->GetHistogram()->SetMinimum(0.50);  //   Y     
+    g_result_diff_per_phi_bin[pb]->Draw("AP");
+    c_diff_per_phi_bin->Update();
+  }
+  c_diff_per_phi_bin->SaveAs(Form("g_ratio_model_data_r%d_per_phi_bin.pdf",run));
+  
+  std::vector<TMultiGraph*> v_mg_cs_logy_per_phi_bin;
+
+  TCanvas *c_result_log_per_phi_bin = new TCanvas("c_result_log_per_phi_bin","c_result_log_per_phi_bin",400,600);
+  c_result_log_per_phi_bin->Divide(12,6);
+
+  for( int pb = 0; pb < g_cs_result_per_phi_bin.size(); pb++ ){    
+    std::cout << " plotting phi bi " << pb << std::endl;
+    c_result_log_per_phi_bin->cd(pb+1);
+    gPad->SetLogy();
+    c_result_log_per_phi_bin->SetGrid();
+    v_mg_cs_logy_per_phi_bin.push_back( new TMultiGraph() );
+    g_cs_result_per_phi_bin[pb]->SetTitle(Form("Elastic Model Cross Section #phi Bin %d",pb+1));
+    g_cs_result_per_phi_bin[pb]->GetXaxis()->SetTitle("#theta [deg]");
+    g_cs_result_per_phi_bin[pb]->GetXaxis()->CenterTitle();
+    g_cs_result_per_phi_bin[pb]->SetMarkerStyle(20);
+    g_cs_model_per_phi_bin[pb]->SetMarkerStyle(22);
+    //g_result_diff[s]->SetMarkerSize(3);
+    //g_cs_result[s]->Draw("AP");
+
+    //g_cs_model[s]->Draw("AP");
+    g_cs_result_per_phi_bin[pb]->SetMarkerSize(0.5);
+    g_cs_model_per_phi_bin[pb]->SetMarkerSize(0.5);
+    g_cs_model_per_phi_bin[pb]->SetMarkerColor(kRed);
+    v_mg_cs_logy_per_phi_bin[pb]->Add(g_cs_result_per_phi_bin[pb]);
+    v_mg_cs_logy_per_phi_bin[pb]->Add(g_cs_model_per_phi_bin[pb]);
+    v_mg_cs_logy_per_phi_bin[pb]->SetTitle(Form("Cross Section Sector %d",pb+1));
+    v_mg_cs_logy_per_phi_bin[pb]->GetXaxis()->SetTitle("#theta [deg]");
+    v_mg_cs_logy_per_phi_bin[pb]->GetXaxis()->CenterTitle();
+    v_mg_cs_logy_per_phi_bin[pb]->GetYaxis()->SetTitle("log( #sigma ) [mb/sr]");
+    v_mg_cs_logy_per_phi_bin[pb]->GetYaxis()->CenterTitle();
+    v_mg_cs_logy_per_phi_bin[pb]->Draw("APE");
+    v_mg_cs_logy_per_phi_bin[pb]->GetXaxis()->SetLimits(13.0, 22.0);
+    v_mg_cs_logy_per_phi_bin[pb]->GetHistogram()->SetMaximum(1.9); 
+    v_mg_cs_logy_per_phi_bin[pb]->GetHistogram()->SetMinimum(0.1); 
+    v_mg_cs_logy_per_phi_bin[pb]->Draw("APE");
+    h_model->Draw("SAME C");
+  
+    TLegend *legend = new TLegend(0.6, 0.7, 0.89, 0.89);
+    legend->AddEntry(g_cs_result_per_phi_bin[pb],"Data");
+    //legend->AddEntry(g_cs_model[s],"Model");
+    legend->AddEntry(h_model,"Model");
+    legend->SetBorderSize(0);
+    legend->Draw();
+
+  }
+  c_result_log_per_phi_bin->SaveAs(Form("g_cs_result_log_r%d_per_phi_bin.pdf",run));
+  
 
   readFromEModel.close();
   fOut->Write();
