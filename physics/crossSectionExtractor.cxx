@@ -40,7 +40,7 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
 
   //h_theta_proj->Rebin(5);
   
-  double lum_run2587 = 10469161.819;
+  double lum_run2587 = 4762209;//10469161.819;
   double lum_sim = 1.0;
   double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h_in->GetNbinsX();
   double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
@@ -67,8 +67,8 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
     double newbincontent= h_theta_proj->GetBinContent(b) / ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
     int bincontent = h_theta_proj->GetBinContent(b);
 
-    //double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
-    double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
+    double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
+    //double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
     double acc_err = pow( accp_theta_bin_err/accp_theta_bin, 2) * pow(newbincontent, 2) * (1.0/accp_theta_bin);
     //double acc_err = pow( accp_theta_bin_err * ( (1.0/accp_theta_bin)*newbincontent ), 2);
     double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
@@ -76,7 +76,7 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
     //double newbincontent_error = newbincontent * (sqrt(bincontent)/bincontent);    
     std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " cross section value " << newbincontent << " error " << newbincontent_error << " acceptance value " << accp_theta_bin << std::endl;
     h_temp->SetBinContent(b,newbincontent);
-    h_temp->SetBinError(b,newbincontent_error);
+    //h_temp->SetBinError(b,newbincontent_error);
   }
 
   return h_temp;
@@ -252,7 +252,7 @@ int crossSectionExtractor(const char* infile, int run){
   //h_theta_proj->Rebin(10);
 
   double lum_run2391 = 6091588.62236702; //6.0915886E6;
-  double lum_run2587 = 10469161.819;//4762209.0;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;// 824013.67435; //713825.6009;//897613.632;//47362.916709528225;// 1711378.663359962;// this value is for 2476run //211835.29;// 16663.43;
+  double lum_run2587 = 4762209.0;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;// 824013.67435; //713825.6009;//897613.632;//47362.916709528225;// 1711378.663359962;// this value is for 2476run //211835.29;// 16663.43;
   double bin_phi_size = (h_el_phi_sect_final[0]->GetBinCenter(bin_max) - h_el_phi_sect_final[0]->GetBinCenter(bin_max-1)) * 3.1415/180.0;
   double bin_theta_size = (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * (3.1415/180.0);
   double theta_max = h_theta_proj->GetBinCenter(h_theta_proj->GetNbinsX()) +  (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1))/2.0;
@@ -277,7 +277,7 @@ int crossSectionExtractor(const char* infile, int run){
 
     std::cout << " cross section " << newbincontent << std::endl;
     h_temp->SetBinContent(b,newbincontent);
-    //h_temp->SetBinContentError(b, newbincontent_error);
+    //    h_temp->SetBinContentError(b, newbincontent_error);
     
   }
 

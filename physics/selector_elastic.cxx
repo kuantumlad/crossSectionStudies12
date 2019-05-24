@@ -279,10 +279,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   if(mcTree==0){  // Check if TTree exists!
     cout << " MC Tree doesn't exist!!!" << endl;
     cout <<"Exit program" << endl;
-    return 0;
+    //return 0;
   }
 
-  //if( data_type == analysis_sim ){    
+  if( data_type == analysis_sim ){    
   std::cout << " SETTING MC VARIABLES " << std::endl;
   mcTree->SetBranchAddress("p4_mc_pid",&p4_mc_pid);
   mcTree->SetBranchAddress("p4_mc_px",&p4_mc_px);
@@ -291,7 +291,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   mcTree->SetBranchAddress("p4_mc_vx",&p4_mc_vx);
   mcTree->SetBranchAddress("p4_mc_vy",&p4_mc_vy);
   mcTree->SetBranchAddress("p4_mc_vz",&p4_mc_vz);
-  
+  }
 
 
   TTree *anaTree=(TTree *) f->Get(inTree);
@@ -570,8 +570,8 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
       readFromWCut >> mean >> sigma;
       std::cout << " >> W CUT PARAMETERS: " << sector << " " << mean << " " << sigma << std::endl;
 
-      lowWValueCut[sector]= mean - 3*sigma;
-      highWValueCut[sector]= mean + 3*sigma;
+      lowWValueCut[sector]= mean - 4*sigma;
+      highWValueCut[sector]= mean + 4*sigma;
     }
   }
   else{
@@ -583,7 +583,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   cout << endl;
         
 
-  std::cout << " Number of MC events " << mcTree->GetEntriesFast() << std::endl;
+  //std::cout << " Number of MC events " << mcTree->GetEntriesFast() << std::endl;
   for(Int_t k=0; k < anaTree->GetEntriesFast(); k++){    
       
     anaTree->GetEntry(k);
@@ -675,7 +675,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
     double mass_el = 0.000511;
 
-      
+    /*  
     mcTree->GetEntry(event[0]);
     	  
     for( int i = 0; i < p4_mc_pid->size(); i++ ){
@@ -688,7 +688,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	mc_ele[ii].SetPxPyPzE(p4_mc_px->at(ii), p4_mc_py->at(ii), p4_mc_pz->at(ii), mc_ele_e );
       }
     }
-    				 
+    */				 
     
     // Assign beta from tree to array
     for( Int_t i = 0; i < BUFFER; i++ ){

@@ -34,8 +34,12 @@ TH1F* AcceptanceRatio(TH1F *h_rec, TH1F *h_gen ){
 
   std::cout << " rec bin " << rec_bins << " mc bins " << mc_bins << std::endl;
   
-  double max_range = h_rec->GetBinCenter(h_rec->GetNbinsX());// + (h_rec->GetBinCenter(1) + h_rec->GetBinCenter(2))/2.0;
-  double min_range = h_rec->GetBinCenter(1);// - (h_rec->GetBinCenter(1) + h_rec->GetBinCenter(2))/2.0;
+  std::cout << " min bin center " << h_rec->GetBinCenter(1) << std::endl;
+  std::cout << " >> bin width/2 " << (h_rec->GetBinCenter(1) + h_rec->GetBinCenter(2))/2.0  << std::endl;
+  std::cout << " root bin width " << h_rec->GetBinWidth(1) << std::endl;
+  double bin_width =  h_rec->GetBinWidth(1);
+  double max_range = h_rec->GetBinCenter(h_rec->GetNbinsX()) + bin_width/2.0;
+  double min_range = h_rec->GetBinCenter(1) - bin_width/2.0;
 
   //create acceptance histrogram over interval min and max range with rec bins (assuming same as mc bins)
   std::cout << " creating acceptance histogram for " << h_rec->GetTitle() << std::endl;
@@ -44,6 +48,7 @@ TH1F* AcceptanceRatio(TH1F *h_rec, TH1F *h_gen ){
 
 
   for( int b = 1; b < rec_bins; b++ ){
+    
     
     
     double accp_ratio = h_rec->GetBinContent(b)/h_gen->GetBinContent(b);    
@@ -184,10 +189,10 @@ int acceptanceExtractor(const char* inFileData, const char* inFileMC, int run, c
   TH2F *h_mc_all_el_theta_vs_phi = (TH2F*)fMC->Get("hist_mc_all_electron_theta_vs_phi");
 
   // change theta range starting from 5 
-  TH1F *h_el_theta_rebin = new TH1F("h_el_theta_rebin","h_el_theta_rebin", h_rc_all_el_theta->GetNbinsX(), 0.0, 40.0);
+  TH1F *h_el_theta_rebin = new TH1F("h_el_theta_rebin","h_el_theta_rebin", h_rc_all_el_theta->GetNbinsX(), 0.0, 30.0);
   for( int b = 0; b< h_rc_all_el_theta->GetNbinsX(); b++ ){
     double bin_content = h_rc_all_el_theta->GetBinContent(b);
-    if( h_rc_all_el_theta->GetBinCenter(b) < 5.0 ) bin_content = 0.0;
+    if( h_rc_all_el_theta->GetBinCenter(b) < 6.0 ) bin_content = 0.0;
     std::cout << " > rebin value " << b << " " << bin_content << std::endl;
     h_el_theta_rebin->SetBinContent(b, bin_content);
   }
@@ -223,7 +228,7 @@ int acceptanceExtractor(const char* inFileData, const char* inFileMC, int run, c
 
   //c_accTheta->cd(2);  
   c1->cd(2);
-  TH1F *h_accp_theta = AcceptanceRatio(h_el_theta_rebin, h_mc_all_el_theta);
+  TH1F *h_accp_theta = AcceptanceRatio(h_rc_all_el_theta, h_mc_all_el_theta);
   h_accp_theta->SetMarkerStyle(20);
   h_accp_theta->SetMarkerColor(kBlack);
   h_accp_theta->Draw("HIST");

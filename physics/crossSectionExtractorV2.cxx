@@ -14,15 +14,13 @@ std::vector<TH1D*> getPhiBinCrossSection(TH2F *h2_in, std::map<int, std::vector<
   int n_phi_bins = h2_in->GetNbinsX();
   std::vector<TH1D*> h_cs_per_phi_bin;
     
-
-
   for( int phib = 1; phib < n_phi_bins; phib++ ){
 
     TH1D *h_theta_proj = h2_in->ProjectionY(Form("proj_%s",h2_in->GetTitle()),phib, phib);
     std::vector<double> accp_corr_phibin = accp_corr[phib-1];
     std::vector<double> accp_corr_phibin_err = accp_corr_err[phib-1];
     
-    double lum_run2587 = 10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
+    double lum_run2587 = 4762209;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
     double lum_sim = 1.0;
     double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h2_in->GetNbinsX();
     double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
@@ -50,9 +48,9 @@ std::vector<TH1D*> getPhiBinCrossSection(TH2F *h2_in, std::map<int, std::vector<
       double newbincontent= h_theta_proj->GetBinContent(b) / ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
       int bincontent = h_theta_proj->GetBinContent(b);
 
-      //double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
-      double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
-      double acc_err = pow( accp_theta_bin_err/accp_theta_bin, 2) * pow(newbincontent, 2) * (1.0/accp_theta_bin);
+      double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
+      //double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
+      double acc_err = 0;// pow( accp_theta_bin_err/accp_theta_bin, 2) * pow(newbincontent, 2) * (1.0/accp_theta_bin);
       //double acc_err = pow( accp_theta_bin_err * ( (1.0/accp_theta_bin)*newbincontent ), 2);
       double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
 
@@ -102,7 +100,7 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
   //h_theta_proj->Rebin(5);
  
   //double lum_run2391 = 6091588.274652874; //609158.862236702; //6.0915886E6;
-  double lum_run2587 = 10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;//
+  double lum_run2587 = 4766209;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;//824013.67435; //713825.6009; //897613.632;// 89637.465;//47362.916709528225;// 171137.8663359962; //211835.29;// 16663.43;// 130597.24968993757 ?
   double lum_sim = 1.0;
   double bin_phi_size = ( 2.0 * 3.141592658 ) / (double)h_in->GetNbinsX();
   double bin_theta_size = 0.0175;//(h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * ( 3.1415/180.0);
@@ -129,8 +127,8 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
     double newbincontent= h_theta_proj->GetBinContent(b) / ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
     int bincontent = h_theta_proj->GetBinContent(b);
 
-    //double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
-    double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
+    double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
+    //double nev_theta_err = newbincontent / (accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle );
     double acc_err = pow( accp_theta_bin_err/accp_theta_bin, 2) * pow(newbincontent, 2) * (1.0/accp_theta_bin);
     //double acc_err = pow( accp_theta_bin_err * ( (1.0/accp_theta_bin)*newbincontent ), 2);
     double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
@@ -380,7 +378,7 @@ int crossSectionExtractorV2(const char* infile, int run){
   //h_theta_proj->Rebin(10);
 
   double lum_run2391 = 6091588.62236702; //6.0915886E6;
-  double lum_run2587 = 10469161.819;//4762209.0;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;// 824013.67435; //713825.6009;//897613.632;//47362.916709528225;// 1711378.663359962;// this value is for 2476run //211835.29;// 16663.43;
+  double lum_run2587 = 4762209.0;//10469161.819; //2113774.4627232; //1164585.2;//1288395.597;// 824013.67435; //713825.6009;//897613.632;//47362.916709528225;// 1711378.663359962;// this value is for 2476run //211835.29;// 16663.43;
   double bin_phi_size = (h_el_phi_sect_final[0]->GetBinCenter(bin_max) - h_el_phi_sect_final[0]->GetBinCenter(bin_max-1)) * 3.1415/180.0;
   double bin_theta_size = (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1)) * (3.1415/180.0);
   double theta_max = h_theta_proj->GetBinCenter(h_theta_proj->GetNbinsX()) +  (h_theta_proj->GetBinCenter(2) - h_theta_proj->GetBinCenter(1))/2.0;
@@ -400,7 +398,7 @@ int crossSectionExtractorV2(const char* infile, int run){
     double newbincontent= h_theta_proj->GetBinContent(b) / (accp_theta_bin * lum_run2587 * (bin_phi_size*(delta_bin*1.0)) * bin_theta_size * sin_angle );
 
     double nev_theta_err = pow(sqrt(h_theta_proj->GetBinContent(b)) * (1.0/( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ) ),2);
-    double acc_err = pow( sqrt(accp_theta_bin_err) * ( (1.0/accp_theta_bin)*newbincontent ),2);
+    double acc_err = 0;// pow( sqrt(accp_theta_bin_err) * ( (1.0/accp_theta_bin)*newbincontent ),2);
     double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
 
     std::cout << " cross section " << newbincontent << std::endl;
@@ -428,7 +426,7 @@ int crossSectionExtractorV2(const char* infile, int run){
 
   //////////////////////////////////////////////////////////////////
   // cross section for each bin in phi
-  std::vector<TH1D*> cs_results_per_phi_bin = getPhiBinCrossSection(h_el_phitheta_final, accp_corr, accp_corr_err);
+  //std::vector<TH1D*> cs_results_per_phi_bin = getPhiBinCrossSection(h_el_phitheta_final, accp_corr, accp_corr_err);
 
 
 
@@ -482,7 +480,7 @@ int crossSectionExtractorV2(const char* infile, int run){
       double data_err_y = cs_results[s]->GetBinError(b);
       double data_err_x = 1.0;
       double data_ratio = data_result/model_result;
-      double data_ratio_err = data_ratio * data_err_y;
+      double data_ratio_err = data_result * (data_err_y / model_result);
 
       //corrections
       double bin_center_correction = bin_center_corr[b-10]; // minus 14 + 6 because start histogram with bin center of 15.5 
@@ -622,7 +620,8 @@ int crossSectionExtractorV2(const char* infile, int run){
   
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // elastic cross section per phi bin 
-  TCanvas *ca = new TCanvas("ca","ca",900,900);
+
+  /*  TCanvas *ca = new TCanvas("ca","ca",900,900);
   ca->Divide(12,6);
   for( int s = 0; s < cs_results_per_phi_bin.size(); s++ ){
     ca->cd(s+1);    
@@ -755,7 +754,7 @@ int crossSectionExtractorV2(const char* infile, int run){
 
   }
   c_result_log_per_phi_bin->SaveAs(Form("g_cs_result_log_r%d_per_phi_bin.pdf",run));
-  
+  */
 
   readFromEModel.close();
   fOut->Write();

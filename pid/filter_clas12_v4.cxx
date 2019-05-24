@@ -88,10 +88,10 @@ int process_Events = -1;
 
 //float Ebeam = 6.42313;
 //float Ebeam = 2.22193;
-float Ebeam = 10.594;
+float Ebeam = 2.2212;
 
-bool simulation  = false;
-bool MC_Particle = false;
+bool simulation  = true;
+bool MC_Particle = true;
 
 bool correct_gamma = true;
 
@@ -184,7 +184,7 @@ bool show_FD_eid_statistics = true;
 bool show_charged_ID_statistics = true;
 bool show_photon_ID_statistics = true;
 
-bool fill_electron_pid_histograms = false;
+bool fill_electron_pid_histograms = true;
 bool fill_hadron_pid_histograms = true;
 bool fill_photon_pid_histograms = false;
 
@@ -4435,8 +4435,9 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
+ int nentries=anaTree->GetEntriesFast();
 
-for(Int_t k=0; k<anaTree->GetEntriesFast();k++){    
+for(Int_t k=0; k<nentries;k++){    
 
   anaTree->GetEntry(k);
 
@@ -9110,9 +9111,10 @@ void select_electron(int run){
         if(FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			FD_eid_DC_hit_position_region3_fiducial_pass += 1;
         if(FD_eid_DC_z_vertex_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			        	FD_eid_DC_z_vertex_pass += 1;
 
-        if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
-                                       && FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] 
-                                       && FD_eid_DC_z_vertex_check[i]){
+        if(FD_eid_default_PID_check[i] // && FD_eid_charge_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
+	   //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] 
+	   && FD_eid_DC_z_vertex_check[i]){
+
           FD_eid_all_pass += 1;
           FD_eid_all_check[i] = true;
         }
