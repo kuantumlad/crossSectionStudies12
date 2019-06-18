@@ -51,5 +51,6 @@
   ofstream rcE("elasrc.dat");
   for (int t = 0; t < 25; t++){
     rcE << rc->GetBinContent(t + 1) << endl;
-    }
+    std::cout << rc->GetBinCenter(t+1) << " " << rc->GetBinContent(t + 1) <<  std::endl;
+  }
 }

@@ -23,6 +23,10 @@ public class genCheck{
 	hiporeader.open(new File(file_in) );
 	DataEvent event = null;
 
+	double beam = 2.211;
+	LorentzVector lv_target = new LorentzVector(0,0,0,0.938);
+	LorentzVector lv_ebeam = new LorentzVector(0,0,beam,beam);
+
 	int max_event=hiporeader.getSize();
 	
 	int num_ev = 0;
@@ -31,7 +35,10 @@ public class genCheck{
 	H1F h_el_theta = new H1F("h_el_theta","h_el_theta",200,0.0,30.0);
 	H1F h_el_phi = new H1F("h_el_phi","h_el_phi",300,-200.0,200.0);
 	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,13.0, 100, 0.0, 30.0);
-
+	H1F h_el_w = new H1F("h_el_w","h_el_w", 200, 0.0, 5.0);
+	H2F h_el_w_q2 = new H2F("h_el_w_q2","h_el_w_q2",200,0.0, 5.0, 200, 0.0, 7.0);
+	
+	
 	H1F h_pr_p = new H1F("h_pr_p","h_pr_p",200,0.0,2.0);
 	H1F h_pr_theta = new H1F("h_pr_theta","h_pr_theta",200,0.0,80.0);
 	H1F h_pr_phi = new H1F("h_pr_phi","h_pr_phi",300,-180.0,180.0);
@@ -54,9 +61,7 @@ public class genCheck{
 		    double px = mcBank.getFloat("px",i); 
 		    double py = mcBank.getFloat("py",i); 
 		    double pz = mcBank.getFloat("pz",i); 
-
-		    
-
+       	    
 		    if( pid == 11 ){
 			double e = Math.sqrt( px*px + py*py + pz*pz + el_mass*el_mass );
 			LorentzVector lv_el = new LorentzVector(px,py,pz,e);
@@ -64,8 +69,18 @@ public class genCheck{
 			h_el_theta.fill( lv_el.theta() * toDeg );
 			h_el_phi.fill( lv_el.phi() * toDeg );			
 			h_el_thetap.fill( lv_el.p(), lv_el.theta() * toDeg );
-		    }
 
+			LorentzVector lv_eX = new LorentzVector(0,0,0,0);
+			lv_eX.add(lv_ebeam);
+			lv_eX.add(lv_target);
+			lv_eX.sub(lv_el);
+						
+			double q2 = 4.0*beam*lv_el.e() * Math.sin( lv_el.theta()/2.0) * Math.sin( lv_el.theta()/2.0);		       
+			double w = lv_eX.mass();
+
+			h_el_w.fill(w);
+			h_el_w_q2.fill(w,q2);			
+		    }
 		    if( pid == 2212 ){
 			double e = Math.sqrt( px*px + py*py + pz*pz + pr_mass*pr_mass );
 			LorentzVector lv_pr = new LorentzVector(px,py,pz,e);
@@ -92,8 +107,9 @@ public class genCheck{
 	c_el.draw(h_el_phi);
 	c_el.cd(3);
 	h_el_thetap.setTitle("Momentum vs Theta");
+	c_el.getPad(3).getAxisZ().setLog(true);
 	c_el.draw(h_el_thetap);
-	c_el.save("h_gen_el_elastic_peterbostedgen.png");
+	c_el.save("h_rec_el_elastic.png");
 
 	EmbeddedCanvas c_pr = new EmbeddedCanvas();
 	c_pr.divide(2,2);
@@ -109,9 +125,19 @@ public class genCheck{
 	c_pr.draw(h_pr_phi);
 	c_pr.cd(3);
 	h_pr_thetap.setTitle("Momentum vs Theta");
+	c_pr.getPad(3).getAxisZ().setLog(true);
 	c_pr.draw(h_pr_thetap);
-	c_pr.save("h_gen_pr_elastic_peterbostedgen.png");
+	c_pr.save("h_rec_pr_elastic.png");
 
+	EmbeddedCanvas c_kin = new EmbeddedCanvas();
+	c_kin.setSize(900,900);
+	c_kin.divide(2,2);
+	c_kin.cd(0);
+	c_kin.draw(h_el_w);
+	c_kin.cd(1);
+	c_kin.getPad(1).getAxisZ().setLog(true);
+	c_kin.draw(h_el_w_q2);
+	c_kin.save("h_rec_el_kin.png");
 
 	
 

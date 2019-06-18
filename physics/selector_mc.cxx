@@ -11,12 +11,12 @@
 #include "TMath.h"
 
 const static int BUFFER = 50;
-double Ebeam = 2.22193;
+double Ebeam = 2.211;//2193;
 
 int ele_sector[BUFFER];
 TLorentzVector ele[BUFFER]; 
 TLorentzVector prot[BUFFER];
-TLorentzVector mc_ele[BUFFER];
+//TLorentzVector mc_ele[BUFFER];
 TLorentzVector mc_prot[BUFFER];
 
 int select_ele;
@@ -301,6 +301,9 @@ int selector_mc(const char* inFile, const char* outputfile, int run ){
       printf("Analysing event number %i of %.00f (%.01f percent)\n", k, events, percent);
     }
 
+
+    TLorentzVector mc_ele[BUFFER];
+
     for( int i = 0; i < p4_mc_pid->size(); i++ ){
       //std::cout << " pid " << p4_mc_pid->at(i) << std::endl;
       int mc_pid = p4_mc_pid->at(i); 
@@ -313,13 +316,26 @@ int selector_mc(const char* inFile, const char* outputfile, int run ){
 	mc_prot[i].SetPxPyPzE(p4_mc_px->at(i),p4_mc_py->at(i),p4_mc_pz->at(i),p4_mc_E);
       }
 
-      if( mc_ele[i].Theta()*180/Pival > 5.0 ){ //ignore events in the central detector < 5 deg
-	if(mc_ele[i].P() > 0) hist_all_electron_p->Fill(mc_ele[i].P());
-	if(mc_ele[i].Theta() > 0) hist_all_electron_theta->Fill(mc_ele[i].Theta()*180/Pival);
-	if(mc_ele[i].Phi() != 0) hist_all_electron_phi->Fill(mc_ele[i].Phi()*180/Pival);
-	if(mc_ele[i].P() > 0) hist_all_electron_p_vs_theta->Fill(mc_ele[i].Theta()*180/Pival, mc_ele[i].P());
-	if(mc_ele[i].P() > 0) hist_all_electron_p_vs_phi->Fill(mc_ele[i].Phi()*180/Pival, mc_ele[i].P());
-	if(mc_ele[i].Theta() > 0 && mc_ele[i].Phi() != 0) hist_all_electron_theta_vs_phi->Fill(mc_ele[i].Phi()*180/Pival, mc_ele[i].Theta()*180/Pival);
+      double W  = kin_W(mc_ele[select_ele]);
+      double w_cut_min = 0.938 - 0.3;
+      double w_cut_max = 0.938 + 0.3;
+
+
+      if( W > w_cut_min && W < w_cut_max ){
+	if( mc_ele[i].Theta()*180/Pival > 7.0 ){ //ignore events in the central detector < 5 deg
+	  //if(mc_ele[i].P() > 0) 
+	  hist_all_electron_p->Fill(mc_ele[i].P());
+	  //if(mc_ele[i].Theta() > 0)
+	  hist_all_electron_theta->Fill(mc_ele[i].Theta()*180/Pival);
+	  //if(mc_ele[i].Phi() != 0) 
+	  hist_all_electron_phi->Fill(mc_ele[i].Phi()*180/Pival);
+	  //if(mc_ele[i].P() > 0)
+	  hist_all_electron_p_vs_theta->Fill(mc_ele[i].Theta()*180/Pival, mc_ele[i].P());
+	  //if(mc_ele[i].P() > 0) 
+	  hist_all_electron_p_vs_phi->Fill(mc_ele[i].Phi()*180/Pival, mc_ele[i].P());
+	  //if(mc_ele[i].Theta() > 0 && mc_ele[i].Phi() != 0) 
+	  hist_all_electron_theta_vs_phi->Fill(mc_ele[i].Phi()*180/Pival, mc_ele[i].Theta()*180/Pival);
+	}
       }
       
     }

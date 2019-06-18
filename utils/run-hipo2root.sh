@@ -15,13 +15,13 @@ path_to_files=${inDir}
 
 echo " Converting " ${tot_files} " hipo files to root files " 
 
-i=100
+i=1
 while [ $i -lt ${tot_files} ]
 do
 
     echo " convert file ${path_to_files}${i}.dat.hipo ---> ${path_to_files}${i}.root  "
     #/work/clas12/bclary/CLAS12/validation/validationBrandon/hipo2root/hipo2root ${path_to_files}out_clas12_2GeV_${i}_tp1sm1.hipo ${path_to_files}out_clas12_2GeV_${i}_tp1sm1.root 
-    /work/clas12/bclary/CLAS12/validation/validationBrandon/hipo2root/hipo2root ${path_to_files}${i}.dat.hipo ${path_to_files}${i}.root 
+    /work/clas12/bclary/CLAS12/validation/validationBrandon/hipo2root/hipo2root ${path_to_files}${i}.lund.hipo ${path_to_files}${i}.root 
     i=$((i+1))
 
 done

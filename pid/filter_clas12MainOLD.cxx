@@ -77,8 +77,8 @@ int process_Events = -1;
 //int process_Events = 10000;
 
 //float Ebeam = 6.42313;
-//float Ebeam = 2.22193;
-float Ebeam = 10.594;
+float Ebeam = 2.211;//93;
+//float Ebeam = 10.594;
 float energy_shift = 2.0;
 
 bool simulation  = true;
@@ -1372,6 +1372,14 @@ int main(int argc, char** argv){
     out_tree.Branch("p4_phot_py", &p4_phot_py);
     out_tree.Branch("p4_phot_pz", &p4_phot_pz);
     out_tree.Branch("p4_phot_E", &p4_phot_E);  
+
+    out_tree.Branch("p4_mc_pid", &vMC_pid);
+    out_tree.Branch("p4_mc_px", &vMC_px);
+    out_tree.Branch("p4_mc_py", &vMC_py);
+    out_tree.Branch("p4_mc_pz", &vMC_pz);
+    out_tree.Branch("p4_mc_vx", &vMC_vx);
+    out_tree.Branch("p4_mc_vy", &vMC_vy);
+    out_tree.Branch("p4_mc_vz", &vMC_vz);
 
 
 /// ////////////////////////////////////////////////////////////////////////////
@@ -4476,8 +4484,9 @@ cout << endl;
  set_cut_parameters("/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/pid/parameters/sf_cut_",run);
 
  cout <<"ana tree " <<anaTree->GetEntriesFast()<<endl;
-
- for(Int_t k=0; k < anaTree->GetEntriesFast(); k++){    
+ int nentries =   anaTree->GetEntriesFast();
+   
+ for(Int_t k=0; k < nentries; k++){    
 
   anaTree->GetEntry(k);
   event = k;
@@ -9224,7 +9233,7 @@ void select_electron(int run){
       //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] 
       //if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] ){// && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_DC_z_vertex_check[i] && FD_eid_EC_hit_position_fiducial_check[i] ){ //&& FD_eid_DC_hit_position_region1_fiducial_check[i] ){ //&&  &&  && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i]){ //&& FD_eid_DC_z_vertex_check[i]){
 	//std::cout << " el pass " << std::endl;
-      if (FD_eid_default_PID_check[i] && FD_eid_charge_check[i]){
+      if (FD_eid_default_PID_check[i] ){// && FD_eid_charge_check[i]){
         FD_eid_all_pass += 1;
         FD_eid_all_check[i] = true;
       }
@@ -9247,7 +9256,7 @@ void select_electron(int run){
       if(FT_eid_energy_vs_radius_check[i] && FT_eid_charge_check[i] && FT_eid_PID_check[i]) 	FT_eid_energy_vs_radius_pass += 1;
 
 
-      if(FT_eid_charge_check[i] && FT_eid_PID_check[i] && FT_eid_FTCAL_fiducial_check[i] && FT_eid_FTTRK_fiducial_check[i] && FT_eid_FTHODO_fiducial_check[i] && FT_eid_energy_vs_radius_check[i]){
+      if(FT_eid_charge_check[i] && FT_eid_PID_check[i] ){// && FT_eid_FTCAL_fiducial_check[i] && FT_eid_FTTRK_fiducial_check[i] && FT_eid_FTHODO_fiducial_check[i] && FT_eid_energy_vs_radius_check[i]){
         FT_eid_all_pass += 1;
         FT_eid_all_check[i] = true;
       }

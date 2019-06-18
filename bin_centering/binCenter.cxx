@@ -29,12 +29,12 @@ TH1D* GetHistoModel(std::string model, int n_bins, double min, double max, int n
     std::cout << " OPENED FILES " << std::endl;	
     while(readFromEModel >> in_model_theta >> in_model_cs ) {
       if ( in_model_theta < 9 && in_model_theta < 40 ) {
-	//std::cout << " dont plot model theta " << std::endl;
+	std::cout << " dont plot model theta " << std::endl;
       }
       else{
 	h_model->SetBinContent(model_theta_bin+1,in_model_cs);
       }
-      //std::cout << " MODEL BIN " << model_theta_bin << " CALC THETA " << model_theta << " MODEL THETA " << in_model_theta << " HISTOGRAM THETA CENTER " << h_model->GetBinCenter(model_theta_bin+1) <<  " >> MODEL VALUE " << in_model_cs << std::endl;
+      std::cout << " MODEL BIN " << model_theta_bin << " CALC THETA " << model_theta << " MODEL THETA " << in_model_theta << " HISTOGRAM THETA CENTER " << h_model->GetBinCenter(model_theta_bin+1) <<  " >> MODEL VALUE " << in_model_cs << std::endl;
       model_theta+=delta_theta;
       model_theta_bin+=1;
     
@@ -73,31 +73,31 @@ TGraphErrors* GetBinCorrection( TH1D *h_model,  TH1D* h_temp, int n_bin_group, i
 
   int start=min;
   int end=start+n_bins_per_group;
-  ///std::cout << " GET BIN CORR FOR " << h_model->GetTitle() << " coarse " << h_temp->GetTitle() << " n bin group " << n_bin_group << " n bins per group " << n_bins_per_group << " min " <<  min << " max " << max << std::endl;
+  std::cout << " GET BIN CORR FOR " << h_model->GetTitle() << " coarse " << h_temp->GetTitle() << " n bin group " << n_bin_group << " n bins per group " << n_bins_per_group << " min " <<  min << " max " << max << std::endl;
     
   int global_sub_bin_counter=0; //count the number of small bins
   for( int bg = min_coarse; bg < n_bin_group-10; bg++ ){
-    // std::cout << " start " << start << " start bin center  " << h_temp->GetBinCenter(start) << " end " << end << " end bin center " <<h_temp->GetBinCenter(end) << std::endl;
+    std::cout << " start " << start << " start bin center  " << h_temp->GetBinCenter(start) << " end " << end << " end bin center " <<h_temp->GetBinCenter(end) << std::endl;
     double sum=0;
     double avg=0;
     for( int bi = start; bi < end; bi++ ){
       double bin_center_content=h_temp->GetBinContent(bi);
       sum=sum+bin_center_content;
       
-      //std::cout <<" bin " << bi << " bin cnter " << h_temp->GetBinCenter(bi) << " bin center value " <<  bin_center_content << std::endl;    
-      //std::cout << global_sub_bin_counter << " & " << h_temp->GetBinCenter(bi) << " & " <<  bin_center_content << " \\\\ "  << std::endl;    
+      std::cout <<" bin " << bi << " bin cnter " << h_temp->GetBinCenter(bi) << " bin center value " <<  bin_center_content << std::endl;    
+      std::cout << global_sub_bin_counter << " & " << h_temp->GetBinCenter(bi) << " & " <<  bin_center_content << " \\\\ "  << std::endl;    
       global_sub_bin_counter++;
     }
 
     int to_center_shift = TMath::Floor(((double)n_bins_per_group - 1.0)/2.0); 
     int center_bin = bg;
     double bin_center_cs = h_model->GetBinContent(bg+1);
-    //std::cout << " start_bin " << start << " center bin  " <<  center_bin << " coarse model value " << bin_center_cs <<std::endl;
+    std::cout << " start_bin " << start << " center bin  " <<  center_bin << " coarse model value " << bin_center_cs <<std::endl;
     avg=sum/(double)n_bins_per_group;
     double bin_corr = bin_center_cs/avg;
     double bin_x = h_model->GetBinCenter(bg+1);
 
-    //std::cout << " bin group index " << bg << " x " << bin_x << " bin_corr " << bin_corr << std::endl;
+    std::cout << " bin group index " << bg << " x " << bin_x << " bin_corr " << bin_corr << std::endl;
     std::cout << bin_x << " & " << bin_corr << " \\\\" << std::endl;
 
     start+=n_bins_per_group;
@@ -121,7 +121,7 @@ TGraphErrors* GetBinCorrection( TH1D *h_model,  TH1D* h_temp, int n_bin_group, i
 
 int binCenter(const char* inModel, const char* inModelCoarse, const char* fOutName){
 
-  TFile *fOut = new TFile(fOutName,"RECREATE");
+  //TFile *fOut = new TFile(fOutName,"RECREATE");
 
   std::string model = inModel;
   std::string modelCoarse = inModelCoarse;
@@ -149,6 +149,7 @@ int binCenter(const char* inModel, const char* inModelCoarse, const char* fOutNa
   g_corr->GetXaxis()->SetTitle("#theta (deg)");
   g_corr->GetYaxis()->SetTitle("Bin Corr.");
   g_corr->Draw("AP");
+  c2->SaveAs("g_bin_center_corr.pdf");
 
 
   TCanvas *c3 = new TCanvas("c3","c3",900,900);
@@ -186,11 +187,11 @@ int binCenter(const char* inModel, const char* inModelCoarse, const char* fOutNa
   hgrid->GetXaxis()->SetLabelOffset(999.); 
 
 
-  c3->SaveAs("coarse_fine_bin_corr_elastic_10bptheta.pdf");
+  //c3->SaveAs("coarse_fine_bin_corr_elastic_10bptheta.pdf");
 
 
 
-  fOut->Write();
+  //fOut->Write();
 
   return 0;
 }

@@ -43,7 +43,7 @@ public class accpTest{
 			
 	double radians_to_deg = 180./3.141592658;
 
-	LorentzVector lv_beam = new LorentzVector(0,0,2.2212,2.2212);
+	LorentzVector lv_beam = new LorentzVector(0,0,2.221,2.221);
 	LorentzVector lv_target = new LorentzVector(0,0,0,mass_proton);
 	
 	// System.out.println(" >> test chi2 "  + Double.toString(test_chi2) + " dof " + Integer.toString(test_dof) + " test prob " + test_prob );	       
@@ -73,6 +73,7 @@ public class accpTest{
 	H2F h_el_theta_phi_mc = new H2F("h_el_p_theta_phi_mc","h_el_p_theta_phi_mc",200,-180.0, 180.0, 200, 0.0, 60.0 );
 
 	H2F h_el_w_theta = new H2F("h_el_w_theta","h_el_w_theta",100, 0.0, 2.2, 100, 0.0, 60.0);
+	H2F h_el_gen_w_theta = new H2F("h_el_gen_w_theta","h_el_gen_w_theta",100, 0.0, 2.2, 100, 0.0, 60.0);
 
 
 	H2F h_q2w = new H2F("h_q2w","h_q2w",200,0.0, 9.0, 200, 0.0, 6.0);
@@ -91,17 +92,26 @@ public class accpTest{
   	H1F h_accep_rec_theta = new H1F("h_accep_rec_theta","h_accep_rec_theta", n_bins, min_theta, max_theta );
 	H1F h_accp_q2 = new H1F("h_accp_theta","h_accp_theta",n_bins,min_theta, max_theta);
 
+	//get acceptance per sector
+	Vector<H1F> h_gen_sect = new Vector<H1F>();
+	Vector<H1F> h_rec_sect = new Vector<H1F>();
+	Vector<H1F> h_accp_sect = new Vector<H1F>();
+	for( int s = 1; s <= 6; s++ ){
+	    h_gen_sect.add( new H1F("h_gen_sect"+Integer.toString(s),"h_gen_sect"+Integer.toString(s),n_bins,min_theta,max_theta) );
+	    h_rec_sect.add( new H1F("h_rec_sect"+Integer.toString(s),"h_rec_sect"+Integer.toString(s),n_bins,min_theta,max_theta) );
+	    h_accp_sect.add( new H1F("h_accp_sect"+Integer.toString(s),"h_accp_sect"+Integer.toString(s),n_bins,min_theta,max_theta) );
+	}
+
+
 	H2F h_gen_phitheta = new H2F("h_gen_phitheta","h_gen_phitheta",74,-180,180,30, 0, 30);
 	H2F h_rec_phitheta = new H2F("h_gen_phitheta","h_gen_phitheta",74,-180,180,30, 0, 30);
 
  	H1F h_gen_theta = new H1F("h_gen_theta","h_gen_theta", n_bins, min_theta, max_theta );
-	
-
+       
 	Vector<H1F> h_accp_theta = new Vector<H1F>();
 	Vector<H1F> h_rec_theta_s = new Vector<H1F>();
 	Vector<H1F> h_gen_theta_s = new Vector<H1F>();
 	Vector<H2F>  h_el_w_theta_s = new Vector<H2F>();
-
 
 	for( int s = 0; s < 6; s++ ){
 	    h_rec_theta_s.add( new H1F("h_rec_theta_sector"+Integer.toString(s),"h_rec_theta_sector"+Integer.toString(s), n_bins, min_theta, max_theta) );
@@ -141,7 +151,7 @@ public class accpTest{
 	    hiporeader.open(new File(file_in) );
 	    DataEvent event = null;
 
-	    int max_event = 10000;/// hiporeader.getSize();
+	    int max_event = hiporeader.getSize();
 	    int num_ev = 0;
 	    System.out.println(" PROCESSING " + Integer.toString(max_event) + " EVENTS " ) ;
 
@@ -243,6 +253,11 @@ public class accpTest{
 			if ( w < 1.1 ){
 			    h_rec_theta_s.get(el_cal_sector).fill(lv_el_rec.theta() * radians_to_deg);
 			    h_rec_phitheta.fill(lv_el_rec.phi() * radians_to_deg, lv_el_rec.theta() * radians_to_deg);
+
+			    
+			    if( lv_el_rec.phi() * radians_to_deg > -80.0 && lv_el_rec.phi() * radians_to_deg < -20.0 ){
+				h_rec_sect.get(5).fill( lv_el_rec.theta() * radians_to_deg );
+			    }
 			}
 		    }
 		}
@@ -279,12 +294,20 @@ public class accpTest{
 			    eX.add(lv_target);
 			    eX.sub(lv_el_gen);
 			    double w = eX.mass();
+
+			    h_el_gen_w_theta.fill(w, lv_el_gen.theta() * radians_to_deg);
 			    
-			    if ( w > 0.9 && w < 1.1 ){
+			    if ( w < 1.1 ){ //w > 0.9 && w < 1.1 ){
 				h_el_p_theta_mc.fill( lv_temp.p(), lv_temp.theta() * radians_to_deg );
 				h_el_theta_phi_mc.fill( lv_temp.phi() * radians_to_deg, lv_temp.theta() * radians_to_deg );
 				h_gen_theta.fill(lv_temp.theta() * radians_to_deg );
 				h_gen_phitheta.fill(lv_temp.phi() * radians_to_deg, lv_temp.theta() * radians_to_deg);
+
+				if( lv_el_gen.phi() * radians_to_deg > -80.0 && lv_el_gen.phi() * radians_to_deg < -20.0 ){
+				    h_gen_sect.get(5).fill( lv_el_gen.theta() * radians_to_deg );
+				}
+
+
 			    }
 			}
 		    }
@@ -317,9 +340,12 @@ public class accpTest{
 	c_temp3.draw(h_gen_theta);
 	c_temp3.save("h_gen_theta.png");
 
-	
 	////////////////////////////////////////////////////
 	// acceptance stuff
+
+	// check raw counts
+
+
 	//getBinContent(int bx, int by) {
 	// xAxis.getNBins();
 	// get theta bins
@@ -332,6 +358,9 @@ public class accpTest{
 
 
 	Vector<GraphErrors> g_theta_accp_per_phi = new Vector< GraphErrors>();
+	Vector<H1F> h_raw_rec_events_per_phi = new Vector<H1F>();
+	Vector<H1F> h_raw_gen_events_per_phi = new Vector<H1F>();
+
 	for( int pb = 0; pb < n_rec_phi_bins; pb++ ){	   
 	    
 	    //g_theta_accp_per_phi.add( new GraphErrors( ) );
@@ -347,6 +376,9 @@ public class accpTest{
 	    double[] accp_err ;
 	    accp_err =  new double[n_rec_theta_bins];   
 	    
+	    h_raw_rec_events_per_phi.add( new H1F("h_raw_rec_events_phi_"+Integer.toString(pb),"h_raw_rec_events_phi_"+Integer.toString(pb),40, 0.0, 40.0) );
+	    h_raw_gen_events_per_phi.add( new H1F("h_raw_gen_events_phi_"+Integer.toString(pb),"h_raw_gen_events_phi_"+Integer.toString(pb),40, 0.0, 40.0) );
+
 	    for(int tb = 0; tb < n_rec_theta_bins; tb++ ){
 
 		//System.out.println(" phi bin " + Integer.toString(pb) + " theta bin " + Integer.toString(tb) );
@@ -365,6 +397,12 @@ public class accpTest{
 		accp_err[tb] = 0.0;
 
 		//System.out.println(" rec bin content " + Double.toString(rec_bin_content) + " gen bin content"  + Double.toString(gen_bin_content) + " ratio " + Double.toString(ratio_bin_content) );
+		if( tb > 9 ){
+		    h_raw_rec_events_per_phi.get(pb).setBinContent( tb, rec_bin_content);
+		    h_raw_gen_events_per_phi.get(pb).setBinContent( tb, gen_bin_content);
+		}
+
+
 	    }
 
 	    for(int i = 0; i < 18; i++){
@@ -377,17 +415,25 @@ public class accpTest{
         c_temp4.setSize(10000,9000); 
 	c_temp4.divide(10,10);
 	for( int pb = 0 ; pb < n_rec_phi_bins; pb++ ){  
-
-	    for ( int b = 0; b < 17; b++ ){
-		//System.out.println(" >> " + Double.toString(g_theta_accp_per_phi.get(pb).getDataY(b) ));
-	    }
-
-
 	    c_temp4.cd(pb);
 	    c_temp4.draw(g_theta_accp_per_phi.get(pb));
 	}
 	c_temp4.save("g_theta_accp_per_phi_bin.png");
+
+	EmbeddedCanvas c_temp4a = new EmbeddedCanvas();
+	c_temp4a.setSize(10000,9000);
+	c_temp4a.divide(10,10);     
+	for( int pb = 0 ; pb < n_rec_phi_bins; pb++ ){  
+	    c_temp4a.cd(pb);
+	    h_raw_rec_events_per_phi.get(pb).setLineColor(2);
+	    c_temp4a.draw(h_raw_rec_events_per_phi.get(pb));
+	    c_temp4a.draw(h_raw_gen_events_per_phi.get(pb),"same");
 	    
+
+	}
+	c_temp4a.save("h_theta_comp_per_phi_bin.png");
+	
+		    
 	EmbeddedCanvas c_temp5 = new EmbeddedCanvas();
 	c_temp5.setSize(1000,1000);
 	c_temp5.divide(2,3);
@@ -402,7 +448,24 @@ public class accpTest{
 	c_temp6.draw(h_el_w_theta);	
 	c_temp6.save("h_el_w_theta.png");
     	     
+	EmbeddedCanvas c_temp7 = new EmbeddedCanvas();
+	c_temp7.setSize(1000,1000);
+	c_temp7.draw(h_el_gen_w_theta);	
+	c_temp7.save("h_el_gen_w_theta.png");
 
+	//test acceptance for one sector
+	EmbeddedCanvas c_temp8 = new EmbeddedCanvas();
+	c_temp8.setSize(900,900);
+	for( int b = 1; b < n_bins; b++ ){
+	    double rec = h_rec_sect.get(5).getBinContent(b);
+	    double gen = h_gen_sect.get(5).getBinContent(b);
+	    double accp_val = rec/gen;
+	    h_accp_sect.get(5).setBinContent(b,accp_val);
+	}
+	c_temp8.draw(h_accp_sect.get(5));
+	c_temp8.save("h_test_accp_sector.png");
+	    
+	    
 
     }
 }

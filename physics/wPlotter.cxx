@@ -45,7 +45,7 @@ void wPlotter(const char* infile, int run){
     
     c1->cd(s+1);
     TH1D *w_temp = (TH1D*)fin->Get(Form("wExclusiveS%d", s + 1));
-    w_temp->SetTitle(Form("Sector %d",s));
+    w_temp->SetTitle(Form("Sector %d",s+1));
     w_temp->GetXaxis()->CenterTitle();
     gStyle->SetOptStat(0);    
     w_temp->SetLineColor(kBlack);

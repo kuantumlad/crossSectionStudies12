@@ -86,12 +86,12 @@ int quickFit(const char* input_file, int model){
   float deltaPPHigh = 0.4;
 
   std::string parentInDirectory = "/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/";
-  TFile f(Form("%s%s.root", parentInDirectory.c_str(), input_file));
+  TFile f(Form("%s",input_file));
   
   std::string parentOutDirectory = " /w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/physics/parameters/";
   TFile *quick_fit_results = new TFile(Form("%squick_fit%d.root", parentOutDirectory.c_str(), model), "recreate");
 
-  float eBeam = 2.2212;
+  float eBeam = 2.211;
   float mProton = 0.98327;
   TTree *anaTree=(TTree *) f.Get("out_tree");
   TTree *simTree=(TTree *) f.Get("mc_tree");

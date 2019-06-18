@@ -1,110 +1,110 @@
-  Incident energy is    10.5939999      GeV
+  Incident energy is    2.22099996      GeV
   Minimum accepted scattered electron energy is  0.500000000    
   Target thickness is    5.78034669E-03  r.l.
   Number of particles per event in bos bank =           3
  Electron scattering angles range from   6.0 to  60.0 degrees
   Elastic peak included
-  Elastic Scattering, Date and time:Thu May 16 03:17:02 2019    
+  Elastic Scattering, Date and time:Tue Jun 11 00:23:42 2019    
   Mininum photon energy =   4.99999989E-03
-  Maximum photon energy =   7.58786774    
-  ntries,nevent, mcall_max:               4269140         400          27
-  sig_int =    2.28776801E-02   2.44088061E-02
-  Number of seconds at Lum=1E34 is   1.74842894    
- Elapsed CPU time =      1.8 seconds
-  ntries,nevent, mcall_max:               8676276         800          37
-  sig_int =    2.25138124E-02   2.35300716E-02
-  Number of seconds at Lum=1E34 is   3.55337405    
- Elapsed CPU time =      3.6 seconds
-  ntries,nevent, mcall_max:              13330048        1200          37
-  sig_int =    2.19807215E-02   2.25959849E-02
-  Number of seconds at Lum=1E34 is   5.45932913    
- Elapsed CPU time =      5.4 seconds
-  ntries,nevent, mcall_max:              17883923        1600          37
-  sig_int =    2.18448751E-02   2.21930258E-02
-  Number of seconds at Lum=1E34 is   7.32437229    
+  Maximum photon energy =   1.69256878    
+  ntries,nevent, mcall_max:               1164295         400           5
+  sig_int =    3.30505204       3.17817903    
+  Number of seconds at Lum=1E34 is   1.21026840E-02
+ Elapsed CPU time =      0.6 seconds
+  ntries,nevent, mcall_max:               2352345         800           7
+  sig_int =    3.27167630       3.18290710    
+  Number of seconds at Lum=1E34 is   2.44522970E-02
+ Elapsed CPU time =      1.2 seconds
+  ntries,nevent, mcall_max:               3513922        1200           7
+  sig_int =    3.28526568       3.22231603    
+  Number of seconds at Lum=1E34 is   3.65267247E-02
+ Elapsed CPU time =      1.6 seconds
+  ntries,nevent, mcall_max:               4706590        1600           7
+  sig_int =    3.27035570       3.22587991    
+  Number of seconds at Lum=1E34 is   4.89243418E-02
+ Elapsed CPU time =      2.1 seconds
+  ntries,nevent, mcall_max:               5914426        2000           7
+  sig_int =    3.25310993       3.21256399    
+  Number of seconds at Lum=1E34 is   6.14796281E-02
+ Elapsed CPU time =      2.6 seconds
+  ntries,nevent, mcall_max:               7289919        2400           7
+  sig_int =    3.16715932       3.20763111    
+  Number of seconds at Lum=1E34 is   7.57776797E-02
+ Elapsed CPU time =      3.2 seconds
+  ntries,nevent, mcall_max:               8503491        2800           8
+  sig_int =    3.16768599       3.21983910    
+  Number of seconds at Lum=1E34 is   8.83926004E-02
+ Elapsed CPU time =      3.8 seconds
+  ntries,nevent, mcall_max:               9533561        3200          10
+  sig_int =    3.22906041       3.23805761    
+  Number of seconds at Lum=1E34 is   9.91000310E-02
+ Elapsed CPU time =      4.2 seconds
+  ntries,nevent, mcall_max:              10679984        3600          10
+  sig_int =    3.24274826       3.23311496    
+  Number of seconds at Lum=1E34 is  0.111016937    
+ Elapsed CPU time =      4.7 seconds
+  ntries,nevent, mcall_max:              11916199        4000          13
+  sig_int =    3.22926426       3.23132181    
+  Number of seconds at Lum=1E34 is  0.123867214    
+ Elapsed CPU time =      5.2 seconds
+  ntries,nevent, mcall_max:              13124507        4400          13
+  sig_int =    3.22515845       3.23837471    
+  Number of seconds at Lum=1E34 is  0.136427402    
+ Elapsed CPU time =      5.7 seconds
+  ntries,nevent, mcall_max:              14341170        4800          13
+  sig_int =    3.21986747       3.23253584    
+  Number of seconds at Lum=1E34 is  0.149074450    
+ Elapsed CPU time =      6.2 seconds
+  ntries,nevent, mcall_max:              15614369        5200          13
+  sig_int =    3.20376205       3.23069477    
+  Number of seconds at Lum=1E34 is  0.162309170    
+ Elapsed CPU time =      6.8 seconds
+  ntries,nevent, mcall_max:              16717205        5600          14
+  sig_int =    3.22259450       3.23352146    
+  Number of seconds at Lum=1E34 is  0.173773021    
  Elapsed CPU time =      7.2 seconds
-  ntries,nevent, mcall_max:              21157522        2000          37
-  sig_int =    2.30811574E-02   2.32595373E-02
-  Number of seconds at Lum=1E34 is   8.66507626    
- Elapsed CPU time =      8.4 seconds
-  ntries,nevent, mcall_max:              26076931        2400          37
-  sig_int =    2.24722810E-02   2.30491832E-02
-  Number of seconds at Lum=1E34 is   10.6798239    
- Elapsed CPU time =     10.4 seconds
-  ntries,nevent, mcall_max:              30361876        2800          37
-  sig_int =    2.25175861E-02   2.29692962E-02
-  Number of seconds at Lum=1E34 is   12.4347258    
- Elapsed CPU time =     12.2 seconds
-  ntries,nevent, mcall_max:              34033034        3204          37
-  sig_int =    2.29871050E-02   2.32824888E-02
-  Number of seconds at Lum=1E34 is   13.9382496    
- Elapsed CPU time =     13.7 seconds
-  ntries,nevent, mcall_max:              37905408        3600          37
-  sig_int =    2.31896248E-02   2.33049169E-02
-  Number of seconds at Lum=1E34 is   15.5241833    
- Elapsed CPU time =     15.2 seconds
-  ntries,nevent, mcall_max:              42159297        4000          37
-  sig_int =    2.31664274E-02   2.32149195E-02
-  Number of seconds at Lum=1E34 is   17.2663651    
- Elapsed CPU time =     17.0 seconds
-  ntries,nevent, mcall_max:              46924704        4401          37
-  sig_int =    2.29003560E-02   2.30223574E-02
-  Number of seconds at Lum=1E34 is   19.2180405    
- Elapsed CPU time =     18.9 seconds
-  ntries,nevent, mcall_max:              51062374        4801          49
-  sig_int =    2.29574200E-02   2.31857393E-02
-  Number of seconds at Lum=1E34 is   20.9126282    
- Elapsed CPU time =     20.6 seconds
-  ntries,nevent, mcall_max:              55416629        5200          49
-  sig_int =    2.29116119E-02   2.31147893E-02
-  Number of seconds at Lum=1E34 is   22.6959152    
- Elapsed CPU time =     22.4 seconds
-  ntries,nevent, mcall_max:              59633635        5600          49
-  sig_int =    2.29292121E-02   2.30649319E-02
-  Number of seconds at Lum=1E34 is   24.4229946    
- Elapsed CPU time =     24.1 seconds
-  ntries,nevent, mcall_max:              63616202        6000          67
-  sig_int =    2.30290443E-02   2.30902024E-02
-  Number of seconds at Lum=1E34 is   26.0540543    
- Elapsed CPU time =     25.8 seconds
-  ntries,nevent, mcall_max:              67562643        6400          67
-  sig_int =    2.31294744E-02   2.31908280E-02
-  Number of seconds at Lum=1E34 is   27.6703205    
- Elapsed CPU time =     27.4 seconds
-  ntries,nevent, mcall_max:              72222204        6800          67
-  sig_int =    2.29895543E-02   2.30134428E-02
-  Number of seconds at Lum=1E34 is   29.5786514    
- Elapsed CPU time =     29.3 seconds
-  ntries,nevent, mcall_max:              76863299        7208          67
-  sig_int =    2.28975061E-02   2.29363423E-02
-  Number of seconds at Lum=1E34 is   31.4794102    
- Elapsed CPU time =     31.2 seconds
-  ntries,nevent, mcall_max:              80584982        7600          67
-  sig_int =    2.30277684E-02   2.30653882E-02
-  Number of seconds at Lum=1E34 is   33.0036316    
- Elapsed CPU time =     32.7 seconds
-  ntries,nevent, mcall_max:              84448879        8000          67
-  sig_int =    2.31306851E-02   2.31513940E-02
-  Number of seconds at Lum=1E34 is   34.5860901    
- Elapsed CPU time =     34.3 seconds
-  ntries,nevent, mcall_max:              89083145        8400          67
-  sig_int =    2.30237525E-02   2.30269246E-02
-  Number of seconds at Lum=1E34 is   36.4840584    
- Elapsed CPU time =     36.1 seconds
-  ntries,nevent, mcall_max:              93394919        8800          67
-  sig_int =    2.30065677E-02   2.29830015E-02
-  Number of seconds at Lum=1E34 is   38.2499466    
- Elapsed CPU time =     37.8 seconds
-  ntries,nevent, mcall_max:              97113532        9200          67
-  sig_int =    2.31313221E-02   2.30115093E-02
-  Number of seconds at Lum=1E34 is   39.7729073    
- Elapsed CPU time =     39.4 seconds
-  ntries,nevent, mcall_max:             101179261        9600          67
-  sig_int =    2.31671240E-02   2.30426081E-02
-  Number of seconds at Lum=1E34 is   41.4380302    
- Elapsed CPU time =     41.0 seconds
-  ntries,nevent, mcall_max:             105558159       10000          67
-  sig_int =    2.31313296E-02   2.30128039E-02
-  Number of seconds at Lum=1E34 is   43.2314110    
- Elapsed CPU time =     42.8 seconds
- Elapsed CPU time =       42.8 seconds
+  ntries,nevent, mcall_max:              17934717        6000          14
+  sig_int =    3.21838593       3.22634220    
+  Number of seconds at Lum=1E34 is  0.186428845    
+ Elapsed CPU time =      7.7 seconds
+  ntries,nevent, mcall_max:              19116490        6400          14
+  sig_int =    3.22072148       3.22690773    
+  Number of seconds at Lum=1E34 is  0.198713228    
+ Elapsed CPU time =      8.2 seconds
+  ntries,nevent, mcall_max:              20330679        6800          14
+  sig_int =    3.21764636       3.22078371    
+  Number of seconds at Lum=1E34 is  0.211334601    
+ Elapsed CPU time =      8.7 seconds
+  ntries,nevent, mcall_max:              21616677        7200          14
+  sig_int =    3.20423937       3.21789479    
+  Number of seconds at Lum=1E34 is  0.224702299    
+ Elapsed CPU time =      9.3 seconds
+  ntries,nevent, mcall_max:              22826666        7600          14
+  sig_int =    3.20296693       3.21368599    
+  Number of seconds at Lum=1E34 is  0.237279996    
+ Elapsed CPU time =      9.8 seconds
+  ntries,nevent, mcall_max:              23984616        8000          14
+  sig_int =    3.20876956       3.21036363    
+  Number of seconds at Lum=1E34 is  0.249316737    
+ Elapsed CPU time =     10.2 seconds
+  ntries,nevent, mcall_max:              25173296        8400          14
+  sig_int =    3.21011472       3.20953274    
+  Number of seconds at Lum=1E34 is  0.261672884    
+ Elapsed CPU time =     10.8 seconds
+  ntries,nevent, mcall_max:              26472881        8800          14
+  sig_int =    3.19788480       3.20582557    
+  Number of seconds at Lum=1E34 is  0.275181890    
+ Elapsed CPU time =     11.3 seconds
+  ntries,nevent, mcall_max:              27802165        9200          14
+  sig_int =    3.18339539       3.20640635    
+  Number of seconds at Lum=1E34 is  0.288999587    
+ Elapsed CPU time =     11.9 seconds
+  ntries,nevent, mcall_max:              29086429        9600          14
+  sig_int =    3.17513514       3.20495272    
+  Number of seconds at Lum=1E34 is  0.302349329    
+ Elapsed CPU time =     12.4 seconds
+  ntries,nevent, mcall_max:              30320313       10000          23
+  sig_int =    3.17283630       3.20724344    
+  Number of seconds at Lum=1E34 is  0.315175414    
+ Elapsed CPU time =     12.9 seconds
+ Elapsed CPU time =       12.9 seconds

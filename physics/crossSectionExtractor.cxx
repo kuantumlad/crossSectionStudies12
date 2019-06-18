@@ -73,10 +73,15 @@ TH1D* getSectorCrossSection(TH1F *h_in, TH2F *h2_in, std::map<int, std::vector<d
     //double acc_err = pow( accp_theta_bin_err * ( (1.0/accp_theta_bin)*newbincontent ), 2);
     double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
 
+    double csErr = h_theta_proj->GetBinError(b)/ ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ); 
+
+    double markov_err = sqrt( (csErr/accp_theta_bin)*(csErr/accp_theta_bin) + (newbincontent*accp_theta_bin_err)*(newbincontent*accp_theta_bin_err) );
+
     //double newbincontent_error = newbincontent * (sqrt(bincontent)/bincontent);    
     std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " cross section value " << newbincontent << " error " << newbincontent_error << " acceptance value " << accp_theta_bin << std::endl;
+    std::cout << b <<  " >> bin center " << h_temp->GetBinCenter(b) << " proj bin value " << h_theta_proj->GetBinContent(b) << " cross section value " << newbincontent << " error " << markov_err << " acceptance value " << accp_theta_bin << std::endl;
     h_temp->SetBinContent(b,newbincontent);
-    //h_temp->SetBinError(b,newbincontent_error);
+    h_temp->SetBinError(b,markov_err);
   }
 
   return h_temp;
@@ -160,8 +165,8 @@ int crossSectionExtractor(const char* infile, int run){
   }
   
   //get acceptance correction map first
-  std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
-  std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
+  std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_110606_ffract0p8_tp06sm06_rad_noshift_newfilter.txt"); // old version GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
+  std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_110606_ffract0p8_tp06sm06_rad_noshift_newfilter.txt"); // also older version parametersGetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
 
   std::vector< TH1F* > h_el_p_sect_final;
   std::vector< TH1F* > h_el_theta_sect_final;
@@ -275,9 +280,13 @@ int crossSectionExtractor(const char* infile, int run){
     double acc_err = pow( sqrt(accp_theta_bin_err) * ( (1.0/accp_theta_bin)*newbincontent ),2);
     double newbincontent_error = newbincontent*sqrt( nev_theta_err + acc_err );
 
+    double csErr = h_theta_proj->GetBinError(b)/ ( accp_theta_bin * lum_run2587 * (bin_phi_size*delta_bin*1.0) * bin_theta_size * sin_angle ); 
+
+    double markov_err = sqrt( (csErr/accp_theta_bin)*(csErr/accp_theta_bin) + (newbincontent*accp_theta_bin_err)*(newbincontent*accp_theta_bin_err) );
+
     std::cout << " cross section " << newbincontent << std::endl;
     h_temp->SetBinContent(b,newbincontent);
-    //    h_temp->SetBinContentError(b, newbincontent_error);
+    h_temp->SetBinError(b, markov_err);
     
   }
 
@@ -338,7 +347,7 @@ int crossSectionExtractor(const char* infile, int run){
     std::vector<double> data_diff_err_y;   
     std::cout << " comparing model and data for sector " << s << std::endl;
     for( int b=1; b<=h_model->GetNbinsX(); b++){
-      if ( b <= 14 || b >= 24 ) continue;
+      if ( b <= 13 || b >= 24 ) continue; // put to 14 later 
       double bin_center_model = h_model->GetBinCenter(b);
       double bin_center_data = cs_results[s]->GetBinCenter(b);
       double model_result = h_model->GetBinContent(b);

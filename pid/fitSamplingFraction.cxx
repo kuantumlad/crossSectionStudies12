@@ -209,7 +209,7 @@ int fitSamplingFraction(const char* inFile, int run){
   for(int s = 0; s < g_el_sf_mean.size(); s++ ){
     c_temp_sfmean->cd(s+1);
 
-    TF1 *fit_mean  = new TF1(Form("fit_mean_s%d",s),"[0]*( 1 + x/sqrt(x*x + [1])) + [2]*x + [3]*x*x", 0.90, 2.16);    
+    TF1 *fit_mean  = new TF1(Form("fit_mean_s%d",s),"[0]*( 1 + x/sqrt(x*x + [1])) + [2]*x + [3]*x*x", 1.3, 2.16);    
     fit_mean->SetParameter(0,0.25);
     fit_mean->SetParameter(1,0.01);
     fit_mean->SetParameter(2,0.01);
@@ -223,9 +223,9 @@ int fitSamplingFraction(const char* inFile, int run){
     fit_mean->Draw("same");
 
     c_temp_sfsig->cd(s+1);
-    TF1 *fit_sigma = new TF1(Form("fit_sigma_s%d",s), "[0] + [1]/x", 0.9, 2.16);
+    TF1 *fit_sigma = new TF1(Form("fit_sigma_s%d",s), "[0] + [1]/x", 1.3, 2.16);
     fit_sigma->SetParameter(0,0.02);
-    fit_sigma->SetParameter(1,0.0);
+    fit_sigma->SetParameter(1,0.001);
     g_el_sf_sigma[s]->Fit(Form("fit_sigma_s%d",s), "R");
     g_el_sf_sigma[s]->SetTitle(Form("EL SF SIGMA FOR SECTOR %d",s));
     g_el_sf_sigma[s]->SetMarkerColor(kBlack);

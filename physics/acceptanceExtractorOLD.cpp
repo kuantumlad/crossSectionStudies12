@@ -52,12 +52,11 @@ TH1F* AcceptanceRatio(TH1F *h_rec, TH1F *h_gen ){
     if(  h_rec->GetBinCenter(b) > 25.0 ) continue;
 
     double accp_ratio = h_rec->GetBinContent(b)/h_gen->GetBinContent(b);    
-    //    double accp_ratio_err = accp_ratio * sqrt( h_rec->GetBinContent(b)/pow(h_gen->GetBinContent(b),2)  + pow(h_rec->GetBinContent(b),2)/pow(h_gen->GetBinContent(b),3));
-    
-    double accp_ratio_err =1.0/h_gen->GetBinContent(b)  * sqrt( h_rec->GetBinContent(b)*h_rec->GetBinContent(b) / h_gen->GetBinContent(b) + h_rec->GetBinContent(b));
+    double accp_ratio_err = accp_ratio * sqrt( h_rec->GetBinContent(b)/pow(h_gen->GetBinContent(b),2)  + pow(h_rec->GetBinContent(b),2)/pow(h_gen->GetBinContent(b),3));
     if(h_gen->GetBinContent(b) == 0 ) accp_ratio = 0.0;
     if(h_gen->GetBinContent(b) == 0 || h_rec->GetBinContent(b) == 0 ) accp_ratio_err = 0.0; 
     
+
     std::cout << " bin " << b << " bin center " << h_rec->GetBinCenter(b) << " rec " << h_rec->GetBinContent(b) << " gen " << h_gen->GetBinContent(b) << std::endl;
     std::cout << " bin " << b << " bin error " <<  accp_ratio_err << std::endl;
     h_accp->SetBinContent(b,accp_ratio);
@@ -116,8 +115,7 @@ TGraphErrors* AcceptancePerSector(TH2F *h_rec_in, TH2F *h_gen_in){
     double theta_center = h_rec->GetBinCenter(b);
     if( theta_center < 9.0 || theta_center > 25.0 ) continue; 
     double accp_ratio = h_rec->GetBinContent(b)/h_gen->GetBinContent(b);    
-    //double accp_ratio_err = accp_ratio * sqrt( h_rec->GetBinContent(b)/pow(h_gen->GetBinContent(b),2)  + pow(h_rec->GetBinContent(b),2)/pow(h_gen->GetBinContent(b),3));
-    double accp_ratio_err =1.0/h_gen->GetBinContent(b)  * sqrt( h_rec->GetBinContent(b)*h_rec->GetBinContent(b) / h_gen->GetBinContent(b) + h_rec->GetBinContent(b));
+    double accp_ratio_err = accp_ratio * sqrt( h_rec->GetBinContent(b)/pow(h_gen->GetBinContent(b),2)  + pow(h_rec->GetBinContent(b),2)/pow(h_gen->GetBinContent(b),3));
     if(h_gen->GetBinContent(b) == 0 ) accp_ratio = 0.0;
     if(h_gen->GetBinContent(b) == 0 || h_rec->GetBinContent(b) == 0 ) accp_ratio_err = 0.0; 
     
@@ -206,15 +204,11 @@ void WriteAcceptanceRatio2D(TH2F* h_rec, TH2F* h_gen, int run, const char* field
   outputAcceptance.open(f_out_name);
   outputAcceptanceError.open(f_out_name_err);
   
-  //TH2F *h_rec_clone = (TH2F*)h_rec->Clone();
-  //h_rec_clone->Divide(h_gen);
-
   for( int bx = 1; bx < h_rec->GetNbinsX(); bx++ ){
     for( int by = 1; by < h_rec->GetNbinsY(); by++ ){
       
       double accp_ratio = h_rec->GetBinContent(bx,by)/h_gen->GetBinContent(bx,by);
-      double accp_ratio_err =1.0/h_gen->GetBinContent(bx,by)  * sqrt( h_rec->GetBinContent(bx,by)*h_rec->GetBinContent(bx,by) / h_gen->GetBinContent(bx,by) + h_rec->GetBinContent(bx,by));  // accp_ratio * sqrt( h_rec->GetBinContent(bx,by)/pow(h_gen->GetBinContent(bx,by),2)  + pow(h_rec->GetBinContent(bx,by),2)/pow(h_gen->GetBinContent(bx,by),3));
-
+      double accp_ratio_err = accp_ratio * sqrt( h_rec->GetBinContent(bx,by)/pow(h_gen->GetBinContent(bx,by),2)  + pow(h_rec->GetBinContent(bx,by),2)/pow(h_gen->GetBinContent(bx,by),3));
       if(h_gen->GetBinContent(bx,by) == 0 || h_rec->GetBinContent(bx,by) == 0 ) accp_ratio_err = 0.0; 
       if( h_gen->GetBinContent(bx,by) == 0 ) accp_ratio = 0.0;
       
@@ -230,7 +224,7 @@ void WriteAcceptanceRatio2D(TH2F* h_rec, TH2F* h_gen, int run, const char* field
 }
 
 
-int acceptanceExtractor(const char* inFileData, int run, const char* field_config ){ // const char* outfile, int run ){
+int acceptanceExtractor(const char* inFileData, const char* inFileMC, int run, const char* field_config ){ // const char* outfile, int run ){
 
  
   TFile *fData; 
@@ -239,29 +233,30 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
   Double_t fraction;
 
   fData = new TFile(inFileData,"");   // Input File
-  if(fData->IsZombie() ){
+  fMC = new TFile(inFileMC,"");
+  if(fData->IsZombie() || fMC->IsZombie()){   // Check if TFile exists!
     cout<<"Input file doesn't exist!" << endl;
     cout<<"Exit program" << endl;
     return 0;
   }
 
-  cout << "Reading from File: " << inFileData << endl;
+  cout << "Reading from File: " << inFileData << " and " << inFileMC << endl;
 
   // get relevant histograms to determine efficiency or geometrical acceptance
   TH1F *h_rc_all_el_p = (TH1F*)fData->Get("particle_histograms_selected/hist_electron_p");
-  TH1F *h_mc_all_el_p = (TH1F*)fData->Get("mc/hist_mc_all_electron_p");
+  TH1F *h_mc_all_el_p = (TH1F*)fMC->Get("hist_mc_all_electron_p");
 
   TH1F *h_rc_all_el_theta = (TH1F*)fData->Get("particle_histograms_selected/hist_electron_theta");
-  TH1F *h_mc_all_el_theta = (TH1F*)fData->Get("mc/hist_mc_all_electron_theta");
+  TH1F *h_mc_all_el_theta = (TH1F*)fMC->Get("hist_mc_all_electron_theta");
 
   TH1F *h_rc_all_el_phi = (TH1F*)fData->Get("particle_histograms_selected/hist_electron_phi");
-  TH1F *h_mc_all_el_phi = (TH1F*)fData->Get("mc/hist_mc_all_electron_phi");
+  TH1F *h_mc_all_el_phi = (TH1F*)fMC->Get("hist_mc_all_electron_phi");
 
   TH2F *h_rc_all_el_p_theta = (TH2F*)fData->Get("particle_histograms_selected/hist_electron_p_theta");
-  TH2F *h_mc_all_el_p_theta = (TH2F*)fData->Get("mc/hist_mc_all_electron_p_theta");
+  TH2F *h_mc_all_el_p_theta = (TH2F*)fMC->Get("hist_mc_all_electron_p_theta");
 
   TH2F *h_rc_all_el_theta_vs_phi = (TH2F*)fData->Get("particle_histograms_selected/hist_electron_theta_vs_phi");
-  TH2F *h_mc_all_el_theta_vs_phi = (TH2F*)fData->Get("mc/hist_mc_all_electron_theta_vs_phi");
+  TH2F *h_mc_all_el_theta_vs_phi = (TH2F*)fMC->Get("hist_mc_all_electron_theta_vs_phi");
 
   // change theta range starting from 5 
   TH1F *h_el_theta_rebin = new TH1F("h_el_theta_rebin","h_el_theta_rebin", h_rc_all_el_theta->GetNbinsX(), 0.0, 30.0);
@@ -271,6 +266,8 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
     std::cout << " > rebin value " << b << " " << bin_content << std::endl;
     h_el_theta_rebin->SetBinContent(b, bin_content);
   }
+
+
 
   TCanvas *c1 = new TCanvas("c1","c1",900,900);
   c1->Divide(1,1);
@@ -412,7 +409,7 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
   c_sim_gen_comp_theta->SaveAs("sim_gen_comp_theta_max_phi_bin.pdf");
 
   //Write acceptance to file for use in cross section calculations
-  WriteAcceptanceRatio2D(h_rc_all_el_theta_vs_phi, h_mc_all_el_theta_vs_phi, run, field_config);
+  //  WriteAcceptanceRatio2D(h_rc_all_el_theta_vs_phi, h_mc_all_el_theta_vs_phi, run, field_config);
 
 
 
@@ -421,130 +418,17 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
   for ( int s = 0; s < 6; s++ ){
     c_g_accp_s->cd(s+1);
     TH2F *h_rec_temp  = (TH2F*)fData->Get(Form("kinematics/h_el_phitheta_s%d_final",s+1));
-    TH2F *h_gen_temp = (TH2F*)fData->Get("mc/hist_mc_all_electron_theta_vs_phi");
+    TH2F *h_gen_temp = (TH2F*)fMC->Get("hist_mc_all_electron_theta_vs_phi");
     std::cout << " getting acceptance for sector " << s << std::endl;
     TGraphErrors *g_accp_sector = AcceptancePerSector(h_rec_temp, h_gen_temp);   
     g_accp_sector->SetTitle(Form(" Acceptance Sector %d",s+1));
     g_accp_sector->Draw("AP");
   }
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // acceptance per phi bin
-  // using the historgrams from the selector_elastic 
-  TCanvas *c_pb = new TCanvas("c_pb","c_pb",1000,1000);
-  c_pb->Divide(10,10);
-  for( int pb = 0; pb < 73; pb++ ){
-    c_pb->cd(pb+1);
-    
-    TH1F *h_rec_temp = (TH1F*)fData->Get(Form("acceptance/h_el_theta_rec_phi%d",pb));
-    TH1F *h_gen_temp = (TH1F*)fData->Get(Form("acceptance/h_el_theta_gen_phi%d",pb));
-    TH1F* h_accp_ratio_temp = AcceptanceRatio(h_rec_temp, h_gen_temp );
-    h_accp_ratio_temp->Draw("ERR");
-    
-    std::vector< double > v_theta_bin;
-    std::vector< double > v_accp;
-    std::vector< double > v_theta_bin_err;
-    std::vector< double > v_accp_err;
-    
-    std::cout << "creating accp across theta for phibin " << pb << std::endl;
-    for( int tb = 0; tb < h_rec_temp->GetNbinsX(); tb++ ){
-      
-      double accp_val = h_accp_ratio_temp->GetBinContent(tb);
-      double theta_bin_center = h_accp_ratio_temp->GetBinCenter(tb);
-      double accp_val_err = h_accp_ratio_temp->GetBinError(tb);
-      double theta_bin_center_err = 0.0;
-      std::cout << "bin center " << theta_bin_center << std::endl;
-      if( theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
-      std::cout << " accp " << accp_val << " bin center " << theta_bin_center << " accp err " <<accp_val_err << " theta bin err " << theta_bin_center_err << std::endl;
-      v_theta_bin.push_back(theta_bin_center);
-      v_accp.push_back(accp_val);
-      v_theta_bin_err.push_back(theta_bin_center_err);
-      v_accp_err.push_back(accp_val_err);
-    }
-
-    std::cout <<" creating graph for accetpance now " << std::endl;
-    TGraphErrors *g_accp_temp = new TGraphErrors(v_theta_bin.size(), &(v_theta_bin[0]), &(v_accp[0]), &(v_theta_bin_err[0]), &(v_accp_err[0]) );
-    g_accp_temp->SetTitle(Form("Acceptance #phi Bin %d",pb));  
-    g_accp_temp->GetXaxis()->SetTitle("#theta (deg)");
-    g_accp_temp->GetYaxis()->SetTitle("Accp");
-    g_accp_temp->GetXaxis()->CenterTitle();
-    g_accp_temp->GetYaxis()->CenterTitle();
-    g_accp_temp->SetMarkerStyle(10);
-    g_accp_temp->SetMarkerSize(0.75);
-    g_accp_temp->SetMarkerColor(kBlack);
-    g_accp_temp->Draw("AP");       
-
-    if( pb == 41 ){
-      TCanvas *c_pb_focus = new TCanvas("c_pb_focus","c_pb_focus",900,900);
-      c_pb_focus->cd(1);
-      g_accp_temp->Draw("AP"); 
-      c_pb_focus->SaveAs("g_acceptance_phi_bin_41.pdf");
-    }
-   
-  }
-  c_pb->SaveAs(Form("g_acceptance_per_phi_bin_%s.pdf",field_config));
   
-  TMultiGraph *mg_accp = new TMultiGraph();
 
-  TCanvas *c_accp_sector = new TCanvas("c_accp_sector","c_accp_sector",900,1200);
-  c_accp_sector->Divide(2,3);
-  for(int ss = 0; ss < 6; ss++){
-    c_accp_sector->cd(ss+1);
-    TH1F *h_rec_temp = (TH1F*)fData->Get(Form("acceptance/h_el_theta_rec_s%d",ss));
-    TH1F *h_gen_temp = (TH1F*)fData->Get(Form("acceptance/h_el_theta_gen_s%d",0));
-    
-    TH1F* h_accp_ratio_temp = AcceptanceRatio(h_rec_temp, h_gen_temp );
-    //    h_accp_ratio_temp->Draw("ERR");
-    std::vector< double > v_theta_bin;
-    std::vector< double > v_accp;
-    std::vector< double > v_theta_bin_err;
-    std::vector< double > v_accp_err;
-    
-    for( int tb = 0; tb < h_rec_temp->GetNbinsX(); tb++ ){
-      double accp_val = h_accp_ratio_temp->GetBinContent(tb)*6.0; // times 6 to account for 6 sectors -> will need to do on a bin by bin basis when looking at entire sector
-      double theta_bin_center = h_accp_ratio_temp->GetBinCenter(tb);
-      double accp_val_err = h_accp_ratio_temp->GetBinError(tb);
-      double theta_bin_center_err = 0.0;
-      if( theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
-      v_theta_bin.push_back(theta_bin_center);
-      v_accp.push_back(accp_val);
-      v_theta_bin_err.push_back(theta_bin_center_err);
-      v_accp_err.push_back(accp_val_err);
-    }
-    
-    TGraphErrors *g_accp_temp = new TGraphErrors(v_theta_bin.size(), &(v_theta_bin[0]), &(v_accp[0]), &(v_theta_bin_err[0]), &(v_accp_err[0]) );
-    g_accp_temp->SetTitle(Form("Acceptance Sector %d",ss));  
-    g_accp_temp->GetXaxis()->SetTitle("#theta (deg)");
-    g_accp_temp->GetYaxis()->SetTitle("Accp");
-    g_accp_temp->GetXaxis()->CenterTitle();
-    g_accp_temp->GetYaxis()->CenterTitle();
-    g_accp_temp->SetMarkerStyle(10);
-    g_accp_temp->SetMarkerSize(0.75);
-    g_accp_temp->SetMarkerColor(kBlack);
-    g_accp_temp->Draw("AP");
-  
-    g_accp_temp->SetMarkerColor(kSpring+ss);
-    //g_accp_temp->SetMarkerSize(1.2);
-    mg_accp->Add(g_accp_temp);
 
-  }
-  c_accp_sector->SaveAs("c_accp_sector.pdf");
 
-  TCanvas *c_mg_accp = new TCanvas("c_mg_accp","c_mg_accp",900,900);  
-  mg_accp->Draw("AP");
-  mg_accp->GetXaxis()->SetTitle("#theta (deg)");
-  mg_accp->GetYaxis()->SetTitle("Accp");
-  mg_accp->GetXaxis()->CenterTitle();
-  mg_accp->GetYaxis()->CenterTitle();
-  c_mg_accp->SaveAs(Form("c_mg_accp_per_sector_%s.pdf",field_config)); 
-  //mg_accp->GetXaxis()->SetLimits(6.0,21.0);
-  //mg_accp->Draw("AP");                                                                                                                                                                                   
-  //c_mg_accp->Update();
-  
- 
+
   return 0;  
 
 
