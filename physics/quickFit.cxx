@@ -91,7 +91,7 @@ int quickFit(const char* input_file, int model){
   std::string parentOutDirectory = " /w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/physics/parameters/";
   TFile *quick_fit_results = new TFile(Form("%squick_fit%d.root", parentOutDirectory.c_str(), model), "recreate");
 
-  float eBeam = 2.211;
+  float eBeam = 2.221;
   float mProton = 0.98327;
   TTree *anaTree=(TTree *) f.Get("out_tree");
   TTree *simTree=(TTree *) f.Get("mc_tree");
@@ -133,18 +133,18 @@ int quickFit(const char* input_file, int model){
   anaTree->SetBranchAddress("p4_ele_pz", &vpart_pz);
   anaTree->SetBranchAddress("p4_ele_E", &vpart_E);
 
-  anaTree->SetBranchAddress("p4_ele_vx", &vpart_vx);
-  anaTree->SetBranchAddress("p4_ele_vy", &vpart_vy);
-  anaTree->SetBranchAddress("p4_ele_vz", &vpart_vz);
+  //anaTree->SetBranchAddress("p4_ele_vx", &vpart_vx);
+  //anaTree->SetBranchAddress("p4_ele_vy", &vpart_vy);
+  //anaTree->SetBranchAddress("p4_ele_vz", &vpart_vz);
 
   anaTree->SetBranchAddress("p4_prot_px", &vprot_px);
   anaTree->SetBranchAddress("p4_prot_py", &vprot_py);
   anaTree->SetBranchAddress("p4_prot_pz", &vprot_pz);
   anaTree->SetBranchAddress("p4_prot_E",  &vprot_E);
 
-  anaTree->SetBranchAddress("p4_prot_vx", &vprot_vx);
-  anaTree->SetBranchAddress("p4_prot_vy", &vprot_vy);
-  anaTree->SetBranchAddress("p4_prot_vz", &vprot_vz);
+  //anaTree->SetBranchAddress("p4_prot_vx", &vprot_vx);
+  //anaTree->SetBranchAddress("p4_prot_vy", &vprot_vy);
+  //anaTree->SetBranchAddress("p4_prot_vz", &vprot_vz);
 
   anaTree->SetBranchAddress("sectorE", &v_sectorE);
   initialE.SetPxPyPzE(0, 0, eBeam, eBeam);
@@ -170,7 +170,7 @@ int quickFit(const char* input_file, int model){
 
   double toRD=180.0/TMath::Pi();
   
-  for(Int_t k=0; k < 100000; k++ ){ //k<anaTree->GetEntriesFast();k++){
+  for(Int_t k=0; k < anaTree->GetEntriesFast();k++){
     anaTree->GetEntry(k);
     NPart = vpart_px->size();
     if (NPart > 0 && NPart < 2){
@@ -178,9 +178,9 @@ int quickFit(const char* input_file, int model){
 	part_px[i] = vpart_px->at(i);
 	part_py[i] = vpart_py->at(i);
 	part_pz[i] = vpart_pz->at(i);
-	part_vx[i] = vpart_vx->at(i);
-	part_vy[i] = vpart_vy->at(i);
-	part_vz[i] = vpart_vz->at(i);
+	//part_vx[i] = vpart_vx->at(i);
+	//part_vy[i] = vpart_vy->at(i);
+	//part_vz[i] = vpart_vz->at(i);
 	part_E[i] = vpart_E->at(i);
 	sectorE[i] = v_sectorE->at(i);
 	sectorElectron = sectorE[i] - 1;
@@ -196,9 +196,9 @@ int quickFit(const char* input_file, int model){
 	      prot_py[j] = vprot_py->at(j);
 	      prot_pz[j] = vprot_pz->at(j);
 	      prot_E[j]  = vprot_E->at(j);
-	      prot_vx[i] = vprot_vx->at(i);
-	      prot_vy[i] = vprot_vy->at(i);
-	      prot_vz[i] = vprot_vz->at(i);
+	      //prot_vx[i] = vprot_vx->at(i);
+	      //prot_vy[i] = vprot_vy->at(i);
+	      //prot_vz[i] = vprot_vz->at(i);
 	      p4_proton[j].SetPxPyPzE(prot_px[j], prot_py[j], prot_pz[j], prot_E[j]);
 	      float deltaPhi = p4_ele[i].Phi()*toRD - p4_proton[j].Phi()*toRD;
 	      if (deltaPhi < 0) deltaPhi = -deltaPhi;

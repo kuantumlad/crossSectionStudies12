@@ -168,6 +168,22 @@ int ecPlotter(const char* input, int run){
 
   c_ec_hit->SaveAs(Form("h_el_echit_%d.pdf",run));
 
+  TCanvas *c_sf_eb = new TCanvas("c_sf_eb","c_sf_eb",900,900);
+  c_sf_eb->Divide(2,3);
+  gStyle->SetOptStat(0);
+  for( int ss = 0; ss < 6; ss++ ){
+    c_sf_eb->cd(ss+1);
+    TH1F *h_sf_neg = (TH1F*)fIn->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_00",ss+1));
+    TH1F *h_sf_eb = (TH1F*)fIn->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_01",ss+1));
+    h_sf_neg->SetTitle(Form("Sampling Fraction Sector %d",ss+1));
+    h_sf_neg->GetXaxis()->SetTitle("p (GeV)");
+    h_sf_neg->GetXaxis()->CenterTitle();
+    h_sf_neg->GetYaxis()->SetTitle("SF");
+    h_sf_neg->GetYaxis()->CenterTitle();
+    h_sf_neg->Draw();
+    h_sf_eb->Draw("same+colz");
+  }
+  c_sf_eb->SaveAs(Form("h_el_sf_ebpid_r%d.pdf",run));
 
   return 0;
 }

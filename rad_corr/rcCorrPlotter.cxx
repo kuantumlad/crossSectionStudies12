@@ -14,7 +14,7 @@ int rcCorrPlotter(){
 
   ifstream infile;
   std::string line;
-  infile.open("/work/clas12/bclary/CLAS12/electron_studies/rad_corr/elastrc_toplot.txt");
+  infile.open("/work/clas12/bclary/CLAS12/electron_studies/rad_corr/elasrcV3_toplot.txt");
   
   std::vector<double> bin_center;
   std::vector<double> rc;
@@ -29,10 +29,13 @@ int rcCorrPlotter(){
     std::istringstream ss(line);
 
     ss >> n0 >> n1 ;
+    std::cout << n0 << " " << n1  << std::endl;
 
     if ( n0 > 9 ){
       bin_center.push_back(n0);
       rc.push_back(n1);
+
+      std::cout << " bin center " << n0 << " radCorr " << n1 << std::endl;
       
       bin_center_err.push_back(0.0);
       rc_err.push_back(0.0);
@@ -50,6 +53,8 @@ int rcCorrPlotter(){
   g_rc->GetYaxis()->CenterTitle();  
   g_rc->SetMarkerStyle(8);
   g_rc->SetMarkerSize(0.75);
+  g_rc->GetHistogram()->SetMaximum(2.5);
+  g_rc->GetHistogram()->SetMinimum(0.2);
   g_rc->Draw("AP");
 
   c_rc->SaveAs("g_rc_values.pdf");

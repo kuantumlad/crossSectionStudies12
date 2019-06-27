@@ -34,10 +34,10 @@ public class genCheck{
 	H1F h_el_p = new H1F("h_el_p","h_el_p",200,0.0,13.0);
 	H1F h_el_theta = new H1F("h_el_theta","h_el_theta",200,0.0,30.0);
 	H1F h_el_phi = new H1F("h_el_phi","h_el_phi",300,-200.0,200.0);
-	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,13.0, 100, 0.0, 30.0);
-	H1F h_el_w = new H1F("h_el_w","h_el_w", 200, 0.0, 5.0);
-	H2F h_el_w_q2 = new H2F("h_el_w_q2","h_el_w_q2",200,0.0, 5.0, 200, 0.0, 7.0);
-	
+	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,2.50, 100, 0.0, 30.0);
+	H2F h_el_thetaphi = new H2F("h_el_thetaphi","h_el_thetaphi",200,-180.0,180.0, 200, 0.0, 30.0);
+	H1F h_el_w = new H1F("h_el_w","h_el_w", 200, 0.0, 3.0);
+	H2F h_el_w_q2 = new H2F("h_el_w_q2","h_el_w_q2",200,0.0, 4.0, 200, 0.0, 1.90);	
 	
 	H1F h_pr_p = new H1F("h_pr_p","h_pr_p",200,0.0,2.0);
 	H1F h_pr_theta = new H1F("h_pr_theta","h_pr_theta",200,0.0,80.0);
@@ -48,13 +48,12 @@ public class genCheck{
 	while( num_ev < max_event ){
 	    event = (DataEvent)hiporeader.gotoEvent(num_ev);
 	    boolean runConfig_pres = event.hasBank("RUN::config");
-	    boolean mcBank_pres  = event.hasBank("REC::Particle");
+	    boolean mcBank_pres  = event.hasBank("MC::Particle");
 	    boolean rawScalerBank_pres = event.hasBank("RAW::scaler");
 	    num_ev++;
 
-
 	    if( mcBank_pres ){
-		DataBank mcBank = event.getBank("REC::Particle");
+		DataBank mcBank = event.getBank("MC::Particle");
 		for( int i = 0; i < mcBank.rows(); i++ ){
 		    int pid = mcBank.getInt("pid",i);
 
@@ -69,6 +68,7 @@ public class genCheck{
 			h_el_theta.fill( lv_el.theta() * toDeg );
 			h_el_phi.fill( lv_el.phi() * toDeg );			
 			h_el_thetap.fill( lv_el.p(), lv_el.theta() * toDeg );
+			h_el_thetaphi.fill(lv_el.phi() * toDeg,lv_el.theta() * toDeg);
 
 			LorentzVector lv_eX = new LorentzVector(0,0,0,0);
 			lv_eX.add(lv_ebeam);
@@ -93,6 +93,7 @@ public class genCheck{
 	    }       	    
 	}
     
+	System.out.println(" creating plots " );
 	EmbeddedCanvas c_el = new EmbeddedCanvas();
 	c_el.divide(2,2);
 	c_el.setSize(800,800);
@@ -105,11 +106,21 @@ public class genCheck{
 	c_el.cd(2);
 	h_el_phi.setTitle("Phi");
 	c_el.draw(h_el_phi);
-	c_el.cd(3);
+	c_el.save("h_gen_el_elastic.png");
+
+	EmbeddedCanvas c_ela = new EmbeddedCanvas();  
+	c_ela.divide(2,1);
+	c_ela.setSize(800,450);
+	c_ela.cd(0);	
 	h_el_thetap.setTitle("Momentum vs Theta");
-	c_el.getPad(3).getAxisZ().setLog(true);
-	c_el.draw(h_el_thetap);
-	c_el.save("h_rec_el_elastic.png");
+	c_ela.getPad(0).getAxisZ().setLog(true);
+	c_ela.draw(h_el_thetap);
+
+	c_ela.cd(1);	
+	h_el_thetaphi.setTitle("Phi vs Theta");
+	c_ela.getPad(1).getAxisZ().setLog(true);
+	c_ela.draw(h_el_thetaphi);
+	c_ela.save("h2_gen_el_elastic.png");     
 
 	EmbeddedCanvas c_pr = new EmbeddedCanvas();
 	c_pr.divide(2,2);
@@ -130,14 +141,15 @@ public class genCheck{
 	c_pr.save("h_rec_pr_elastic.png");
 
 	EmbeddedCanvas c_kin = new EmbeddedCanvas();
-	c_kin.setSize(900,900);
-	c_kin.divide(2,2);
+	c_kin.setSize(800,425);
+	c_kin.divide(2,1);
 	c_kin.cd(0);
+	c_kin.getPad(0).getAxisY().setLog(true);
 	c_kin.draw(h_el_w);
 	c_kin.cd(1);
 	c_kin.getPad(1).getAxisZ().setLog(true);
 	c_kin.draw(h_el_w_q2);
-	c_kin.save("h_rec_el_kin.png");
+	c_kin.save("h_gen_el_kin.png");
 
 	
 

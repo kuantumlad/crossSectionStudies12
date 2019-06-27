@@ -79,7 +79,7 @@ int process_Events = -1;
 //float Ebeam = 6.42313;
 //float Ebeam = 2.22193;
 //float Ebeam = 10.594;
-float Ebeam = 2.211;//10.6;
+float Ebeam = 2.221;//10.6;
 
 /// select the field polarity (relevant for fiducial cuts, sampling fraction and vertex cuts)
 /// only set 1 as true!
@@ -1402,10 +1402,10 @@ Int_t filter_clas12( Char_t *inFile, Char_t *outputfile, int run)
    anaTree->SetBranchAddress("REC_Event_EVNTime", &vEVNTime);
    anaTree->SetBranchAddress("REC_Event_TYPE", &vTYPE);
    anaTree->SetBranchAddress("REC_Event_TRG", &vTRG);
-   anaTree->SetBranchAddress("REC_Event_BCG", &vBCG);
-   anaTree->SetBranchAddress("REC_Event_STTime", &vSTTime);
+   anaTree->SetBranchAddress("REC_Event_beamCharge", &vBCG);
+   anaTree->SetBranchAddress("REC_Event_startTime", &vSTTime);
    anaTree->SetBranchAddress("REC_Event_RFTime", &vRFTime);
-   anaTree->SetBranchAddress("REC_Event_Helic", &vHelic);
+   anaTree->SetBranchAddress("REC_Event_helicity", &vHelic);
 
    anaTree->SetBranchAddress("REC_Particle_pid", &vpart_pid);
    anaTree->SetBranchAddress("REC_Particle_charge", &vpart_charge);   
@@ -4610,7 +4610,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries = 500000; //anaTree->GetEntriesFast();
+ int nentries = anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 
@@ -9086,12 +9086,12 @@ TH1F *create_hist_FT_beta(int cutnum){
 
 void get_event_properties(void){
 
-  if(vNRUN->size() > 0)    NRUN = vNRUN->at(0);
-  if(vNEVENT->size() > 0)  NEVENT = vNEVENT->at(0);
-  if(vEVNTime->size() > 0) EVNTime = vNEVENT->at(0);
-  if(vTYPE->size() > 0)    TYPE = vTYPE->at(0);
-  if(vTRG->size() > 0)     TRG = vNEVENT->at(0);
-  if(vBCG->size() > 0)     BCG = vNEVENT->at(0);
+  if(vNRUN->size() > 0)    NRUN = 0;//vNRUN->at(0);
+  if(vNEVENT->size() > 0)  NEVENT = 0;//vNEVENT->at(0);
+  if(vEVNTime->size() > 0) EVNTime = 0;//vNEVENT->at(0);
+  if(vTYPE->size() > 0)    TYPE = 0;//vTYPE->at(0);
+  if(vTRG->size() > 0)     TRG = 0;//vNEVENT->at(0);
+  if(vBCG->size() > 0)     BCG = v->at(0);
   if(vSTTime->size() > 0)  STTime = vSTTime->at(0);
   if(vRFTime->size() > 0)  RFTime = vRFTime->at(0);
   if(vHelic->size() > 0)   Helic = vHelic->at(0);
@@ -9422,8 +9422,8 @@ void select_electron(int run){
         if(FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			FD_eid_DC_hit_position_region3_fiducial_pass += 1;
         if(FD_eid_DC_z_vertex_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			        	FD_eid_DC_z_vertex_pass += 1;
 
-        if(FD_eid_default_PID_check[i] ){ // && FD_eid_charge_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] ){ // && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
-	  //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] 
+        if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] && FD_eid_EC_hit_position_fiducial_check[i] // && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
+	   && FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] ){
           //                             && FD_eid_DC_z_vertex_check[i]){
           FD_eid_all_pass += 1;
           FD_eid_all_check[i] = true;

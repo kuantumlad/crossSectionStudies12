@@ -434,7 +434,7 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // acceptance per phi bin
   // using the historgrams from the selector_elastic 
-  TCanvas *c_pb = new TCanvas("c_pb","c_pb",1000,1000);
+  TCanvas *c_pb = new TCanvas("c_pb","c_pb",2000,2000);
   c_pb->Divide(10,10);
   for( int pb = 0; pb < 73; pb++ ){
     c_pb->cd(pb+1);
@@ -457,7 +457,7 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
       double accp_val_err = h_accp_ratio_temp->GetBinError(tb);
       double theta_bin_center_err = 0.0;
       std::cout << "bin center " << theta_bin_center << std::endl;
-      if( theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
+      if( theta_bin_center < 8 || theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
       std::cout << " accp " << accp_val << " bin center " << theta_bin_center << " accp err " <<accp_val_err << " theta bin err " << theta_bin_center_err << std::endl;
       v_theta_bin.push_back(theta_bin_center);
       v_accp.push_back(accp_val);
@@ -477,11 +477,11 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
     g_accp_temp->SetMarkerColor(kBlack);
     g_accp_temp->Draw("AP");       
 
-    if( pb == 41 ){
+    if( pb == 28 ){
       TCanvas *c_pb_focus = new TCanvas("c_pb_focus","c_pb_focus",900,900);
       c_pb_focus->cd(1);
       g_accp_temp->Draw("AP"); 
-      c_pb_focus->SaveAs("g_acceptance_phi_bin_41.pdf");
+      c_pb_focus->SaveAs("g_acceptance_phi_bin_28.pdf");
     }
    
   }
@@ -508,7 +508,7 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
       double theta_bin_center = h_accp_ratio_temp->GetBinCenter(tb);
       double accp_val_err = h_accp_ratio_temp->GetBinError(tb);
       double theta_bin_center_err = 0.0;
-      if( theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
+      if( theta_bin_center < 8 || theta_bin_center > 21 ) continue; // there is an issue with tracking above 20deg 
       v_theta_bin.push_back(theta_bin_center);
       v_accp.push_back(accp_val);
       v_theta_bin_err.push_back(theta_bin_center_err);
@@ -516,7 +516,7 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
     }
     
     TGraphErrors *g_accp_temp = new TGraphErrors(v_theta_bin.size(), &(v_theta_bin[0]), &(v_accp[0]), &(v_theta_bin_err[0]), &(v_accp_err[0]) );
-    g_accp_temp->SetTitle(Form("Acceptance Sector %d",ss));  
+    g_accp_temp->SetTitle(Form("Acceptance Sector %d",ss+1));  
     g_accp_temp->GetXaxis()->SetTitle("#theta (deg)");
     g_accp_temp->GetYaxis()->SetTitle("Accp");
     g_accp_temp->GetXaxis()->CenterTitle();

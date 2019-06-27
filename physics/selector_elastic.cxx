@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <functional>
 #include <TCutG.h>
+#include <TProfile.h>
 using namespace std;
 
 #include "Math/GenVector/PxPyPzE4D.h"
@@ -616,6 +617,8 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   out->cd("bin_migration");
   std::vector< TH1F* > h_mig_el_theta;
   std::vector< TH1F* > h_mig_el_q2;
+  std::vector< TH2F* > h_mig_resolution_gen;
+  std::vector< TProfile* > p_mig_resolution_gen;
 
   std::vector<TH2F*> h_mig_recon_gen_el_theta;
 
@@ -626,6 +629,8 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     std::cout << " creating histo with number of bins as " << nbins << std::endl;
     h_mig_el_theta.push_back( new TH1F(Form("h_mig_el_theta_bs_%d",bb),Form("h_mig_el_theta_bs_%d",bb), nbins, 0.0, 30.0) );
     h_mig_recon_gen_el_theta.push_back( new TH2F(Form("h_mig_recon_gen_el_theta_bs%d",bb),Form("h_mig_recon_gen_el_theta_bs%d",bb),  nbins, 0.0, 30.0,  nbins, 0.0, 30.0) );
+    h_mig_resolution_gen.push_back( new TH2F(Form("h_mig_reresolution_gen_bs%d",bb), Form("h_mig_resolution_gen_bs%d",bb), nbins, 0.0, 30.0,  300, -0.1, 0.1) );       
+    p_mig_resolution_gen.push_back( new TProfile(Form("p_mig_reresolution_gen_bs%d",bb), Form("p_mig_reresolution_gen_bs%d",bb), nbins, 0.0, 30.0,  -0.05, 0.05) ); 
   }
 
 
@@ -981,11 +986,15 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
 	  // adding bin migration information here
 	  for( int bg = 1; bg <= 20; bg++ ){
+	    //get bin numbers for a theta 
 	    int gen_bin =  h_mig_el_theta[bg-1]->FindBin(mc_ele[0].Theta()*180/Pival);
 	    int rec_bin =  h_mig_el_theta[bg-1]->FindBin(ele[select_ele].Theta()*180/Pival);
+	    // update current bin content value
 	    int current_bin_content = h_mig_recon_gen_el_theta[bg-1]->GetBinContent(gen_bin, rec_bin);
 	    h_mig_recon_gen_el_theta[bg-1]->SetBinContent(gen_bin, rec_bin, current_bin_content+1);
-
+	    double resolution_theta = ele[select_ele].Theta()*180/Pival - mc_ele[0].Theta()*180/Pival;
+	    p_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta, 1.0);
+	    h_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta);
  	    if( gen_bin == rec_bin ){
 	      h_mig_el_theta[bg-1]->SetBinContent(rec_bin, h_mig_el_theta[bg-1]->GetBinContent(rec_bin)+1);
 	    }
