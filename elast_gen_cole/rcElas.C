@@ -1,5 +1,5 @@
 {
-  TFile *noRC = new TFile("elast_gen_2GeV_0_50_norad.root");//elast_gen_2GeV_norad.root");
+  TFile *noRC = new TFile("elast_gen_2GeV_10to49_norad.root");//elast_gen_2GeV_0_50_norad.root");//elast_gen_2GeV_norad.root");
   TTree *t1NORC = (TTree*)noRC->Get("h10");
   Float_t TheteNORC;
   Int_t ev;
@@ -14,7 +14,7 @@
     thetaNORCH->Fill(TheteNORC);
   }
 
-  TFile *RC = new TFile("elast_gen_2GeV_0_50_rad.root"); //elast_gen_2GeV_rad.root");
+  TFile *RC = new TFile("elast_gen_2GeV_10to49_rad.root");//elast_gen_2GeV_0_50_rad.root"); //elast_gen_2GeV_rad.root");
   TTree *t1RC = (TTree*)RC->Get("h10");
   Float_t TheteRC;
   Int_t evRC;

@@ -46,8 +46,8 @@ int comparisonDetectorPlotter( const char* inFileData, const char* inFileMC, int
 
   cout << "Reading from File: " << inFileData << " and " << inFileMC << endl;
   
-  TH2D *h_data_ec_pcal_hit_position_final = (TH2D*)fData->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_00"); //09
-  TH2D *h_sim_ec_pcal_hit_position_final = (TH2D*)fMC->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_00");
+  TH2D *h_data_ec_pcal_hit_position_final = (TH2D*)fData->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_09"); //09
+  TH2D *h_sim_ec_pcal_hit_position_final = (TH2D*)fMC->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_09");
 
   TCanvas *c1 = new TCanvas("C1","c1",920, 470);
   gStyle->SetOptStat(0000);
@@ -81,8 +81,8 @@ int comparisonDetectorPlotter( const char* inFileData, const char* inFileMC, int
   gStyle->SetOptStat(0);
   for( int ss = 0; ss < 6; ss++ ){
     c_sf_eb->cd(ss+1);
-    TH2F *h_sf_neg_sim = (TH2F*)fMC->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_00",ss+1));
-    TH2F *h_sf_neg_data = (TH2F*)fData->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_00",ss+1));
+    TH2F *h_sf_neg_sim = (TH2F*)fMC->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_09",ss+1));
+    TH2F *h_sf_neg_data = (TH2F*)fData->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_09",ss+1));
 
     TH2F *h_sim_clone = (TH2F*)h_sf_neg_sim->Clone();
     TH2F *h_data_clone = (TH2F*)h_sf_neg_data->Clone();
@@ -100,7 +100,7 @@ int comparisonDetectorPlotter( const char* inFileData, const char* inFileMC, int
     h_sim_clone->GetXaxis()->SetRange(0, 300);
 
   }
-  c_sf_eb->SaveAs(Form("h_r%d_f%s_comparison_pid_electron_sf_cut00.pdf",run,field_config)); //looks at all negative tracks
+  c_sf_eb->SaveAs(Form("h_r%d_f%s_comparison_pid_electron_sf_cut09.pdf",run,field_config)); //looks at all negative tracks
 
   TCanvas *c_htcc_eb = new TCanvas("c_htcc_eb","c_htcc_eb",900,900);
   //c_htcc_eb->Divide(2,3);
@@ -124,7 +124,9 @@ int comparisonDetectorPlotter( const char* inFileData, const char* inFileMC, int
   // "xmin" = 0, "xmax" = 10
   f1_data->SetParameters(h_nphe_neg_data->GetMaximum(), 30, 1); // you MUST set non-zero initial values for parameters
   f1_sim->SetParameters(h_nphe_neg_sim->GetMaximum(), 10, 1); // you MUST set non-zero initial values for parameters
+  std::cout << " fit data " << std::endl;
   h_nphe_neg_data->Fit("f1_data", "R"); // "R" = fit between "xmin" and "xmax" of the "f1"
+  std::cout << " fit sim " << std::endl;
   h_nphe_neg_sim->Fit("f1_sim", "R"); // "R" = fit between "xmin" and "xmax" of the "f1"
   f1_data->SetLineColor(kRed);
   f1_sim->SetLineColor(kBlue);
@@ -134,7 +136,7 @@ int comparisonDetectorPlotter( const char* inFileData, const char* inFileMC, int
   poisson_k_sim.push_back(f1_sim->GetParameter(1)/f1_sim->GetParameter(2));
   poisson_k_data.push_back(f1_data->GetParameter(1)/f1_data->GetParameter(2));
       
-  c_htcc_eb->SaveAs(Form("h_r%d_f%s_comparison_pid_electron_nphe_cut00.pdf",run,field_config));
+  c_htcc_eb->SaveAs(Form("h_r%d_f%s_comparison_pid_electron_nphe_cut09.pdf",run,field_config));
 
   //print out fit parameters 
    std::cout << " simulation fit parameter k " << std::endl;

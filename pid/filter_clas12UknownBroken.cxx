@@ -89,11 +89,11 @@ bool outbending = false;
 
 ///
 
-bool simulation  = false;
+bool simulation  = true;
 
 ///
 
-bool use_own_PID_electron = true;   
+bool use_own_PID_electron = false;   
 bool use_own_PID_proton =   false;
 bool use_own_PID_neutron =  false;
 bool use_own_PID_pip =      false;
@@ -426,13 +426,6 @@ const static int BUFFER = 60;   // increased from 40
   float part_DC_c2x[BUFFER], part_DC_c2y[BUFFER], part_DC_c2z[BUFFER];
   float part_DC_c3x[BUFFER], part_DC_c3y[BUFFER], part_DC_c3z[BUFFER];
 
-  int part_TRK_detector[BUFFER];
-  int part_TRK_DC_sector[BUFFER];
-  int part_TRK_DC_NDF[BUFFER];
-  float part_TRK_DC_chi2[BUFFER];
-
-
-
 
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// partcile variables for identified particles:
@@ -440,7 +433,6 @@ const static int BUFFER = 60;   // increased from 40
   int e_count, p_count, n_count, pip_count, pim_count, Kp_count, Km_count, g_count;
   int e_MCcount, p_MCcount, n_MCcount, pip_MCcount, pim_MCcount, Kp_MCcount, Km_MCcount, g_MCcount;  
   int e_ind[BUFFER], p_ind[BUFFER], n_ind[BUFFER], pip_ind[BUFFER], pim_ind[BUFFER], Kp_ind[BUFFER], Km_ind[BUFFER], g_ind[BUFFER];
-
 
   TLorentzVector p4_ele[BUFFER];
   TLorentzVector p4_ele_raw[BUFFER];
@@ -460,23 +452,6 @@ const static int BUFFER = 60;   // increased from 40
   float Kp_vx[BUFFER], Kp_vy[BUFFER], Kp_vz[BUFFER], Kp_beta[BUFFER], Kp_FTOF_sec[BUFFER];
   float Km_vx[BUFFER], Km_vy[BUFFER], Km_vz[BUFFER], Km_beta[BUFFER], Km_FTOF_sec[BUFFER];
   float g_vx[BUFFER], g_vy[BUFFER], g_vz[BUFFER], g_sec[BUFFER];
-
-  //added
-  float e_chi2[BUFFER], e_chi2red[BUFFER];
-  int e_ndf[BUFFER];
-
-  float e_DC_c1x[BUFFER],e_DC_c1y[BUFFER], e_DC_c1z[BUFFER];
-  float e_DC_c2x[BUFFER],e_DC_c2y[BUFFER], e_DC_c2z[BUFFER];
-  float e_DC_c3x[BUFFER],e_DC_c3y[BUFFER], e_DC_c3z[BUFFER];
-  float e_pcal_det[BUFFER], e_pcal_sect[BUFFER];
-  float e_pcal_x[BUFFER], e_pcal_y[BUFFER], e_pcal_z[BUFFER], e_pcal_lu[BUFFER], e_pcal_lv[BUFFER], e_pcal_lw[BUFFER];
-
-  float e_eical_det[BUFFER], e_eical_sect[BUFFER];
-  float e_eical_x[BUFFER], e_eical_y[BUFFER], e_eical_z[BUFFER], e_eical_lu[BUFFER], e_eical_lv[BUFFER], e_eical_lw[BUFFER];
-
-  float e_eocal_det[BUFFER], e_eocal_sect[BUFFER];
-  float e_eocal_x[BUFFER], e_eocal_y[BUFFER], e_eocal_z[BUFFER], e_eocal_lu[BUFFER], e_eocal_lv[BUFFER], e_eocal_lw[BUFFER];
-
 
 
 // variables for reconstructed particles
@@ -555,53 +530,7 @@ int select_eta;
   vector<int> Kp_det;
   vector<int> Km_det;
   vector<int> phot_det;
-  //added
-  vector<double> ele_chi2;
-  vector<double> ele_ndf;
-  vector<double> ele_chi2red;
 
-  vector<double> ele_vz;
-  vector<double> prot_vz;
-  vector<double> neutr_vz;
-  vector<double> piplus_vz; 
-  vector<double> piminus_vz;
-  vector<double> Kplus_vz;
-  vector<double> Kminus_vz;
-  vector<double> ele_dc_c1x;
-  vector<double> ele_dc_c2x;
-  vector<double> ele_dc_c3x;
-  vector<double> ele_dc_c1y;
-  vector<double> ele_dc_c2y;
-  vector<double> ele_dc_c3y;
-
-  vector<int> ele_pcal_det;
-  vector<int> ele_pcal_sect;
-  vector<double> ele_pcal_x;
-  vector<double> ele_pcal_y;
-  vector<double> ele_pcal_z;
-  vector<double> ele_pcal_lu;
-  vector<double> ele_pcal_lv;
-  vector<double> ele_pcal_lw;
-
-  vector<int> ele_eical_det;
-  vector<int> ele_eical_sect;
-  vector<double> ele_eical_x;
-  vector<double> ele_eical_y;
-  vector<double> ele_eical_z;
-  vector<double> ele_eical_lu;
-  vector<double> ele_eical_lv;
-  vector<double> ele_eical_lw;
-
-  vector<int> ele_eocal_det;
-  vector<int> ele_eocal_sect;
-  vector<double> ele_eocal_x;
-  vector<double> ele_eocal_y;
-  vector<double> ele_eocal_z;
-  vector<double> ele_eocal_lu;
-  vector<double> ele_eocal_lv;
-  vector<double> ele_eocal_lw;
-
-  
 
 // cut statistics:
 int event;
@@ -978,21 +907,6 @@ bool CD_Kmid_all_check[BUFFER];
   TH1F *hist_DC_z_vertex_sec5[FD_eid_cuts];
   TH1F *hist_DC_z_vertex_sec6[FD_eid_cuts];
 
-  TH1F *hist_DC_track_chi2[FD_eid_cuts];
-  TH1F *hist_DC_track_ndf[FD_eid_cuts];
-
-  TH1F *hist_DC_track_chi2_sec1[FD_eid_cuts];
-  TH1F *hist_DC_track_chi2_sec2[FD_eid_cuts];
-  TH1F *hist_DC_track_chi2_sec3[FD_eid_cuts];
-  TH1F *hist_DC_track_chi2_sec4[FD_eid_cuts];
-  TH1F *hist_DC_track_chi2_sec5[FD_eid_cuts];
-  TH1F *hist_DC_track_chi2_sec6[FD_eid_cuts];
-
-  TH2F *hist_DC_track_hit_chi2[FD_eid_cuts];
-  TH2F *hist_DC_track_hit_chi2_region1[FD_eid_cuts];
-  TH2F *hist_DC_track_hit_chi2_region2[FD_eid_cuts];
-  TH2F *hist_DC_track_hit_chi2_region3[FD_eid_cuts];
-
 
 /// b) FTOF + additional cuts for charged hadrons:
 
@@ -1103,20 +1017,6 @@ TH1F *create_hist_DC_z_vertex_sec3(int cutnum);
 TH1F *create_hist_DC_z_vertex_sec4(int cutnum);
 TH1F *create_hist_DC_z_vertex_sec5(int cutnum);
 TH1F *create_hist_DC_z_vertex_sec6(int cutnum);
-
-TH1F *create_DC_track_chi2(int cutnum);
-TH1F *create_DC_track_ndf(int cutnum);
-TH1F *create_DC_track_chi2_sec1(int cutnum);
-TH1F *create_DC_track_chi2_sec2(int cutnum);
-TH1F *create_DC_track_chi2_sec3(int cutnum);
-TH1F *create_DC_track_chi2_sec4(int cutnum);
-TH1F *create_DC_track_chi2_sec5(int cutnum);
-TH1F *create_DC_track_chi2_sec6(int cutnum);
-
-TH2F *create_DC_track_hit_position_chi2_region1(int cutnum);
-TH2F *create_DC_track_hit_position_chi2_region2(int cutnum);
-TH2F *create_DC_track_hit_position_chi2_region3(int cutnum);
-
 
 // TOF + others for charged hadrons
 
@@ -1480,49 +1380,6 @@ Int_t filter_clas12( Char_t *inFile, Char_t *outputfile, int run)
     out_tree.Branch("Km_det", &Km_det);
     out_tree.Branch("phot_det", &phot_det);
 
-    out_tree.Branch("ele_chi2",&ele_chi2);
-    out_tree.Branch("ele_ndf",&ele_ndf);
-    out_tree.Branch("ele_chi2red",&ele_chi2red);
-
-    out_tree.Branch("ele_vz", &ele_vz);
-    out_tree.Branch("prot_vz", &prot_vz);
-    out_tree.Branch("neutr_vz", &neutr_vz);
-    out_tree.Branch("pip_vz", &piplus_vz);
-    out_tree.Branch("pim_vz", &piminus_vz);
-    out_tree.Branch("Kp_vz", &Kplus_vz);
-    out_tree.Branch("Km_vz", &Kminus_vz);
-    out_tree.Branch("ele_dc_c1x",&ele_dc_c1x);
-    out_tree.Branch("ele_dc_c2x",&ele_dc_c2x);
-    out_tree.Branch("ele_dc_c3x",&ele_dc_c3x);
-
-    out_tree.Branch("ele_dc_c1y",&ele_dc_c1y);
-    out_tree.Branch("ele_dc_c2y",&ele_dc_c2y);
-    out_tree.Branch("ele_dc_c3y",&ele_dc_c3y);
-
-    out_tree.Branch("ele_pcal_sect",&ele_pcal_sect);
-    out_tree.Branch("ele_pcal_x",&ele_pcal_x);
-    out_tree.Branch("ele_pcal_y",&ele_pcal_y);
-    out_tree.Branch("ele_pcal_z",&ele_pcal_z);
-    out_tree.Branch("ele_pcal_lu",&ele_pcal_lu);
-    out_tree.Branch("ele_pcal_lv",&ele_pcal_lv);
-    out_tree.Branch("ele_pcal_lw",&ele_pcal_lw);
-
-    out_tree.Branch("ele_eical_sect",&ele_eical_sect);
-    out_tree.Branch("ele_eical_x",&ele_eical_x);
-    out_tree.Branch("ele_eical_y",&ele_eical_y);
-    out_tree.Branch("ele_eical_z",&ele_eical_z);
-    out_tree.Branch("ele_eical_lu",&ele_eical_lu);
-    out_tree.Branch("ele_eical_lv",&ele_eical_lv);
-    out_tree.Branch("ele_eical_lw",&ele_eical_lw);
-
-    out_tree.Branch("ele_eocal_sect",&ele_eocal_sect);
-    out_tree.Branch("ele_eocal_x",&ele_eocal_x);
-    out_tree.Branch("ele_eocal_y",&ele_eocal_y);
-    out_tree.Branch("ele_eocal_z",&ele_eocal_z);
-    out_tree.Branch("ele_eocal_lu",&ele_eocal_lu);
-    out_tree.Branch("ele_eocal_lv",&ele_eocal_lv);
-    out_tree.Branch("ele_eocal_lw",&ele_eocal_lw);
-
     out_tree.Branch("gen_event_helicity", &MC_helicity);
     out_tree.Branch("gen_event_npart", &MC_Npart);
     out_tree.Branch("gen_event_ebeam", &MC_Ebeam);
@@ -1545,10 +1402,10 @@ Int_t filter_clas12( Char_t *inFile, Char_t *outputfile, int run)
    anaTree->SetBranchAddress("REC_Event_EVNTime", &vEVNTime);
    anaTree->SetBranchAddress("REC_Event_TYPE", &vTYPE);
    anaTree->SetBranchAddress("REC_Event_TRG", &vTRG);
-   anaTree->SetBranchAddress("REC_Event_BCG", &vBCG);
-   anaTree->SetBranchAddress("REC_Event_STTime", &vSTTime);
+   //anaTree->SetBranchAddress("REC_Event_beamCharge", &vBCG);
+   anaTree->SetBranchAddress("REC_Event_startTime", &vSTTime);
    anaTree->SetBranchAddress("REC_Event_RFTime", &vRFTime);
-   anaTree->SetBranchAddress("REC_Event_Helic", &vHelic);
+   anaTree->SetBranchAddress("REC_Event_helicity", &vHelic);
 
    anaTree->SetBranchAddress("REC_Particle_pid", &vpart_pid);
    anaTree->SetBranchAddress("REC_Particle_charge", &vpart_charge);   
@@ -1607,8 +1464,6 @@ Int_t filter_clas12( Char_t *inFile, Char_t *outputfile, int run)
    anaTree->SetBranchAddress("REC_Track_pindex", &vTRK_pindex);
    anaTree->SetBranchAddress("REC_Track_detector", &vTRK_detector);  
    anaTree->SetBranchAddress("REC_Track_sector", &vTRK_sector);   
-   anaTree->SetBranchAddress("REC_Track_chi2", &vTRK_chi2);   
-   anaTree->SetBranchAddress("REC_Track_NDF", &vTRK_NDF);   
 
    anaTree->SetBranchAddress("REC_Traj_pindex", &vTraj_pindex); 
    anaTree->SetBranchAddress("REC_Traj_detId", &vTraj_detID);   
@@ -1618,7 +1473,6 @@ Int_t filter_clas12( Char_t *inFile, Char_t *outputfile, int run)
    anaTree->SetBranchAddress("REC_Traj_cx", &vTraj_cx);   
    anaTree->SetBranchAddress("REC_Traj_cy", &vTraj_cy);
    anaTree->SetBranchAddress("REC_Traj_cz", &vTraj_cz);   
-
 
 if(simulation == true){
 
@@ -1909,20 +1763,6 @@ for(Int_t i = 0; i < 11; i++){
   create_hist_DC_z_vertex_sec4(i);
   create_hist_DC_z_vertex_sec5(i);
   create_hist_DC_z_vertex_sec6(i);
-
-  create_DC_track_chi2(i);
-  create_DC_track_ndf(i);
-  create_DC_track_chi2_sec1(i);
-  create_DC_track_chi2_sec2(i);
-  create_DC_track_chi2_sec3(i);
-  create_DC_track_chi2_sec4(i);
-  create_DC_track_chi2_sec5(i);
-  create_DC_track_chi2_sec6(i);
-
-  create_DC_track_hit_position_chi2_region1(i);
-  create_DC_track_hit_position_chi2_region2(i);
-  create_DC_track_hit_position_chi2_region3(i);
-
 }
 
 TH2F *hist_DC_hit_position_region2_cut5a;
@@ -4770,7 +4610,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries = 10000;// anaTree->GetEntriesFast();
+ int nentries = anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 
@@ -4807,14 +4647,7 @@ p4_ele_px.clear(); p4_prot_px.clear(); p4_neutr_px.clear(); p4_pip_px.clear(); p
 p4_ele_py.clear(); p4_prot_py.clear(); p4_neutr_py.clear(); p4_pip_py.clear(); p4_pim_py.clear(); p4_Kp_py.clear(); p4_Km_py.clear(); p4_phot_py.clear();
 p4_ele_pz.clear(); p4_prot_pz.clear(); p4_neutr_pz.clear(); p4_pip_pz.clear(); p4_pim_pz.clear(); p4_Kp_pz.clear(); p4_Km_pz.clear(); p4_phot_pz.clear();
 //added
- sectorE.clear(); electron_event_number.clear(); 
- ele_chi2.clear(); ele_ndf.clear(); ele_chi2red.clear();
- ele_vz.clear(); prot_vz.clear(); neutr_vz.clear(); piplus_vz.clear(); piminus_vz.clear(); Kplus_vz.clear(); Kminus_vz.clear();
- ele_dc_c1x.clear(); ele_dc_c2x.clear(); ele_dc_c3x.clear(); ele_dc_c1y.clear(); ele_dc_c2y.clear(); ele_dc_c3y.clear();
- ele_pcal_det.clear(); ele_pcal_sect.clear(); ele_pcal_x.clear(); ele_pcal_y.clear(); ele_pcal_z.clear();  ele_pcal_lu.clear();  ele_pcal_lv.clear();  ele_pcal_lw.clear();
- ele_eical_det.clear(); ele_eical_sect.clear(); ele_eical_x.clear(); ele_eical_y.clear(); ele_eical_z.clear();  ele_eical_lu.clear();  ele_eical_lv.clear();  ele_eical_lw.clear();
- ele_eocal_det.clear(); ele_eocal_sect.clear(); ele_eocal_x.clear(); ele_eocal_y.clear(); ele_eocal_z.clear();  ele_eocal_lu.clear();  ele_eocal_lv.clear();  ele_eocal_lw.clear();
-  
+ sectorE.clear(); electron_event_number.clear();
 
 p4_ele_E.clear(); p4_prot_E.clear(); p4_neutr_E.clear(); p4_pip_E.clear(); p4_pim_E.clear(); p4_Kp_E.clear(); p4_Km_E.clear(); p4_phot_E.clear();
 ele_det.clear(); prot_det.clear(); neutr_det.clear(); pip_det.clear(); pim_det.clear(); Kp_det.clear(); Km_det.clear(); phot_det.clear();
@@ -4849,17 +4682,6 @@ for(Int_t i = 0; i < BUFFER; i++){
 
   e_vx[i] = 0;  e_vy[i] = 0;  e_vz[i] = 0;  e_beta[i] = 0, e_FTOF_sec[i] = -1, e_PCAL_sec[i] = -1;
   p_vx[i] = 0;  p_vy[i] = 0;  p_vz[i] = 0;  p_beta[i] = 0, p_FTOF_sec[i] = -1, p_PCAL_sec[i] = -1; 
-
-  //added
-  e_chi2[i] = 0; e_ndf[i] = 0; e_chi2red[i] = 0;
-  
-  e_DC_c1x[i] = 0; e_DC_c1y[i] = 0; e_DC_c1z[i] = 0;
-  e_DC_c2x[i] = 0; e_DC_c2y[i] = 0; e_DC_c2z[i] = 0;
-  e_DC_c3x[i] = 0; e_DC_c3y[i] = 0; e_DC_c3z[i] = 0;
-  
-  e_pcal_sect[i] = 0; e_pcal_x[i] = 0; e_pcal_y[i] = 0; e_pcal_z[i] = 0; e_pcal_lu[i] =0; e_pcal_lv[i] = 0; e_pcal_lw[i] = 0;
-  e_eical_sect[i] = 0; e_eical_x[i] = 0; e_eical_y[i] = 0; e_eical_z[i] = 0; e_eical_lu[i] =0; e_eical_lv[i] = 0; e_eical_lw[i] = 0;
-  e_eocal_sect[i] = 0; e_eocal_x[i] = 0; e_eocal_y[i] = 0; e_eocal_z[i] = 0; e_eocal_lu[i] =0; e_eocal_lv[i] = 0; e_eocal_lw[i] = 0;
 
  eventNumber[i]=-1;
 
@@ -4924,13 +4746,6 @@ for(Int_t i = 0; i < BUFFER; i++){
   part_DC_c1x[i] = 0; part_DC_c1y[i] = 0; part_DC_c1z[i] = 0;
   part_DC_c2x[i] = 0; part_DC_c2y[i] = 0; part_DC_c2z[i] = 0;
   part_DC_c3x[i] = 0; part_DC_c3y[i] = 0; part_DC_c3z[i] = 0;
-
-
-  part_TRK_detector[i]=0;
-  part_TRK_DC_sector[i]=0;
-  part_TRK_DC_NDF[i]=0;
-  part_TRK_DC_chi2[i]=0;
-
 
   FD_eid_default_PID_check[i] = false;
   FD_eid_charge_check[i] = false;
@@ -5969,21 +5784,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[0]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[0]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[0]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[0]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[0]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[0]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[0]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[0]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[0]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[0]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[0]->Fill(part_vz[i]);
@@ -6038,23 +5838,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[1]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[1]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[1]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[1]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[1]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[1]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[1]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[1]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[1]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[1]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[1]->Fill(part_vz[i]);
@@ -6107,23 +5890,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[2]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[2]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[2]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[2]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[2]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[2]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[2]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[2]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[2]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[2]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[2]->Fill(part_vz[i]);
@@ -6175,22 +5941,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[3]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[3]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[3]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[3]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[3]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[3]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[3]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[3]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[3]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[3]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[3]->Fill(part_vz[i]);
@@ -6238,22 +5988,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) hist_DC_hit_position_region1[4]->Fill(part_DC_c1x[i], part_DC_c1y[i]);
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[4]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[4]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
-
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[4]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[4]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[1]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[4]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[4]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[4]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
 
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[4]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[4]->Fill(part_vz[i]);
@@ -6307,22 +6041,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[5]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[5]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[5]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[5]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[5]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[5]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[5]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[5]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[5]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[5]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[5]->Fill(part_vz[i]);
@@ -6375,22 +6093,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[6]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[6]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[6]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[6]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[6]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[6]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[6]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[6]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[6]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[6]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[6]->Fill(part_vz[i]);
@@ -6441,22 +6143,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) hist_DC_hit_position_region1[7]->Fill(part_DC_c1x[i], part_DC_c1y[i]);
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[7]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[7]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
-
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[7]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[7]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[7]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[7]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[7]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[7]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
 
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[7]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[7]->Fill(part_vz[i]);
@@ -6596,22 +6282,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[9]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[9]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
 
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[9]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[9]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[9]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[9]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[9]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[9]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
-
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[9]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[9]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 3 && part_vz[i] != 0) hist_DC_z_vertex_sec3[9]->Fill(part_vz[i]);
@@ -6692,22 +6362,6 @@ if(fill_electron_pid_histograms){
     if(part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) hist_DC_hit_position_region1[10]->Fill(part_DC_c1x[i], part_DC_c1y[i]);
     if(part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) hist_DC_hit_position_region2[10]->Fill(part_DC_c2x[i], part_DC_c2y[i]);
     if(part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) hist_DC_hit_position_region3[10]->Fill(part_DC_c3x[i], part_DC_c3y[i]);
-
-    // DC added Track variables
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_chi2[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 > 0 ) hist_DC_track_ndf[10]->Fill(part_TRK_DC_NDF[i]);
-    
-    if(part_DC_sector[i]-1 == 0 ) hist_DC_track_chi2_sec1[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 1 ) hist_DC_track_chi2_sec2[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 2 ) hist_DC_track_chi2_sec3[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 3 ) hist_DC_track_chi2_sec4[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 4 ) hist_DC_track_chi2_sec5[10]->Fill(part_TRK_DC_chi2[i]);
-    if(part_DC_sector[i]-1 == 5 ) hist_DC_track_chi2_sec6[10]->Fill(part_TRK_DC_chi2[i]);
-
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c1x[i] != 0 && part_DC_c1y[i] != 0) ) hist_DC_track_hit_chi2_region1[10]->Fill(part_DC_c1x[i], part_DC_c1y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c2x[i] != 0 && part_DC_c2y[i] != 0) ) hist_DC_track_hit_chi2_region2[10]->Fill(part_DC_c2x[i], part_DC_c2y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-    if(part_TRK_DC_chi2[i] != 0 && (part_DC_c3x[i] != 0 && part_DC_c3y[i] != 0) ) hist_DC_track_hit_chi2_region3[10]->Fill(part_DC_c3x[i], part_DC_c3y[i], part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i]);
-
 
     if(part_Cal_PCAL_sector[i]== 1 && part_vz[i] != 0) hist_DC_z_vertex_sec1[10]->Fill(part_vz[i]);
     if(part_Cal_PCAL_sector[i]== 2 && part_vz[i] != 0) hist_DC_z_vertex_sec2[10]->Fill(part_vz[i]);
@@ -9157,113 +8811,7 @@ TH1F *create_hist_DC_z_vertex_sec6(int cutnum){
   return(hist_DC_z_vertex_sec6[cutnum]);
 }
 
-TH1F *create_DC_track_chi2(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_cut_%02d", cutnum);
-  hist_DC_track_chi2[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2[cutnum]);
-}
 
-TH1F *create_DC_track_ndf(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_ndf_cut_%02d", cutnum);
-  hist_DC_track_ndf[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_ndf[cutnum]->GetXaxis()->SetTitle("NDF^{2}");
-  hist_DC_track_ndf[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_ndf[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec1(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec1_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec1[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec1[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec1[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec1[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec2(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec2_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec2[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec2[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec2[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec2[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec3(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec3_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec3[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec3[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec3[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec3[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec4(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec4_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec4[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec4[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec4[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec4[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec5(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec5_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec5[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec5[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec5[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec5[cutnum]);
-}
-
-TH1F *create_DC_track_chi2_sec6(int cutnum){
-  char name[100];
-  sprintf(name,"DC_track_chi2_sec6_cut_%02d", cutnum);
-  hist_DC_track_chi2_sec6[cutnum] = new TH1F(name, name, 900, 0.0, 100.0);   
-  hist_DC_track_chi2_sec6[cutnum]->GetXaxis()->SetTitle("Chi2^{2}");
-  hist_DC_track_chi2_sec6[cutnum]->GetYaxis()->SetTitle("count");
-  return(hist_DC_track_chi2_sec6[cutnum]);
-}
-
-TH2F *create_DC_track_hit_position_chi2(int cutnum){
-  char name[100];
-  sprintf(name,"DC_hit_position_chi2_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
-  hist_DC_track_hit_chi2[cutnum]->GetXaxis()->SetTitle("x /cm");
- hist_DC_track_hit_chi2[cutnum]->GetYaxis()->SetTitle("y /cm");
-  return(hist_DC_track_hit_chi2[cutnum]);
-}
-
-TH2F *create_DC_track_hit_position_chi2_region1(int cutnum){
-  char name[100];
-  sprintf(name,"DC_hit_position_chi2_region1_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2_region1[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
-  hist_DC_track_hit_chi2_region1[cutnum]->GetXaxis()->SetTitle("x /cm");
-  hist_DC_track_hit_chi2_region1[cutnum]->GetYaxis()->SetTitle("y /cm");
-  return(hist_DC_track_hit_chi2_region1[cutnum]);
-}
-
-TH2F *create_DC_track_hit_position_chi2_region2(int cutnum){
-  char name[100];
-  sprintf(name,"DC_hit_position_chi2_region2_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2_region2[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
-  hist_DC_track_hit_chi2_region2[cutnum]->GetXaxis()->SetTitle("x /cm");
-  hist_DC_track_hit_chi2_region2[cutnum]->GetYaxis()->SetTitle("y /cm");
-  return(hist_DC_track_hit_chi2_region2[cutnum]);
-}
-
-TH2F *create_DC_track_hit_position_chi2_region3(int cutnum){
-  char name[100];
-  sprintf(name,"DC_hit_position_chi2_region3_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2_region3[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
-  hist_DC_track_hit_chi2_region3[cutnum]->GetXaxis()->SetTitle("x /cm");
-  hist_DC_track_hit_chi2_region3[cutnum]->GetYaxis()->SetTitle("y /cm");
-  return(hist_DC_track_hit_chi2_region3[cutnum]);
-}
 
 // /////////////////////////////////////////////////////////////////////////////
 // Basic hadron cuts
@@ -9294,9 +8842,6 @@ TH2F *create_DC_hit_position_region3_hadron(int cutnum){
   hist_DC_hit_position_region3_hadron[cutnum]->GetYaxis()->SetTitle("y /cm");
   return(hist_DC_hit_position_region3_hadron[cutnum]);
 }
-
-
-
 
 
 TH2F* create_hist_EC_outer_vs_EC_inner_hadron(const int cutnum){
@@ -9541,20 +9086,12 @@ TH1F *create_hist_FT_beta(int cutnum){
 
 void get_event_properties(void){
 
-
-  if(vNRUN->size() > 0)    NRUN = vNRUN->at(0);
-  if(vNEVENT->size() > 0)  NEVENT = vNEVENT->at(0);
-  if(vEVNTime->size() > 0) EVNTime = vNEVENT->at(0);
-  if(vTYPE->size() > 0)    TYPE = vTYPE->at(0);
-  if(vTRG->size() > 0)     TRG = vNEVENT->at(0);
-  if(vBCG->size() > 0)     BCG = vNEVENT->at(0);
-
-  //if(vNRUN->size() > 0)    NRUN = 0;//vNRUN->at(0);
-  //if(vNEVENT->size() > 0)  NEVENT = 0;//vNEVENT->at(0);
-  //if(vEVNTime->size() > 0) EVNTime = 0;//vNEVENT->at(0);
-  //if(vTYPE->size() > 0)    TYPE = 0;//vTYPE->at(0);
-  //if(vTRG->size() > 0)     TRG = 0;//vNEVENT->at(0);
-  //if(vBCG->size() > 0)     BCG = 0;//v->at(0);
+  if(vNRUN->size() > 0)    NRUN = 0;//vNRUN->at(0);
+  if(vNEVENT->size() > 0)  NEVENT = 0;//vNEVENT->at(0);
+  if(vEVNTime->size() > 0) EVNTime = 0;//vNEVENT->at(0);
+  if(vTYPE->size() > 0)    TYPE = 0;//vTYPE->at(0);
+  if(vTRG->size() > 0)     TRG = 0;//vNEVENT->at(0);
+  if(vBCG->size() > 0)     BCG = 0;//v->at(0);
   if(vSTTime->size() > 0)  STTime = vSTTime->at(0);
   if(vRFTime->size() > 0)  RFTime = vRFTime->at(0);
   if(vHelic->size() > 0)   Helic = vHelic->at(0);
@@ -9750,9 +9287,6 @@ void assign_particles(void){
     for(int i = 0; i < TRK_Nentries; i++){
       if(vTRK_pindex->at(i) < BUFFER && vTRK_detector->at(i) == 6){     // DC
         part_DC_sector[vTRK_pindex->at(i)] = vTRK_sector->at(i);
-        part_TRK_DC_NDF[vTRK_pindex->at(i)] = vTRK_NDF->at(i);
-        part_TRK_DC_chi2[vTRK_pindex->at(i)] = vTRK_chi2->at(i);
-        part_TRK_DC_sector[vTRK_pindex->at(i)] = vTRK_sector->at(i);
       }
     }
   }
@@ -9974,56 +9508,7 @@ void select_electron(int run){
       double p = sqrt(vpart_px->at(e_ind[i])*vpart_px->at(e_ind[i]) + vpart_py->at(e_ind[i])*vpart_py->at(e_ind[i]) + vpart_pz->at(e_ind[i])*vpart_pz->at(e_ind[i]));
       p4_ele[i].SetPxPyPzE(vpart_px->at(e_ind[i]), vpart_py->at(e_ind[i]), vpart_pz->at(e_ind[i]), sqrt(p*p + m_e*m_e));
       e_FTOF_sec[i] = part_FTOF_sector_layer2[e_ind[i]];
-
-      //added
-
-      e_chi2[i] = part_TRK_DC_chi2[i];
-      e_ndf[i] = part_TRK_DC_NDF[i];
-      e_chi2red[i] = part_TRK_DC_chi2[i]/part_TRK_DC_NDF[i];
-
       e_PCAL_sec[i] = part_Cal_PCAL_sector[e_ind[i]];
-
-      e_DC_c1x[i] = part_DC_c1x[e_ind[i]];
-      e_DC_c1y[i] = part_DC_c1x[e_ind[i]];
-      e_DC_c1z[i] = part_DC_c1x[e_ind[i]];
-
-      e_DC_c2x[i] = part_DC_c2x[e_ind[i]];
-      e_DC_c2y[i] = part_DC_c2y[e_ind[i]];
-      e_DC_c2z[i] = part_DC_c2z[e_ind[i]];
-
-      e_DC_c3x[i] = part_DC_c3x[e_ind[i]];
-      e_DC_c3y[i] = part_DC_c3y[e_ind[i]];
-      e_DC_c3z[i] = part_DC_c3z[e_ind[i]];
-
-      e_pcal_sect[i] = part_Cal_PCAL_sector[e_ind[i]];
-      e_pcal_x[i] = part_Cal_PCAL_x[e_ind[i]];
-      e_pcal_y[i] = part_Cal_PCAL_y[e_ind[i]];
-      e_pcal_z[i] = part_Cal_PCAL_z[e_ind[i]];
-
-      e_pcal_lu[i] = part_Cal_PCAL_lu[e_ind[i]];
-      e_pcal_lv[i] = part_Cal_PCAL_lv[e_ind[i]];
-      e_pcal_lw[i] = part_Cal_PCAL_lw[e_ind[i]];
-
-      e_eical_sect[i] = part_Cal_ECin_sector[e_ind[i]];
-      e_eical_x[i] = part_Cal_ECin_x[e_ind[i]];
-      e_eical_y[i] = part_Cal_ECin_y[e_ind[i]];
-      e_eical_z[i] = part_Cal_ECin_z[e_ind[i]];
-
-      e_eical_lu[i] = part_Cal_ECin_lu[e_ind[i]];
-      e_eical_lv[i] = part_Cal_ECin_lv[e_ind[i]];
-      e_eical_lw[i] = part_Cal_ECin_lw[e_ind[i]];
-
-      e_eocal_sect[i] = part_Cal_ECout_sector[e_ind[i]];
-      e_eocal_x[i] = part_Cal_ECout_x[e_ind[i]];
-      e_eocal_y[i] = part_Cal_ECout_y[e_ind[i]];
-      e_eocal_z[i] = part_Cal_ECout_z[e_ind[i]];
-
-      e_eocal_lu[i] = part_Cal_ECout_lu[e_ind[i]];
-      e_eocal_lv[i] = part_Cal_ECout_lv[e_ind[i]];
-      e_eocal_lw[i] = part_Cal_ECout_lw[e_ind[i]];
-
-
-
       eventNumber[i] =  event;
 
       if(part_status[e_ind[i]] >= 1000 && part_status[e_ind[i]] < 2000) ele_detect[i] = 1; 
@@ -13697,54 +13182,8 @@ void fill_output_vector_electron(void){
       p4_ele_py.push_back(p4_ele[i].Py());
       p4_ele_pz.push_back(p4_ele[i].Pz());
       p4_ele_E.push_back(p4_ele[i].E()); 
-      ele_det.push_back(ele_detect[i]);
-      
-      //added
+      ele_det.push_back(ele_detect[i]);      
       sectorE.push_back(e_PCAL_sec[i]);
-
-      //chi2 from rec traj bank
-      ele_chi2.push_back( e_chi2[i] );
-      ele_ndf.push_back( e_ndf[i] );
-      ele_chi2red.push_back( e_chi2red[i] );
-
-      ele_vz.push_back( e_vz[i] );      
-      ele_dc_c1x.push_back(e_DC_c1x[i]);
-      ele_dc_c2x.push_back(e_DC_c2x[i]);
-      ele_dc_c3x.push_back(e_DC_c3x[i]);
-      ele_dc_c1y.push_back(e_DC_c1y[i]);
-      ele_dc_c2y.push_back(e_DC_c2y[i]);
-      ele_dc_c3y.push_back(e_DC_c3y[i]);
-
-      ele_pcal_det.push_back( e_pcal_det[i] );
-      ele_pcal_sect.push_back( e_pcal_sect[i] );
-      ele_pcal_x.push_back( e_pcal_x[i] );
-      ele_pcal_y.push_back( e_pcal_y[i] );
-      ele_pcal_z.push_back( e_pcal_z[i] );
-
-      ele_pcal_lu.push_back( e_pcal_lu[i] );
-      ele_pcal_lv.push_back( e_pcal_lv[i] );
-      ele_pcal_lw.push_back( e_pcal_lw[i] );
-
-      ele_eical_det.push_back( e_eical_det[i] );
-      ele_eical_sect.push_back( e_eical_sect[i] );
-      ele_eical_x.push_back( e_eical_x[i] );
-      ele_eical_y.push_back( e_eical_y[i] );
-      ele_eical_z.push_back( e_eical_z[i] );
-
-      ele_eical_lu.push_back( e_eical_lu[i] );
-      ele_eical_lv.push_back( e_eical_lv[i] );
-      ele_eical_lw.push_back( e_eical_lw[i] );
-
-      ele_eocal_det.push_back( e_eocal_det[i] );
-      ele_eocal_sect.push_back( e_eocal_sect[i] );
-      ele_eocal_x.push_back( e_eocal_x[i] );
-      ele_eocal_y.push_back( e_eocal_y[i] );
-      ele_eocal_z.push_back( e_eocal_z[i] );
-
-      ele_eocal_lu.push_back( e_eocal_lu[i] );
-      ele_eocal_lv.push_back( e_eocal_lv[i] );
-      ele_eocal_lw.push_back( e_eocal_lw[i] );
-     
       electron_event_number.push_back(eventNumber[i]);
 
     } 

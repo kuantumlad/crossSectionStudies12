@@ -289,8 +289,8 @@ int crossSectionExtractorV2(const char* infile, int run){
   //std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
   //std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
 
-  std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_120606_ffract0p8_tm06sm06_rad_noshift_newfilter_fidcuts.txt"); // old version GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
-  std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_120606_ffract0p8_tm06sm06_rad_noshift_newfilter_fidcuts.txt"); // also older version parametersGetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
+  std::map<int, std::vector<double> > accp_corr = GetAcceptanceFactors("elastic_theta_phi_acceptance_130606_ftm06sm06_fract0p8_tm06sm06_rad_noshift_newfilter_fidcut.txt"); // old version GetAcceptanceFactors("elastic_theta_phi_acceptance_2587_ftm06sm06.txt");
+  std::map<int, std::vector<double> > accp_corr_err = GetAcceptanceFactors("elastic_theta_phi_acceptance_error_130606_ftm06sm06_fract0p8_tm06sm06_rad_noshift_newfilter_fidcut.txt"); // also older version parametersGetAcceptanceFactors("elastic_theta_phi_acceptance_error_2587_ftm06sm06.txt");
 
 
 

@@ -139,8 +139,8 @@ int comparisonPlotter( const char* inFileData, const char* inFileMC, int run , c
   c6->Divide(2,3);
   for( int s = 0; s < 6; s++ ){
     c6->cd(s+1);
-    TH1D* h_data_vz = (TH1D*)fData->Get(Form("FD_PID_electron_DC_plots/DC_z_vertex_sec%d_cut_01",s+1));
-    TH1D* h_sim_vz = (TH1D*)fMC->Get(Form("FD_PID_electron_DC_plots/DC_z_vertex_sec%d_cut_01",s+1));
+    TH1D* h_data_vz = (TH1D*)fData->Get(Form("FD_PID_electron_DC_plots/DC_z_vertex_sec%d_cut_09",s+1));
+    TH1D* h_sim_vz = (TH1D*)fMC->Get(Form("FD_PID_electron_DC_plots/DC_z_vertex_sec%d_cut_09",s+1));
     
     h_sim_vz->SetTitle("Data vs Sim: Vz (cm)");
     h_sim_vz->GetXaxis()->SetTitle("Vz (cm)");

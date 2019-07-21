@@ -396,6 +396,11 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   anaTree->SetBranchAddress("p4_phot_E", &p4_phot_E);  
   //added
 
+
+
+
+
+
   if( data_type == analysis_sim ){    
     std::cout << " SETTING MC VARIABLES " << std::endl;
     anaTree->SetBranchAddress("gen_pid",&p4_mc_pid);
