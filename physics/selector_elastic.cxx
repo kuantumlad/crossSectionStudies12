@@ -51,6 +51,7 @@ int process_Events = -1;            // process all events
 ///
 
 Float_t Pival = 3.14159265359;
+double toDeg = 180.0/Pival;
 
 Float_t m_e = 0.000511;
 Float_t m_p = 0.93827;
@@ -116,10 +117,10 @@ vector<double> *Kp_sector = 0;
 vector<double> *Km_sector = 0;
 
 //added 
-vector<double> *ele_chi2 = 0;
+  vector<double> *ele_chi2 = 0;
   vector<double> *ele_ndf= 0;
   vector<double> *ele_chi2red= 0;
-
+  vector<double> *ele_dc_sect = 0;
   vector<double> *ele_vz = 0;
   vector<double> *prot_vz = 0;
   vector<double> *neutr_vz = 0;
@@ -168,6 +169,51 @@ vector<double> *ele_chi2 = 0;
 const static int BUFFER = 20;
 
 int ele_sector[BUFFER];
+double el_chi2[BUFFER];
+double el_ndf[BUFFER]; 
+double el_chi2red[BUFFER]; 
+double el_dc_sect[BUFFER];
+
+double el_vz[BUFFER]; 
+double pr_vz[BUFFER]; 
+double neut_vz[BUFFER]; 
+double pip_vz[BUFFER]; 
+double pim_vz[BUFFER]; 
+double kp_vz[BUFFER]; 
+double km_vz[BUFFER]; 
+
+double el_dc_c1x[BUFFER]; 
+double el_dc_c1y[BUFFER]; 
+double el_dc_c2x[BUFFER]; 
+double el_dc_c2y[BUFFER]; 
+double el_dc_c3x[BUFFER]; 
+double el_dc_c3y[BUFFER]; 
+
+double el_pcal_sec[BUFFER]; 
+double el_pcal_x[BUFFER]; 
+double el_pcal_y[BUFFER]; 
+double el_pcal_z[BUFFER]; 
+double el_pcal_lu[BUFFER]; 
+double el_pcal_lv[BUFFER]; 
+double el_pcal_lw[BUFFER]; 
+
+double el_eical_sec[BUFFER]; 
+double el_eical_x[BUFFER]; 
+double el_eical_y[BUFFER]; 
+double el_eical_z[BUFFER]; 
+double el_eical_lu[BUFFER]; 
+double el_eical_lv[BUFFER]; 
+double el_eical_lw[BUFFER]; 
+
+double el_eocal_sec[BUFFER]; 
+double el_eocal_x[BUFFER]; 
+double el_eocal_y[BUFFER]; 
+double el_eocal_z[BUFFER]; 
+double el_eocal_lu[BUFFER]; 
+double el_eocal_lv[BUFFER]; 
+double el_eocal_lw[BUFFER]; 
+
+
 TLorentzVector ele[BUFFER]; 
 TLorentzVector prot[BUFFER]; 
 TLorentzVector neutr[BUFFER]; 
@@ -395,6 +441,50 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   anaTree->SetBranchAddress("p4_phot_pz", &p4_phot_pz);
   anaTree->SetBranchAddress("p4_phot_E", &p4_phot_E);  
   //added
+
+  anaTree->SetBranchAddress("ele_chi2",&ele_chi2);
+  anaTree->SetBranchAddress("ele_ndf",&ele_ndf);
+  anaTree->SetBranchAddress("ele_chi2red",&ele_chi2red);
+  anaTree->SetBranchAddress("ele_dc_sect",&ele_dc_sect);
+  anaTree->SetBranchAddress("ele_vz",&ele_vz);
+  anaTree->SetBranchAddress("prot_vz", &prot_vz);
+  anaTree->SetBranchAddress("neutr_vz",&neutr_vz);
+  anaTree->SetBranchAddress("pip_vz",&pip_vz);
+  anaTree->SetBranchAddress("pim_vz", &piminus_vz);  
+  anaTree->SetBranchAddress("Kp_vz", &Kplus_vz);
+  anaTree->SetBranchAddress("ele_dc_c1x",&ele_dc_c1x); 
+  anaTree->SetBranchAddress("ele_dc_c2x",&ele_dc_c2x); 
+  anaTree->SetBranchAddress("ele_dc_c3x",&ele_dc_c3x);
+
+  anaTree->SetBranchAddress("ele_dc_c1y",&ele_dc_c1y);
+  anaTree->SetBranchAddress("ele_dc_c2y",&ele_dc_c2y);   
+  anaTree->SetBranchAddress("ele_dc_c3y",&ele_dc_c3y);  
+
+  anaTree->SetBranchAddress("ele_pcal_sect",&ele_pcal_sect); 
+  anaTree->SetBranchAddress("ele_pcal_x",&ele_pcal_x); 
+  anaTree->SetBranchAddress("ele_pcal_y",&ele_pcal_y);
+  anaTree->SetBranchAddress("ele_pcal_z",&ele_pcal_z);  
+  anaTree->SetBranchAddress("ele_pcal_lu",&ele_pcal_lu);  
+  anaTree->SetBranchAddress("ele_pcal_lv",&ele_pcal_lv); 
+  anaTree->SetBranchAddress("ele_pcal_lw",&ele_pcal_lw);
+
+  anaTree->SetBranchAddress("ele_eical_sect",&ele_eical_sect);     
+  anaTree->SetBranchAddress("ele_eical_x",&ele_eical_x);
+  anaTree->SetBranchAddress("ele_eical_y",&ele_eical_y);
+  anaTree->SetBranchAddress("ele_eical_z",&ele_eical_z);  
+  anaTree->SetBranchAddress("ele_eical_lu",&ele_eical_lu);  
+  anaTree->SetBranchAddress("ele_eical_lv",&ele_eical_lv); 
+  anaTree->SetBranchAddress("ele_eical_lw",&ele_eical_lw); 
+
+  anaTree->SetBranchAddress("ele_eocal_sect",&ele_eocal_sect); 
+  anaTree->SetBranchAddress("ele_eocal_x",&ele_eocal_x);  
+  anaTree->SetBranchAddress("ele_eocal_y",&ele_eocal_y);
+  anaTree->SetBranchAddress("ele_eocal_z",&ele_eocal_z); 
+  anaTree->SetBranchAddress("ele_eocal_lu",&ele_eocal_lu); 
+  anaTree->SetBranchAddress("ele_eocal_lv",&ele_eocal_lv);
+  anaTree->SetBranchAddress("ele_eocal_lw",&ele_eocal_lw);  
+
+
 
   if( data_type == analysis_sim ){    
     std::cout << " SETTING MC VARIABLES " << std::endl;
@@ -629,6 +719,31 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     h_el_theta_accp_per_phi.push_back( new TH1F(Form("h_el_theta_accp_phi%d",pp),Form("h_el_theta_acp_phi%d",pp), 30, 0.0, 30.0) );
   }
 
+
+  std::vector< TH2F* > h_el_theta_phi_per_mntm;
+  int n_bins_mntm = 20;
+  TH1F *h_p_bins = new TH1F("h_p_bins","h_p_bins",n_bins_mntm, 1.3, 2.5);			    
+  for( int bb = 0; bb < n_bins_mntm; bb++ ){
+    h_el_theta_phi_per_mntm.push_back( new TH2F(Form("h_el_theta_phi_per_mntm_b%d",bb), Form("h_el_theta_phi_per_mntm_b%d",bb), 219, -180.0, 180.0, 30, 0.0, el_theta_max ) );
+  }
+
+  std::vector< TH2F* > h_el_theta_phi_per_vz;
+  int n_bins_vz = 50;
+  TH1F *h_vz_bins = new TH1F("h_vz_bins","h_vz_bins",n_bins_vz, 0.0, 10.0 );			    
+  for( int bb = 0; bb< n_bins_vz; bb++ ){
+    h_el_theta_phi_per_vz.push_back( new TH2F(Form("h_el_theta_phi_per_vz_b%d",bb), Form("h_el_theta_phi_per_vz_b%d",bb), 219, -180.0, 180.0, 30, 0.0, el_theta_max ) );  
+  }
+  
+  std::vector< TH2F* > h_el_theta_phi_sect;
+  std::vector< std::vector< TH2F* > > h_el_theta_phi_sect_per_p;
+  for( int ss = 0; ss < 6; ss++ ){
+    h_el_theta_phi_sect.push_back( new TH2F(Form("h_el_theta_phi_s%d",ss), Form("h_el_theta_phi_s%d",ss), 30, 0.0, el_theta_max, 60, -30.0, 30.0 ) );  
+    std::vector< TH2F*> h2_temp_theta_phi_sect_per_p;
+    for( int bb = 0; bb < n_bins_mntm; bb++ ){       
+      h2_temp_theta_phi_sect_per_p.push_back( new TH2F(Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), 30, 0.0, el_theta_max, 60, -30.0, 30.0 ) );   
+  }
+    h_el_theta_phi_sect_per_p.push_back(h2_temp_theta_phi_sect_per_p);
+  }
   
   out->mkdir("accecpted_rejected");				
   out->cd("accecpted_rejected");
@@ -657,13 +772,11 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
   TH2F *h_el_phitheta_accp_gen = new TH2F("h_el_phitheta_accp_gen","h_el_phitheta_accp_gen", 200, -180.0, 180.0, 200, 0.0, 30.0);
   for( int ss = 0; ss < 6; ss++ ){
-
     h_el_theta_accp_gen.push_back( new TH1F(Form("h_el_theta_accp_gen_s%d",ss),Form("h_el_theta_accp_gen_s%d",ss), 30, 0.0, 30.0) );
     h_el_ptheta_accp_gen.push_back( new TH2F(Form("h_el_ptheta_accp_gen_%d",ss),Form("h_el_ptheta_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 40.0) );
     h_el_wtheta_accp_gen.push_back( new TH2F(Form("h_el_wtheta_accp_gen_%d",ss), Form("h_el_wtheta_accp_gen_%d",ss),200, 0.0, 1.5, 200, 0.0, 40.0) );
     h_el_wphi_accp_gen.push_back( new TH2F(Form("h_el_wphi_accp_gen_%d",ss), Form("h_el_wphi_accp_gen_%d",ss),200, -180.0, 180.0 , 200, 0.0, 2.0) ); 
     h_el_pw_accp_gen.push_back( new TH2F(Form("h_el_pw_accp_gen_%d",ss), Form("h_el_pw_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 2.0 ) );
-
   }
 
 
@@ -687,6 +800,49 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     p_mig_resolution_gen.push_back( new TProfile(Form("p_mig_reresolution_gen_bs%d",bb), Form("p_mig_reresolution_gen_bs%d",bb), nbins, 0.0, 30.0,  -0.05, 0.05) ); 
   }
 
+  out->mkdir("dc_detector");
+  out->cd("dc_detector");
+  TH1D *h_el_chi2 = new TH1D("h_el_chi2","h_el_chi2",100, 0.0, 1000.0);
+  TH1D *h_el_ndf = new TH1D("h_el_ndf","h_el_ndf",100, 0.0, 100.0);
+  TH1D *h_el_chi2red = new TH1D("h_el_chi2red","h_el_chi2red",100, 0.0, 200.0);
+
+  TH2D *h_el_dcr1_xy_wchi2 = new TH2D("h_el_dcr1_xy_wchi2","h_el_dcr1_xy_wchi2",900,-450,450, 900,-450,450); 
+  TH2D *h_el_dcr2_xy_wchi2 = new TH2D("h_el_dcr2_xy_wchi2","h_el_dcr2_xy_wchi2",900,-450,450, 900,-450,450); 
+  TH2D *h_el_dcr3_xy_wchi2 = new TH2D("h_el_dcr3_xy_wchi2","h_el_dcr3_xy_wchi2",900,-450,450, 900,-450,450); 
+
+  std::vector<TH1D*> h_el_chi2_sect;
+  std::vector<TH1D*> h_el_ndf_sect;
+  std::vector<TH1D*> h_el_chi2red_sect;
+
+  for( int s = 0; s < 6; s++ ){
+    h_el_chi2_sect.push_back( new TH1D(Form("h_el_chi2_s%d",s), Form("h_el_chi2_s%d",s), 100, 0.0, 1000.0 ) );
+
+    h_el_ndf_sect.push_back( new TH1D(Form("h_el_ndf_s%d",s), Form("h_el_ndf_s%d",s), 100, 0.0, 100.0 ) );
+
+    h_el_chi2red_sect.push_back( new TH1D(Form("h_el_chi2red_s%d",s), Form("h_el_chi2red_s%d",s), 100, 0.0, 200.0 ) );
+  }
+
+  std::vector< TH1D* > h_el_vz_sect;
+  std::vector< TH2D* > h2_el_vz_p_sect;
+  std::vector< TH2D* > h2_el_vz_phi_per_p;
+  TH1D* h_el_vz = new TH1D("h_el_vz","h_el_vz",100, -40.0, 40.0);
+  TH2D* h_el_vz_phi = new TH2D("h_el_vz_phi","h_el_vz_phi",200, -180.0, 180.0, 100, -15.0, 15.0);
+ 
+
+  for(int s = 0; s < 6; s++ ){   
+    h_el_vz_sect.push_back( new TH1D(Form("h_el_vz_s%d",s), Form("h_el_vz_s%d",s), 100, -40.0, 40.0) );
+    h2_el_vz_p_sect.push_back( new TH2D(Form("h2_el_vz_p_s%d", s), Form("h2_el_vz_p_s%d", s), 100, -40.0, 40.0, 100, 0.0, 2.6) );
+  }
+
+  for( int bb = 0; bb < n_bins_mntm ; bb ++ ){
+    h2_el_vz_phi_per_p.push_back( new TH2D(Form("h2_el_vz_phi_per_p_b%d",bb), Form("h2_el_vz_phi_per_p_b%d",bb), 200, -180.0, 180.0, 100, -15.0, 15.0) );
+  }
+
+  out->mkdir("ec_detector");
+  out->cd("ec_detector");
+  
+  
+  
 
   /// /////////////////////////////////////////////////////////////////////////////    
   ///  create output tree:
@@ -769,7 +925,8 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
   //std::cout << " Number of MC events " << mcTree->GetEntriesFast() << std::endl;
   //for(Int_t k=0; k < 1000000; k++ ){ // anaTree->GetEntriesFast(); k++){    
-  for(Int_t k=0; k < anaTree->GetEntriesFast(); k++){    
+  int  nentries = anaTree->GetEntriesFast();
+  for(Int_t k=0; k < nentries; k++){    
       
     anaTree->GetEntry(k);
     //std::cout << " k " << k << std::endl;
@@ -840,10 +997,64 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     /// //////////////////////////////////////////////////////////////////
 
     for(Int_t i = 0; i < BUFFER; i++){ 
-      if(ele_count > i){ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); ele_sector[i]=sectorE->at(i); }//event[i]=eventNumber->at(i);}
-      else{ele[i].SetPxPyPzE(0, 0, 0, 0); ele_sector[i] = -1;}
-      if(prot_count > i){prot[i].SetPxPyPzE(p4_prot_px->at(i),p4_prot_py->at(i),p4_prot_pz->at(i),p4_prot_E->at(i));}
-      else{prot[i].SetPxPyPzE(0, 0, 0, 0);}
+      if(ele_count > i){
+	ele[i].SetPxPyPzE(p4_ele_px->at(i),p4_ele_py->at(i),p4_ele_pz->at(i),p4_ele_E->at(i)); 
+	ele_sector[i]=sectorE->at(i); 
+
+	el_chi2[i] = ele_chi2->at(i);
+	el_ndf[i] = ele_ndf->at(i);
+	el_chi2red[i] = ele_chi2red->at(i);
+	el_dc_sect[i] = ele_dc_sect->at(i);
+	el_vz[i] = ele_vz->at(i);
+
+	el_dc_c1x[i] = ele_dc_c1x->at(i);
+	el_dc_c1y[i] = ele_dc_c1y->at(i);
+	el_dc_c2x[i] = ele_dc_c2x->at(i);
+	el_dc_c2y[i] = ele_dc_c2y->at(i);
+	el_dc_c3x[i] = ele_dc_c3x->at(i);
+	el_dc_c3y[i] = ele_dc_c3y->at(i);
+
+	el_pcal_sec[i] = ele_pcal_sect->at(i);
+	el_pcal_x[i] = ele_pcal_x->at(i);
+	el_pcal_y[i] = ele_pcal_y->at(i);
+	el_pcal_z[i] = ele_pcal_z->at(i);
+
+	el_pcal_lu[i] = ele_pcal_lu->at(i);
+	el_pcal_lv[i] = ele_pcal_lv->at(i);
+	el_pcal_lw[i] = ele_pcal_lw->at(i);
+
+	el_eical_sec[i] = ele_eical_sect->at(i);
+	el_eical_x[i] = ele_eical_x->at(i);
+	el_eical_y[i] = ele_eical_y->at(i);
+	el_eical_z[i] = ele_eical_z->at(i);
+
+	el_eical_lu[i] = ele_eical_lu->at(i);
+	el_eical_lv[i] = ele_eical_lv->at(i);
+	el_eical_lw[i] = ele_eical_lw->at(i);
+
+	el_eocal_sec[i] = ele_eocal_sect->at(i);
+	el_eocal_x[i] = ele_eocal_x->at(i);
+	el_eocal_y[i] = ele_eocal_y->at(i);
+	el_eocal_z[i] = ele_eocal_z->at(i);
+
+	el_eocal_lu[i] = ele_eocal_lu->at(i);
+	el_eocal_lv[i] = ele_eocal_lv->at(i);
+	el_eocal_lw[i] = ele_eocal_lw->at(i);
+
+
+	
+      }//event[i]=eventNumber->at(i);}
+      else{
+	ele[i].SetPxPyPzE(0, 0, 0, 0);
+	ele_sector[i] = -1;
+      }
+      
+      if(prot_count > i){
+	prot[i].SetPxPyPzE(p4_prot_px->at(i),p4_prot_py->at(i),p4_prot_pz->at(i),p4_prot_E->at(i));
+      }
+      else{
+	prot[i].SetPxPyPzE(0, 0, 0, 0);
+      }
       if(neutr_count > i){neutr[i].SetPxPyPzE(p4_neutr_px->at(i),p4_neutr_py->at(i),p4_neutr_pz->at(i),p4_neutr_E->at(i));}
       else{neutr[i].SetPxPyPzE(0, 0, 0, 0);}
       if(pip_count > i){pip[i].SetPxPyPzE(p4_pip_px->at(i),p4_pip_py->at(i),p4_pip_pz->at(i),p4_pip_E->at(i));}
@@ -981,8 +1192,20 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    h_el_phi_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180.0/Pival);
 	    h_el_ptheta_sect_final[el_sect]->Fill( ele[select_ele].P(), ele[select_ele].Theta()*180/Pival );   
 	    h_el_phitheta_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
-	    h_el_phitheta_final->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 
+	    h_el_phitheta_final->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 	    
 	    //
+
+	    // acceptance related plots to define fiducial regions
+	    int p_bin = h_p_bins->GetXaxis()->FindBin(ele[select_ele].P());
+	    if( p_bin > 0 && p_bin < n_bins_mntm ){
+	      h_el_theta_phi_per_mntm[p_bin]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 
+	      h2_el_vz_phi_per_p[p_bin]->Fill(ele[select_ele].Phi() * toDeg, el_vz[select_ele]);  
+	    }
+
+	    int vz_bin = h_vz_bins->GetXaxis()->FindBin(fabs(el_vz[select_ele]));
+	    if( vz_bin > 0 && vz_bin < n_bins_vz ){
+	      h_el_theta_phi_per_vz[vz_bin]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
+	    }
 
 	    int phi_bin_to_fill = hist_mc_electron_theta_vs_phi->GetXaxis()->FindBin(ele[select_ele].Phi()*180/Pival) - 1;
 	    //std::cout << " reconstructed phi bin " << phi_bin_to_fill << std::endl;
@@ -991,6 +1214,60 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    h_el_theta_rec_sect[el_sect-1]->Fill( ele[select_ele].Theta()*180/Pival );  
 	    h_el_theta_rec->Fill( ele[select_ele].Theta()*180/Pival );
 	    
+
+	    //////////////////////
+	    // fill detector based information
+	    int dc_sect = el_dc_sect[select_ele];
+	    //std::cout << " dc sector " << dc_sect << std::endl;
+	    h_el_chi2->Fill( el_chi2[select_ele] );
+	    h_el_ndf->Fill( el_ndf[select_ele] );
+	    h_el_chi2red->Fill( el_chi2[select_ele]/el_ndf[select_ele] );
+	    
+	    h_el_chi2_sect[dc_sect]->Fill(el_chi2[select_ele]);
+	    h_el_ndf_sect[dc_sect]->Fill(el_ndf[select_ele]);
+	    h_el_chi2red_sect[dc_sect]->Fill(el_chi2[select_ele]/el_ndf[select_ele]);
+	    
+
+	    h_el_dcr1_xy_wchi2->Fill(el_dc_c1x[select_ele], el_dc_c1y[select_ele], el_chi2[select_ele]);
+	    h_el_dcr2_xy_wchi2->Fill(el_dc_c2x[select_ele], el_dc_c2y[select_ele], el_chi2[select_ele]);///el_ndf[select_ele]);
+	    h_el_dcr3_xy_wchi2->Fill(el_dc_c3x[select_ele], el_dc_c3y[select_ele], el_chi2[select_ele]);///el_ndf[select_ele]);
+
+	    
+	    h_el_vz->Fill(el_vz[select_ele]);
+	    h_el_vz_phi->Fill(ele[select_ele].Phi() * toDeg, el_vz[select_ele]); 
+	    h_el_vz_sect[dc_sect]->Fill(el_vz[select_ele]);
+	    h2_el_vz_p_sect[dc_sect]->Fill(el_vz[select_ele], ele[select_ele].P() );
+
+
+	    double el_scattered_phi = ele[select_ele].Phi()*180/Pival + 15.0;
+	    double phi_shift = 0.0;
+	    if( el_scattered_phi < 0 ){
+	      el_scattered_phi = el_scattered_phi + 360;	      
+	    }
+
+	    if( el_sect-1 == 0 ){
+	      phi_shift =  10.0 + 25;
+	    }
+	    else if ( el_sect-1 == 1 ){
+	      phi_shift = 70 + 15;
+	    }
+	    else if ( el_sect-1 == 2 ){
+	      phi_shift = 130 + 15;
+	    }
+	    else if ( el_sect-1 == 3 ){
+	      phi_shift = 180 +25 ;
+	    }
+	    else if ( el_sect-1 == 4 ){
+	      phi_shift = 240 + 25 ;
+	    }
+	    else if ( el_sect-1 == 5 ){
+	      phi_shift = 300 + 25;
+	    }
+
+	    h_el_theta_phi_sect[el_sect-1]->Fill( ele[select_ele].Theta()*180/Pival , el_scattered_phi - phi_shift);
+	    if ( p_bin > 0 &&  p_bin < n_bins_mntm ){
+	      h_el_theta_phi_sect_per_p[el_sect-1][p_bin]->Fill( ele[select_ele].Theta()*180/Pival , el_scattered_phi - phi_shift);
+	    }
 	     
 
 	  }

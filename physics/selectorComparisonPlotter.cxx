@@ -54,6 +54,56 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   
   bool printAll = false;
 
+  TCanvas *c0 = new TCanvas("c0","c0",800,1200);
+  c0->cd(1);
+  TH1D *h_data_final_p = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_p");
+  TH1D *h_sim_final_p = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_p");
+  double scale_p_factor = h_data_final_p->GetMaximum()/h_sim_final_p->GetMaximum();
+  h_sim_final_p->Scale(scale_p_factor);
+  
+  h_data_final_p->SetLineColor(kRed); 
+  h_sim_final_p->SetLineColor(kBlue-2); 
+  h_data_final_p->GetXaxis()->SetTitle("Momentum (GeV)");
+  h_data_final_p->GetXaxis()->CenterTitle();
+  h_sim_final_p->Draw("HIST");
+  h_data_final_p->Draw("HIST SAME");
+  c0->SaveAs(Form("comparison_hist_p_final_r%d_f%s.pdf",run,field_config));
+
+  
+
+  TCanvas *c0a = new TCanvas("c0a","c0a",800,1200);
+  c0a->cd(1);
+  TH1D *h_data_final_theta = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_theta");
+  TH1D *h_sim_final_theta = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_theta");
+  double scale_theta_factor = h_data_final_theta->GetMaximum()/h_sim_final_theta->GetMaximum();
+  h_sim_final_theta->Scale(scale_theta_factor);
+  
+  h_data_final_theta->SetLineColor(kRed); 
+  h_sim_final_theta->SetLineColor(kBlue-2); 
+  h_data_final_theta->GetXaxis()->SetTitle("#theta (deg)");
+  h_data_final_theta->GetXaxis()->CenterTitle();
+  h_sim_final_theta->Draw("HIST");
+  h_data_final_theta->Draw("HIST SAME");
+  c0a->SaveAs(Form("comparison_hist_theta_final_r%d_f%s.pdf",run,field_config));
+
+
+  TCanvas *c0b = new TCanvas("c0b","c0b",800,1200);
+  c0b->cd(1);
+  TH1D *h_data_final_phi = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_phi");
+  TH1D *h_sim_final_phi = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_phi");
+  double scale_phi_factor = h_data_final_phi->GetMaximum()/h_sim_final_phi->GetMaximum();
+  h_sim_final_phi->Scale(scale_phi_factor);
+  
+  h_data_final_phi->SetLineColor(kRed); 
+  h_sim_final_phi->SetLineColor(kBlue-2); 
+  h_data_final_phi->GetXaxis()->SetTitle("#phi (deg)");
+  h_data_final_phi->GetXaxis()->CenterTitle();
+  h_sim_final_phi->Draw("HIST");
+  h_data_final_phi->Draw("HIST SAME");
+  c0b->SaveAs(Form("comparison_hist_phi_final_r%d_f%s.pdf",run,field_config));
+
+  
+
   TCanvas *c1 = new TCanvas("c1","c1",800,1200);
   c1->Divide(2,3);
   for( int s = 0; s < 6; s++ ){
@@ -544,5 +594,104 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
     c2->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
   }
    
+  TCanvas *c3 = new TCanvas("c3","c3",900,900);
+  c3->Divide(1,1);
+  c3->cd(1);
+
+  TH1D *h_el_vz = (TH1D*)fData->Get(Form("dc_detector/h_el_vz")); 
+  TH1D *h_el_vz_sim = (TH1D*)fSim->Get(Form("dc_detector/h_el_vz"));
+
+  double scale_vz_factor = h_el_vz->GetMaximum()/h_el_vz_sim->GetMaximum();
+  h_el_vz->Scale(scale_vz_factor);
+
+  gStyle->SetOptStat(0000);                                                                                                                                                                              
+  h_el_vz->SetLineColor(kRed);
+  h_el_vz_sim->SetLineColor(kBlue);
+  h_el_vz->GetXaxis()->SetTitle("vz (cm)");
+  h_el_vz->GetYaxis()->SetTitle("counts");
+  
+
+  h_el_vz->SetTitle("Selected Elastic Vz");
+  h_el_vz_sim->Draw("HIST");
+  h_el_vz->Draw("HIST SAME");
+
+  TLegend *l8 = new TLegend(0.11,0.7,0.48,0.89);
+  l8->SetBorderSize(0);
+  l8->AddEntry(h_el_vz,"DATA");
+  l8->AddEntry(h_el_vz_sim,"SIM");
+  l8->Draw();
+
+  c3->Update();
+
+  kin_name="data_sim_gen_vz";
+  if( printAll ){
+    c3->Print(Form("data_sim_gen_comparison_r%d_f%s.pdf",run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+  else{  
+    c3->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+
+  c3->Clear(); 
+  c3->SetCanvasSize(900,900);
+  c3->SetWindowSize(910,910);
+  c3->Divide(1,1);
+  gStyle->SetOptStat(0000);
+ 
+  TH2D *h_el_vz_phi = (TH2D*)fData->Get("dc_detector/h_el_vz_phi");
+  TH2D *h_el_vz_phi_sim = (TH2D*)fSim->Get("dc_detector/h_el_vz_phi");
+  
+  h_el_vz_phi_sim->SetTitle("Sim Vz vs #phi");
+  h_el_vz_phi_sim->GetXaxis()->SetTitle("#phi (deg)");
+  h_el_vz_phi_sim->GetYaxis()->SetTitle("vz (cm)");
+  h_el_vz_phi_sim->Draw("colz");
+
+  c3->Update();
+  kin_name="data_vz_phi";
+  if( printAll ){
+    c3->Print(Form("data_sim_gen_comparison_r%d_f%s.pdf)",run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+  else{  
+    c3->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+
+  //DRAW VERTEX FOR EACH SECTOR
+  c3->Clear(); 
+  c3->SetCanvasSize(900,1200);
+  c3->SetWindowSize(910,1200);
+  c3->Divide(2,3);
+  gStyle->SetOptStat(0000);
+
+  for( int ss = 0; ss <= 5; ss++ ){
+    c3->cd(ss+1);
+    TH1D *h_el_vz_sect = (TH1D*)fData->Get(Form("dc_detector/h_el_vz_s%d",ss));
+    TH1D *h_el_vz_sect_sim = (TH1D*)fSim->Get(Form("dc_detector/h_el_vz_s%d",ss));
+
+    double scale_vz_factor_sect = h_el_vz_sect->GetMaximum()/h_el_vz_sect_sim->GetMaximum();
+    h_el_vz_sect->Scale(1.0/scale_vz_factor);
+
+    h_el_vz_sect->SetLineColor(kRed);
+    h_el_vz_sect_sim->SetLineColor(kBlue-2);
+    
+    h_el_vz_sect->GetXaxis()->SetTitle("vz (cm)");
+    h_el_vz_sect->GetYaxis()->SetTitle("Counts");
+
+    h_el_vz_sect_sim->SetTitle(Form("Selected Electron Vz Sector %d",ss+1));
+    h_el_vz_sect_sim->Draw("HIST");
+    h_el_vz_sect->Draw("HIST SAME");
+
+  }
+
+  c3->Update();
+  kin_name="data_vz_sector";
+  if( printAll ){
+    c3->Print(Form("data_sim_gen_comparison_r%d_f%s.pdf)",run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+  else{  
+    c3->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+    
+
+  //
+
   return 0;
 }
