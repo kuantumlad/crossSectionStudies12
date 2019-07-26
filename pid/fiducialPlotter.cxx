@@ -43,6 +43,12 @@ int fiducialPlotter(const char* input, int run){
   TH2F *h_el_dc_hit_position_r2_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region2_cut_05"); 
   TH2F *h_el_dc_hit_position_r3_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region3_cut_07"); 
 
+
+  //Histograms with all negative tracks weighted with track chi2 from rec::traj
+  TH2F *h_el_dc_hit_position_wchi2_r1 = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_chi2_region1_cut_00"); 
+  TH2F *h_el_dc_hit_position_wchi2_r2 = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_chi2_region2_cut_00");
+  TH2F *h_el_dc_hit_position_wchi2_r3 = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_chi2_region3_cut_00");
+
   gStyle->SetOptStat(0);
 
   TCanvas *cel = new TCanvas("cel","cel",800,800);
@@ -197,6 +203,49 @@ int fiducialPlotter(const char* input, int run){
   h_el_pcal_hit_position->GetYaxis()->SetTitle("y (cm)");
   h_el_pcal_hit_position->GetYaxis()->CenterTitle();
   c_pcal->SaveAs(Form("h_el_pcal_hit_position_%d.pdf",run));
+
+
+  // Electron DC Hit Position Weighted By track chi2
+  TH2F *h_el_dc_hit_position_chi2_r1 = new TH2F("h_el_dc_hit_position_chi2_r1","h_el_dc_hit_position_chi2_r1", 900,-450,450, 900,-450,450);  
+  TH2F *h_el_dc_hit_position_chi2_r2 = new TH2F("h_el_dc_hit_position_chi2_r2","h_el_dc_hit_position_chi2_r2", 900,-450,450, 900,-450,450);  
+  TH2F *h_el_dc_hit_position_chi2_r3 = new TH2F("h_el_dc_hit_position_chi2_r3","h_el_dc_hit_position_chi2_r3", 900,-450,450, 900,-450,450);  
+  h_el_dc_hit_position_chi2_r1->Divide(h_el_dc_hit_position_wchi2_r1, h_el_dc_hit_position_r1, 1.0, 1.0);
+  h_el_dc_hit_position_chi2_r2->Divide(h_el_dc_hit_position_wchi2_r2, h_el_dc_hit_position_r2, 1.0, 1.0);
+  h_el_dc_hit_position_chi2_r3->Divide(h_el_dc_hit_position_wchi2_r3, h_el_dc_hit_position_r3, 1.0, 1.0);
+
+  TCanvas *c_elwchi2_r1 = new TCanvas("c_elwchi2_r1","c_elwchi2_r1",900,900);
+  gPad->SetLogz();
+  h_el_dc_hit_position_chi2_r1->SetTitle("DC R1 Hit Position #chi^{2}");
+  h_el_dc_hit_position_chi2_r1->GetXaxis()->SetTitle("x (cm)");
+  h_el_dc_hit_position_chi2_r1->GetYaxis()->SetTitle("y (cm)");
+  h_el_dc_hit_position_chi2_r1->GetXaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r1->GetYaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r1->Draw("colz");
+  c_elwchi2_r1->SaveAs(Form("h_el_dc_hit_position_chi2_r1_cut00_r%d.pdf",run));
+
+  TCanvas *c_elwchi2_r2 = new TCanvas("c_elwchi2_r2","c_elwchi2_r2",900,900);
+  gPad->SetLogz();
+  h_el_dc_hit_position_chi2_r2->GetXaxis()->SetTitle("x (cm)");
+  h_el_dc_hit_position_chi2_r2->GetYaxis()->SetTitle("y (cm)");
+  h_el_dc_hit_position_chi2_r2->GetXaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r2->GetYaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r2->Draw("colz");
+  c_elwchi2_r2->SaveAs(Form("h_el_dc_hit_position_chi2_r2_cut00_r%d.pdf",run));
+
+
+  TCanvas *c_elwchi2_r3 = new TCanvas("c_elwchi2_r3","c_elwchi2_r3",900,900);
+  gPad->SetLogz();
+  h_el_dc_hit_position_chi2_r3->GetXaxis()->SetTitle("x (cm)");
+  h_el_dc_hit_position_chi2_r3->GetYaxis()->SetTitle("y (cm)");
+  h_el_dc_hit_position_chi2_r3->GetXaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r3->GetYaxis()->CenterTitle();
+  h_el_dc_hit_position_chi2_r3->Draw("colz");
+  c_elwchi2_r3->SaveAs(Form("h_el_dc_hit_position_chi2_r3_cut00_r%d.pdf",run));
+
+
+
+
+  //h_el_dc_hit_position_chi2_r1
 
   return 0;
 }

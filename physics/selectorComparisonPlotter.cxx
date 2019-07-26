@@ -54,7 +54,7 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   
   bool printAll = false;
 
-  TCanvas *c0 = new TCanvas("c0","c0",800,1200);
+  TCanvas *c0 = new TCanvas("c0","c0",900,900);
   c0->cd(1);
   TH1D *h_data_final_p = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_p");
   TH1D *h_sim_final_p = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_p");
@@ -65,13 +65,23 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   h_sim_final_p->SetLineColor(kBlue-2); 
   h_data_final_p->GetXaxis()->SetTitle("Momentum (GeV)");
   h_data_final_p->GetXaxis()->CenterTitle();
+
   h_sim_final_p->Draw("HIST");
+  h_sim_final_p->GetXaxis()->SetRangeUser(1.25,2.5);
+  h_sim_final_p->Draw("HIST");
+
+
   h_data_final_p->Draw("HIST SAME");
+  h_data_final_p->GetXaxis()->SetRangeUser(1.25,2.5);
+  h_data_final_p->Draw("HIST SAME");
+
+
+
   c0->SaveAs(Form("comparison_hist_p_final_r%d_f%s.pdf",run,field_config));
 
   
 
-  TCanvas *c0a = new TCanvas("c0a","c0a",800,1200);
+  TCanvas *c0a = new TCanvas("c0a","c0a",900,900);
   c0a->cd(1);
   TH1D *h_data_final_theta = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_theta");
   TH1D *h_sim_final_theta = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_theta");
@@ -87,7 +97,7 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   c0a->SaveAs(Form("comparison_hist_theta_final_r%d_f%s.pdf",run,field_config));
 
 
-  TCanvas *c0b = new TCanvas("c0b","c0b",800,1200);
+  TCanvas *c0b = new TCanvas("c0b","c0b", 900 ,900);
   c0b->cd(1);
   TH1D *h_data_final_phi = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_phi");
   TH1D *h_sim_final_phi = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_phi");
@@ -637,13 +647,34 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   c3->Divide(1,1);
   gStyle->SetOptStat(0000);
  
-  TH2D *h_el_vz_phi = (TH2D*)fData->Get("dc_detector/h_el_vz_phi");
   TH2D *h_el_vz_phi_sim = (TH2D*)fSim->Get("dc_detector/h_el_vz_phi");
   
   h_el_vz_phi_sim->SetTitle("Sim Vz vs #phi");
   h_el_vz_phi_sim->GetXaxis()->SetTitle("#phi (deg)");
   h_el_vz_phi_sim->GetYaxis()->SetTitle("vz (cm)");
   h_el_vz_phi_sim->Draw("colz");
+
+  c3->Update();
+  kin_name="sim_vz_phi";
+  if( printAll ){
+    c3->Print(Form("data_sim_gen_comparison_r%d_f%s.pdf)",run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+  else{  
+    c3->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
+  }
+
+  c3->Clear(); 
+  c3->SetCanvasSize(900,900);
+  c3->SetWindowSize(910,910);
+  c3->Divide(1,1);
+  gStyle->SetOptStat(0000);
+ 
+  TH2D *h_el_vz_phi = (TH2D*)fData->Get("dc_detector/h_el_vz_phi");
+  
+  h_el_vz_phi->SetTitle("Data Vz vs #phi");
+  h_el_vz_phi->GetXaxis()->SetTitle("#phi (deg)");
+  h_el_vz_phi->GetYaxis()->SetTitle("vz (cm)");
+  h_el_vz_phi->Draw("colz");
 
   c3->Update();
   kin_name="data_vz_phi";
@@ -653,6 +684,8 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   else{  
     c3->Print(Form("comparison_%s_r%d_f%s.pdf",kin_name.c_str(),run,field_config),"pdf"); //"h1.pdf(","pdf");
   }
+
+
 
   //DRAW VERTEX FOR EACH SECTOR
   c3->Clear(); 

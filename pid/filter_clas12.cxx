@@ -8269,7 +8269,7 @@ if(FT_photid_all_check[i]){
 
   if(FD_eid_default_PID_check[i]){ 
 
-    if(part_p[i] > 3 &&  part_p[i] < 6){
+    if(part_p[i] > 0 &&  part_p[i] < 6){
 
       if(part_Cal_PCAL_sector[i] == 1 && part_p[i] > 0) hist_electron_sampfrac_vs_u_coord_sec1->Fill(part_Cal_PCAL_lu[i], part_Cal_energy_total[i]/part_p[i]);
       if(part_Cal_PCAL_sector[i] == 2 && part_p[i] > 0) hist_electron_sampfrac_vs_u_coord_sec2->Fill(part_Cal_PCAL_lu[i], part_Cal_energy_total[i]/part_p[i]);
@@ -9344,7 +9344,7 @@ TH2F *create_DC_track_hit_position_chi2_region1(int cutnum){
 TH2F *create_DC_track_hit_position_chi2_region2(int cutnum){
   char name[100];
   sprintf(name,"DC_hit_position_chi2_region2_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2_region2[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
+  hist_DC_track_hit_chi2_region2[cutnum] = new TH2F(name, name, 1000,-500,500, 1000,-500,500);
   hist_DC_track_hit_chi2_region2[cutnum]->GetXaxis()->SetTitle("x /cm");
   hist_DC_track_hit_chi2_region2[cutnum]->GetYaxis()->SetTitle("y /cm");
   return(hist_DC_track_hit_chi2_region2[cutnum]);
@@ -9353,7 +9353,7 @@ TH2F *create_DC_track_hit_position_chi2_region2(int cutnum){
 TH2F *create_DC_track_hit_position_chi2_region3(int cutnum){
   char name[100];
   sprintf(name,"DC_hit_position_chi2_region3_cut_%02d", cutnum);
-  hist_DC_track_hit_chi2_region3[cutnum] = new TH2F(name, name, 900,-450,450, 900,-450,450);   
+  hist_DC_track_hit_chi2_region3[cutnum] = new TH2F(name, name, 1000,-500,500, 1000,-500,500);
   hist_DC_track_hit_chi2_region3[cutnum]->GetXaxis()->SetTitle("x /cm");
   hist_DC_track_hit_chi2_region3[cutnum]->GetYaxis()->SetTitle("y /cm");
   return(hist_DC_track_hit_chi2_region3[cutnum]);

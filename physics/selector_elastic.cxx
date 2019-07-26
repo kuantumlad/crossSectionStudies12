@@ -810,6 +810,15 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   TH2D *h_el_dcr2_xy_wchi2 = new TH2D("h_el_dcr2_xy_wchi2","h_el_dcr2_xy_wchi2",900,-450,450, 900,-450,450); 
   TH2D *h_el_dcr3_xy_wchi2 = new TH2D("h_el_dcr3_xy_wchi2","h_el_dcr3_xy_wchi2",900,-450,450, 900,-450,450); 
 
+  TH2D *h_el_dcr1_xy = new TH2D("h_el_dcr1_xy","h_el_dcr1_xy",900,-450,450, 900,-450,450); 
+  TH2D *h_el_dcr2_xy = new TH2D("h_el_dcr2_xy","h_el_dcr2_xy",900,-450,450, 900,-450,450); 
+  TH2D *h_el_dcr3_xy = new TH2D("h_el_dcr3_xy","h_el_dcr3_xy",900,-450,450, 900,-450,450); 
+
+  TH2D *h_el_dcr1_xy_chi2 = new TH2D("h_el_dcr1_xy_chi2","h_el_dcr1_xy_chi2",900,-450,450, 900,-450,450);
+  TH2D *h_el_dcr2_xy_chi2 = new TH2D("h_el_dcr2_xy_chi2","h_el_dcr2_xy_chi2",900,-450,450, 900,-450,450);
+  TH2D *h_el_dcr3_xy_chi2 = new TH2D("h_el_dcr3_xy_chi2","h_el_dcr3_xy_chi2",900,-450,450, 900,-450,450);
+
+
   std::vector<TH1D*> h_el_chi2_sect;
   std::vector<TH1D*> h_el_ndf_sect;
   std::vector<TH1D*> h_el_chi2red_sect;
@@ -1232,7 +1241,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    h_el_dcr2_xy_wchi2->Fill(el_dc_c2x[select_ele], el_dc_c2y[select_ele], el_chi2[select_ele]);///el_ndf[select_ele]);
 	    h_el_dcr3_xy_wchi2->Fill(el_dc_c3x[select_ele], el_dc_c3y[select_ele], el_chi2[select_ele]);///el_ndf[select_ele]);
 
-	    
+	    h_el_dcr1_xy->Fill(el_dc_c1x[select_ele], el_dc_c1y[select_ele]);
+	    h_el_dcr2_xy->Fill(el_dc_c2x[select_ele], el_dc_c2y[select_ele]);
+	    h_el_dcr3_xy->Fill(el_dc_c3x[select_ele], el_dc_c3y[select_ele]);
+	   
 	    h_el_vz->Fill(el_vz[select_ele]);
 	    h_el_vz_phi->Fill(ele[select_ele].Phi() * toDeg, el_vz[select_ele]); 
 	    h_el_vz_sect[dc_sect]->Fill(el_vz[select_ele]);
@@ -1341,6 +1353,12 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
   }
   
+  // map out the DC chi2 over surface
+
+  h_el_dcr1_xy_chi2->Divide(h_el_dcr1_xy_wchi2,h_el_dcr1_xy,1.0,1.0);
+  h_el_dcr2_xy_chi2->Divide(h_el_dcr2_xy_wchi2,h_el_dcr2_xy,1.0,1.0);
+  h_el_dcr3_xy_chi2->Divide(h_el_dcr3_xy_wchi2,h_el_dcr3_xy,1.0,1.0);
+
   h_el_theta_accp->Divide(h_el_theta_rec, h_el_theta_gen,1.0, 1.0);
   for(int ss = 0; ss < 6; ss++){ 
     h_el_theta_accp_sect[ss]->Divide(h_el_theta_rec_sect[ss], h_el_theta_gen_sect[0],1.0,1.0/6.0);
