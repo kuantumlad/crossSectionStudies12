@@ -27,7 +27,7 @@
 #include <TStyle.h>
 using namespace std;
 
-int fiducialPlotter(const char* input, int run){
+int fiducialPlotter(const char* input, const char* config, int run){
 
   TFile *fIn = new TFile(input,"");
 
@@ -41,7 +41,7 @@ int fiducialPlotter(const char* input, int run){
   // Histograms with cuts on DC R1 and R3 and negative charge and EB PID
   TH2F *h_el_dc_hit_position_r1_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region1_cut_05"); 
   TH2F *h_el_dc_hit_position_r2_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region2_cut_05"); 
-  TH2F *h_el_dc_hit_position_r3_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region3_cut_07"); 
+  TH2F *h_el_dc_hit_position_r3_cut = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_region3_cut_06"); 
 
 
   //Histograms with all negative tracks weighted with track chi2 from rec::traj
@@ -49,17 +49,23 @@ int fiducialPlotter(const char* input, int run){
   TH2F *h_el_dc_hit_position_wchi2_r2 = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_chi2_region2_cut_00");
   TH2F *h_el_dc_hit_position_wchi2_r3 = (TH2F*)fIn->Get("FD_PID_electron_DC_plots/DC_hit_position_chi2_region3_cut_00");
 
+
   gStyle->SetOptStat(0);
 
   TCanvas *cel = new TCanvas("cel","cel",800,800);
   h_el_dc_hit_position_r1->SetTitle("Electron DCR1 Fiducial Cut");
+  h_el_dc_hit_position_r1->GetXaxis()->SetRangeUser(-200,200);
+  h_el_dc_hit_position_r1->GetYaxis()->SetRangeUser(-200,200);
+  h_el_dc_hit_position_r1_cut->GetXaxis()->SetRangeUser(-200,200);
+  h_el_dc_hit_position_r1_cut->GetYaxis()->SetRangeUser(-200,200);
+
   h_el_dc_hit_position_r1->Draw();
   h_el_dc_hit_position_r1_cut->Draw("same+colz");
   h_el_dc_hit_position_r1->GetXaxis()->SetTitle("x (cm)");
   h_el_dc_hit_position_r1->GetXaxis()->CenterTitle();
   h_el_dc_hit_position_r1->GetYaxis()->SetTitle("y (cm)");
   h_el_dc_hit_position_r1->GetYaxis()->CenterTitle();
-  cel->SaveAs(Form("h_el_dc_hit_position_r1_%d.pdf",run));
+  cel->SaveAs(Form("h_el_dc_hit_position_r1_%s_%d.pdf",config,run));
 
   // Histogram for hadron with 2212 from EB
   TH2F *h_pr_dc_pos_r1 = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_00");
@@ -75,7 +81,7 @@ int fiducialPlotter(const char* input, int run){
 
   // Histogram for hadron with 321 from EB, pos charge, and DCR1 Fiducial and DCR3 respectively
   TH2F *h_kp_dc_pos_r1_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_42");
-  TH2F *h_kp_dc_pos_r3_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_43");
+  TH2F *h_kp_dc_pos_r3_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region3_hadron_cut_43");
 
   // Histogram for hadron with -321 from EB
   TH2F *h_km_dc_pos_r1 = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_50");
@@ -83,7 +89,7 @@ int fiducialPlotter(const char* input, int run){
 
   // Histogram for hadron with -321 from EB, pos charge, and DCR1 Fiducial and DCR3 respectively
   TH2F *h_km_dc_pos_r1_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_52");
-  TH2F *h_km_dc_pos_r3_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region1_hadron_cut_53");
+  TH2F *h_km_dc_pos_r3_cut = (TH2F*)fIn->Get("FD_PID_hadron_DC_fiducial_plot/DC_hit_position_region3_hadron_cut_53");
 
 
   
@@ -104,7 +110,7 @@ int fiducialPlotter(const char* input, int run){
   h_el_dc_hit_position_r1->GetXaxis()->CenterTitle();
   h_el_dc_hit_position_r1->GetYaxis()->SetTitle("y (cm)");
   h_el_dc_hit_position_r1->GetYaxis()->CenterTitle();
-  c_dcr1->SaveAs(Form("h_el_dc_hit_position_r1_%d.pdf",run));
+  c_dcr1->SaveAs(Form("h_el_dc_hit_position_r1_%s_%d.pdf",config,run));
 
   TCanvas *c_dcr3 = new TCanvas("c_dcr3","c_dcr3",800,800);
   h_el_dc_hit_position_r3->SetTitle("Electron DCR3 Fiducial Cut"); 
@@ -127,7 +133,7 @@ int fiducialPlotter(const char* input, int run){
   //el1->Draw("same");
   
 
-  c_dcr3->SaveAs(Form("h_el_dc_hit_position_r3_%d.pdf",run));
+  c_dcr3->SaveAs(Form("h_el_dc_hit_position_r3_%s_%d.pdf",config,run));
 
   if ( plotHadrons ){
     // Kaon Plus
@@ -202,7 +208,7 @@ int fiducialPlotter(const char* input, int run){
   h_el_pcal_hit_position->GetXaxis()->CenterTitle();
   h_el_pcal_hit_position->GetYaxis()->SetTitle("y (cm)");
   h_el_pcal_hit_position->GetYaxis()->CenterTitle();
-  c_pcal->SaveAs(Form("h_el_pcal_hit_position_%d.pdf",run));
+  c_pcal->SaveAs(Form("h_el_pcal_hit_position_%s_%d.pdf",config,run));
 
 
   // Electron DC Hit Position Weighted By track chi2
@@ -221,7 +227,7 @@ int fiducialPlotter(const char* input, int run){
   h_el_dc_hit_position_chi2_r1->GetXaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r1->GetYaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r1->Draw("colz");
-  c_elwchi2_r1->SaveAs(Form("h_el_dc_hit_position_chi2_r1_cut00_r%d.pdf",run));
+  c_elwchi2_r1->SaveAs(Form("h_el_dc_hit_position_chi2_r1_cut00_%s_r%d.pdf",config,run));
 
   TCanvas *c_elwchi2_r2 = new TCanvas("c_elwchi2_r2","c_elwchi2_r2",900,900);
   gPad->SetLogz();
@@ -230,7 +236,7 @@ int fiducialPlotter(const char* input, int run){
   h_el_dc_hit_position_chi2_r2->GetXaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r2->GetYaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r2->Draw("colz");
-  c_elwchi2_r2->SaveAs(Form("h_el_dc_hit_position_chi2_r2_cut00_r%d.pdf",run));
+  c_elwchi2_r2->SaveAs(Form("h_el_dc_hit_position_chi2_r2_cut00_%s_r%d.pdf",config,run));
 
 
   TCanvas *c_elwchi2_r3 = new TCanvas("c_elwchi2_r3","c_elwchi2_r3",900,900);
@@ -240,7 +246,7 @@ int fiducialPlotter(const char* input, int run){
   h_el_dc_hit_position_chi2_r3->GetXaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r3->GetYaxis()->CenterTitle();
   h_el_dc_hit_position_chi2_r3->Draw("colz");
-  c_elwchi2_r3->SaveAs(Form("h_el_dc_hit_position_chi2_r3_cut00_r%d.pdf",run));
+  c_elwchi2_r3->SaveAs(Form("h_el_dc_hit_position_chi2_r3_cut00_%s_r%d.pdf",config,run));
 
 
 

@@ -20,7 +20,7 @@
 
   //gStyle->SetOptStat(0);
 
-  //gStyle->SetPalette(kRainBow);
+  gStyle->SetPalette(kRainBow);
   //gStyle->SetPalette(kRainBow);
   gROOT->ForceStyle();
 
