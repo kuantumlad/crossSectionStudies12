@@ -37,9 +37,9 @@ using namespace ROOT::Math;
 /// //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// settings:
 
-//double Ebeam = 6.42313;
+double Ebeam = 7.546;//6.42313;
 //double Ebeam = 2.211;//2193;
-double Ebeam = 10.594;
+//double Ebeam = 10.594;
 
 int process_Events = -1;            // process all events
 //int process_Events = 500000;     // process given number of events
@@ -342,7 +342,7 @@ double kin_epKpKmXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp, 
 /// main
 ///
 
-Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string data_type = "DATA")
+Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string data_type = "DATA")
 {
 		
   Char_t *inTree="out_tree";
@@ -484,7 +484,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   anaTree->SetBranchAddress("ele_eocal_lv",&ele_eocal_lv);
   anaTree->SetBranchAddress("ele_eocal_lw",&ele_eocal_lw);  
 
-
+  
 
   if( data_type == analysis_sim ){    
     std::cout << " SETTING MC VARIABLES " << std::endl;
@@ -660,6 +660,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH1F* > h_el_w_sect;
   std::vector< TH1F* > h_el_theta_sect;
   std::vector< TH2F* > h_el_q2w_sect;
+  std::vector< TH2F* > h_el_q2w_sect_final;
   std::vector< TH2F* > h_el_ptheta_sect;
   std::vector< TH2F* > h_el_W_vs_y_sect;
   std::vector< TH2F* > h_el_wtheta_sect;
@@ -672,15 +673,18 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH2F* > h_el_phitheta_sect_final;
 
   TH2F *h_el_phitheta_final = new TH2F(Form("h_el_phitheta_final_run%d",run), Form("h_el_phitheta_final_run%d",run), 73, -180.0, 180.0, 30, 0.0, el_theta_max );
-  hist_W_vs_y  = new TH2F(Form("hist_W_vs_y_final_run%d",run), Form("hist_W_vs_y_final_run%d",run), 100, 0.9, 1.2, 100, 0.0, 1.1);
+  hist_W_vs_y  = new TH2F(Form("hist_W_vs_y_final_run%d",run), Form("hist_W_vs_y_final_run%d",run), 100, 0.9, 4.0, 100, 0.0, 1.1);
   
   hist_W_vs_theta = new TH2F("hist_W_vs_theta","hist_W_vs_theta", 60, 0.0, 2.0, 60, 5.0, 20.0 ); // theta bin of 0.25
 
   for( int s = 0; s < 7; s++ ){
-    h_el_w_sect.push_back( new TH1F(Form("h_el_w_s%d",s),Form("h_el_w_s%d",s), 100, 0.9, 1.2) );
+    h_el_w_sect.push_back( new TH1F(Form("h_el_w_s%d",s),Form("h_el_w_s%d",s), 100, 0.9, 3.5) );
     h_el_theta_sect.push_back( new TH1F(Form("h_el_theta_s%d",s),Form("h_el_theta_s%d",s), 100, 0.0, 40.0) );
    
-    h_el_q2w_sect.push_back( new TH2F(Form("h_el_q2w_s%d",s),Form("h_el_q2w_s%d",s), 200, 0.9, 1.2, 200, 0.0, 2.5) );
+    //dmriser binning 
+    h_el_q2w_sect.push_back( new TH2F(Form("h_el_q2w_s%d",s),Form("h_el_q2w_s%d",s), 40, 0.9, 2.1, 20, 1.0, 6.0) );
+    h_el_q2w_sect_final.push_back( new TH2F(Form("h_el_q2w_final_s%d",s),Form("h_el_q2w_final_s%d",s), 40, 0.9, 2.1, 20, 1.0, 6.0) );
+
     h_el_ptheta_sect.push_back( new TH2F(Form("h_el_ptheta_s%d",s),Form("h_el_ptheta_s%d",s), 200, 0.0, 2.5, 200, 0.0, 40.0) );
     
     h_el_p_sect_final.push_back( new TH1F(Form("h_el_p_s%d_final",s),Form("h_el_p_s%d_final",s),100, 0.0, 2.5) );
@@ -690,9 +694,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     h_el_ptheta_sect_final.push_back( new TH2F(Form("h_el_ptheta_s%d_final",s),Form("h_el_ptheta_s%d_final",s), 200, 0.0, 2.5, 200, 0.0, el_theta_max) );
     h_el_phitheta_sect_final.push_back( new TH2F(Form("h_el_phitheta_s%d_final",s),Form("h_el_phitheta_s%d_final",s), 73, -180.0, 180.0, 30, 0.0, el_theta_max) );
 
-    h_el_W_vs_y_sect.push_back( new TH2F(Form("h_el_W_vs_y_s%d_final",s),Form("h_el_W_vs_y_s%d_final",s), 100, 0.9, 1.2, 100, 0.0, 1.10) );
+    h_el_W_vs_y_sect.push_back( new TH2F(Form("h_el_W_vs_y_s%d_final",s),Form("h_el_W_vs_y_s%d_final",s), 100, 0.9, 4.0, 100, 0.0, 1.10) );
     
-    h_el_wtheta_sect.push_back( new TH2F(Form("h_el_wtheta_s%d_final",s), Form("h_el_wtheta_s%d_final",s),  60, 0.0, 1.4, 60, 5.0, 20.0 ) ); // theta bin of 0.25  
+    h_el_wtheta_sect.push_back( new TH2F(Form("h_el_wtheta_s%d_final",s), Form("h_el_wtheta_s%d_final",s),  60, 0.0, 2.0, 60, 5.0, 20.0 ) ); // theta bin of 0.25  
   }
 
   out->mkdir("acceptance");				
@@ -1173,8 +1177,8 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	hist_W_vs_theta->Fill(W,ele[select_ele].Theta()*180/Pival);  
 
 	//if( W > w_cut_min && W < 1.1 ) { ///w_cut_max ){
-	if( W < 1.1 ) { 
-	  if( (ele[select_ele].Theta()*180/Pival) > 6.0 ){
+	if( W > 1.0 && y < 0.4 ) { 
+	  if( true) {//(ele[select_ele].Theta()*180/Pival) > 6.0 ){
 	    recon_event=true;
 
 	    // Fill best electron
@@ -1211,6 +1215,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    h_el_phitheta_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
 	    h_el_phitheta_final->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 	    
 	    //
+	    h_el_q2w_sect_final[el_sect]->Fill( W, Q2 );
 
 	    // acceptance related plots to define fiducial regions
 	    int p_bin = h_p_bins->GetXaxis()->FindBin(ele[select_ele].P());

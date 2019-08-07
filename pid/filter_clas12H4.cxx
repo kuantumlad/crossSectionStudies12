@@ -76,9 +76,9 @@ using namespace ROOT::Math;
 int process_Events = -1;
 //int process_Events = 2000000;
 
-//float Ebeam = 6.42313;
+float Ebeam = 6.42313;    //7.546;//= 6.42313;
 //float Ebeam = 2.22193;
-float Ebeam = 10.594;
+//float Ebeam = 10.594;
 //float Ebeam = 2.221;//10.6;
 
 /// select the field polarity (relevant for fiducial cuts, sampling fraction and vertex cuts)
@@ -4813,7 +4813,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries = anaTree->GetEntriesFast();
+ int nentries = 1000000;//  anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 

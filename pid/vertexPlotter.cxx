@@ -97,8 +97,8 @@ int vertexPlotter(const char* input, int run){
     l->SetLineStyle(2);
     
     // use 2.5 from fitted center to each side of the target (5cm long target) 
-    double vz_min = fit_mean - 2.5;//sigma_range*fit_sig;
-    double vz_max = fit_mean + 2.5;// sigma_range*fit_sig;
+    double vz_min = -12.0; // 12cm in filter_clas12H4 fit_mean - 2.5;//sigma_range*fit_sig;
+    double vz_max = 9.0;//fit_mean + 2.5;// sigma_range*fit_sig;
     
     TBox *box_vz = new TBox(vz_min, ymin, vz_max, ymax );
     box_vz->SetFillColorAlpha(kBlue-4,0.15);

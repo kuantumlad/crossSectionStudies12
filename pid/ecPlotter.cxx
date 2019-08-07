@@ -66,7 +66,7 @@ int ecPlotter(const char* input, int run){
   //sf_cut_mean_run2
   std::string parm_path = "/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/pid/parameters/sf_cut_";
   std::cout << " loading ec sampling fraction parameters from " << parm_path << " for run " << run << std::endl;
-
+  /*
   ec_mean = loadECParameters(parm_path + "mean_run" + std::to_string(run) + ".txt");
   ec_sig = loadECParameters(parm_path + "sigma_run" + std::to_string(run) + ".txt");
   
@@ -148,7 +148,8 @@ int ecPlotter(const char* input, int run){
   }
 
   c_el_sf->SaveAs(Form("h_el_sf_sector_%d.pdf",run));
-
+  */
+  /*
   TCanvas *c_ec_hit = new TCanvas("c_ec_hit","c_ec_hit",900,900);
   gStyle->SetOptStat(0);
   gPad->SetLogz();
@@ -167,11 +168,11 @@ int ecPlotter(const char* input, int run){
   c_ec_hit->Update();
 
   c_ec_hit->SaveAs(Form("h_el_echit_%d.pdf",run));
-
+*/
   TCanvas *c_sf_eb = new TCanvas("c_sf_eb","c_sf_eb",900,900);
   c_sf_eb->Divide(2,3);
   gStyle->SetOptStat(0);
-  for( int ss = 0; ss < 6; ss++ ){
+  for( int ss = 0; ss < 1; ss++ ){
     c_sf_eb->cd(ss+1);
     TH1F *h_sf_neg = (TH1F*)fIn->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_00",ss+1));
     TH1F *h_sf_eb = (TH1F*)fIn->Get(Form("FD_PID_electron_EC_plots/EC_total_sampling_fraction_sec%d_cut_01",ss+1));

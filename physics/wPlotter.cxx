@@ -37,13 +37,13 @@ void wPlotter(const char* infile, int run){
   }
 
   TH1D *wSector[6];
-
   TCanvas *c1 = new TCanvas("c1","c1",600,400);
   c1->Divide(3,2);
 
   for( int s = 0; s < 6; s++ ){
     
     c1->cd(s+1);
+
     TH1D *w_temp = (TH1D*)fin->Get(Form("wExclusiveS%d", s + 1));
     w_temp->SetTitle(Form("Sector %d",s+1));
     w_temp->GetXaxis()->CenterTitle();

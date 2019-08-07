@@ -61,17 +61,17 @@ int htccPlotter(const char* input, const char* config, int run){
   h_htcc_nphe_p->Draw("colz");
   nphe_cut->Draw("same");
   c_htcc_1->SaveAs(Form("hist_nphe_vs_p_%d.pdf",run));
-*/
+  */
 
   TCanvas *c_htcc_2 = new TCanvas("c_htcc_2","c_htcc_2",900,900);
-  TH1D *h_htcc_nphe = ((TH2F*)fIn->Get("HTCC_Nphe/hist_HTCC_Nphe_vs_momentum"))->ProjectionY();
+  TH1F *h_htcc_nphe = ((TH1F*)fIn->Get("FD_PID_electron_HTCC_plots/HTCC_nphe_cut_09"));
   h_htcc_nphe->SetTitle("HTCC Nphe");
-  h_htcc_nphe->GetXaxis()->SetRangeUser(0.0,16);
+  h_htcc_nphe->GetXaxis()->SetRangeUser(0.0,30);
   h_htcc_nphe->GetXaxis()->SetTitle("Nphe");
   h_htcc_nphe->GetXaxis()->CenterTitle();
   h_htcc_nphe->GetXaxis()->SetTitleOffset(0.5);
   h_htcc_nphe->GetXaxis()->SetTitleSize(0.06);
-
+  
   h_htcc_nphe->Draw();
   c_htcc_2->Update();
   double y_max = gPad->GetUymax();
@@ -79,7 +79,32 @@ int htccPlotter(const char* input, const char* config, int run){
   nphe_cut_2->SetLineColor(kRed);
   nphe_cut_2->SetLineWidth(5);
   nphe_cut_2->Draw("same");
+  
+  TF1 *f_nphe_data = new TF1("f1_data","[0]*TMath::Power(([1]/[2]),(x/[2]))*(TMath::Exp(-([1]/[2])))/TMath::Gamma((x/[2])+1.)", 2, 25); 
+  f_nphe_data->SetParameters(h_htcc_nphe->GetMaximum(), 30, 1);
+  h_htcc_nphe->Fit("f1_data","R");
+  f_nphe_data->SetLineColor(kRed);
+  f_nphe_data->Draw("same");
+  
+
+  std::cout << " par1 " << f_nphe_data->GetParameter(0) << " par 2 " << f_nphe_data->GetParameter(1) << " par 3 " << f_nphe_data->GetParameter(2) << std::endl;
+  std::cout << " k value " << f_nphe_data->GetParameter(1)/f_nphe_data->GetParameter(2) << std::endl;
+  double k_fit = f_nphe_data->GetParameter(1)/f_nphe_data->GetParameter(2) ;
+  double fit_p0 =  f_nphe_data->GetParameter(0);
+  double fit_p1 =  f_nphe_data->GetParameter(1);
+  double fit_p2 =  f_nphe_data->GetParameter(2);
+  int threshold = 1;
+  double sum_poisson_prob = 0.0;
+  for( int nn = 0; nn <= threshold ; nn++ ){
+    double  poisson_prob = TMath::Power(k_fit,nn)/TMath::Gamma(nn+1)/TMath::Exp(k_fit);
+    std::cout <<" poisson prob for nphe =  " << nn << ": "  << poisson_prob << std::endl;
+    sum_poisson_prob+=poisson_prob;
+  }
+  std::cout << " sum_poisson_prob " << sum_poisson_prob << std::endl;
+
+
   c_htcc_2->SaveAs(Form("hist_nphe_%s_%d.pdf",config,run));
+  
   
 
   /*  TCanvas *c_htcc_eb = new TCanvas("c_htcc_eb","c_htcc_eb",900,900);
