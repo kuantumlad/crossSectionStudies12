@@ -82,7 +82,15 @@ int thetaPhiPlotter( const char *inFileData, const char* field_config ){
     h_theta_phi_per_vz->Draw("colz");
   }
   c2->SaveAs(Form("h_el_theta_phi_per_vz_%s.pdf",field_config));
-  
+
+  TCanvas *c_kin = new TCanvas("c_kin","c_kin",900,900);
+  c_kin->cd(1);
+  TH2F h_ptheta_sect5 = (TH2F*)fData->Get(Form("h_el_ptheta_s%d",5));
+  h_ptheta_sect5->SetTitle("Theta vs P Sector 5");
+  h_ptheta_sect5->GetXaxis()->SetTitle("p (GeV)");
+  h_ptheta_sect5->GeYXaxis()->SetTitle("#theta (deg)");
+  h_ptheta_sect5->Draw("colz");
+  c_kin->SaveAs(Form("h_el_ptheta_%s.pdf",field_config));
 
 
 

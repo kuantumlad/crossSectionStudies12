@@ -96,8 +96,46 @@ void disPlotter(const char* infile, const char* config, int run){
     l_nP->Draw("same");
     l_nPP->Draw("same");
   }
-
   c2->SaveAs(Form("h_el_w_dis_%s.pdf",config));
+
+  TCanvas *c3 = new TCanvas("c3","c3",1800,1200);
+  c3->Divide(3,2);
+
+  TH1F *h_w_temp = (TH1F*)fin->Get(Form("kinematics/h_el_w_s%d",1));
+  int w_temp_bins = h_w_temp->GetXaxis()->GetNbins();
+  std::vector<TH1F*> h_w_per_sect;
+  TH1F *h_el_w_all_sect = new TH1F("h_el_w_all_sect","h_el_w_all_sect",h_w_temp->GetXaxis()->GetNbins(),h_w_temp->GetXaxis()->GetBinLowEdge(1), h_w_temp->GetXaxis()->GetBinUpEdge(w_temp_bins));   
+  for( int s = 1; s <= 6; s++ ){    
+    //c1->SetGrid();
+    TH1F* h_el_w_sect = (TH1F*)fin->Get(Form("kinematics/h_el_w_s%d",s));
+    h_el_w_all_sect->Add(h_el_w_sect,1.0);
+    h_w_per_sect.push_back(h_el_w_sect);
+  }
+
+  
+  for( int ss = 0; ss < h_w_per_sect.size(); ss++ ){
+    c3->cd(ss+1);
+    //TH1F * h_temp = h_w_per_sect[ss];
+    TH1F *h_temp = (TH1F*)h_w_per_sect[ss]->Clone(Form("htemp_el_w_s%d",ss));
+
+    h_temp->SetTitle(Form("Ratio of Events in Sector %d to All",ss));
+    h_temp->Divide(h_el_w_all_sect);
+    
+    TLine *l_ratio = new TLine(h_temp->GetXaxis()->GetBinLowEdge(1), 1.0/6.0, h_temp->GetXaxis()->GetBinUpEdge(w_temp_bins), 1.0/6.0);
+    TGraph *g_w_ratio = new TGraph(h_temp);
+    g_w_ratio->SetMarkerStyle(2);
+    g_w_ratio->SetMarkerSize(0.8);
+    g_w_ratio->GetHistogram()->SetMaximum(0.24);
+    g_w_ratio->GetXaxis()->SetTitle("W (GeV)");
+    g_w_ratio->Draw("AP");
+    l_ratio->Draw("same");
+
+
+  }
+
+  c3->SaveAs("h_el_w_ratio_to_all_sect.pdf");
+
+
 
 
   return 0;

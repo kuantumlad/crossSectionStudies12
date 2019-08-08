@@ -1177,7 +1177,13 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	hist_W_vs_theta->Fill(W,ele[select_ele].Theta()*180/Pival);  
 
 	//if( W > w_cut_min && W < 1.1 ) { ///w_cut_max ){
-	if( W > 1.0 && y < 0.4 ) { 
+
+	bool w_cut = W > 1.0;
+	bool y_cut = y < 0.4;
+	bool q2_cut= Q2 > 1.0;
+	bool p_cut =  ele[select_ele].P() > 1.0 ;
+
+	if( w_cut && y_cut && q2_cut && p_cut ){
 	  if( true) {//(ele[select_ele].Theta()*180/Pival) > 6.0 ){
 	    recon_event=true;
 
