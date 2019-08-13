@@ -76,7 +76,7 @@ using namespace ROOT::Math;
 int process_Events = -1;
 //int process_Events = 2000000;
 
-float Ebeam = 6.42313;    //7.546;//= 6.42313;
+float Ebeam = 7.564; //6.42313;    //7.546;//= 6.42313;
 //float Ebeam = 2.22193;
 //float Ebeam = 10.594;
 //float Ebeam = 2.221;//10.6;
@@ -89,7 +89,7 @@ bool outbending = false;//false;
 
 ///
 
-bool simulation  = false;
+bool simulation  = true;
 
 ///
 
@@ -4813,7 +4813,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries = 1000000;//  anaTree->GetEntriesFast();
+ int nentries =anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 
@@ -10063,14 +10063,13 @@ void select_electron(int run){
   int check = 0;
 
   int Npart = vpart_pid->size();
-
+  //std::cout << " npart " << Npart << std::endl;
   for(Int_t i = 0; i < Npart; i++){
     if( i < BUFFER){
-
       /// ////////////////////////////////////////////////////////////////////////////////////////////
       /// Forward detector:
 
-      if(part_status[i] > -4000 && part_status[i] <= -2000){
+      if(true){//part_status[i] > -4000 && part_status[i] <= 0 ){//-2000){
 
         // PID checks:
 
@@ -10087,7 +10086,7 @@ void select_electron(int run){
         FD_eid_DC_z_vertex_check[i] = DC_z_vertex_cut(i);   
 
         // count statistics
-
+	//std::cout << " eid deafulat check " << FD_eid_default_PID_check[i] << std::endl;
         if(Track_Quality_check[i]) 													Track_Quality_pass += 1;
         if(FD_eid_default_PID_check[i] == true) 	    				                                                FD_eid_default_PID_pass += 1;
         if(FD_eid_charge_check[i]  == true)					                                                        FD_eid_charge_pass += 1;
@@ -10100,8 +10099,8 @@ void select_electron(int run){
         if(FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			FD_eid_DC_hit_position_region3_fiducial_pass += 1;
         if(FD_eid_DC_z_vertex_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			        	FD_eid_DC_z_vertex_pass += 1;
 
-        if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] && FD_eid_EC_hit_position_fiducial_check[i] // && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
-	   && FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_DC_z_vertex_check[i] ){
+        if(FD_eid_default_PID_check[i] ){// && FD_eid_charge_check[i] ) {//&& FD_eid_EC_hit_position_fiducial_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
+	  //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] ){// && FD_eid_DC_z_vertex_check[i] ){
 
           FD_eid_all_pass += 1;
           FD_eid_all_check[i] = true;
@@ -10111,7 +10110,7 @@ void select_electron(int run){
       /// ////////////////////////////////////////////////////////////////////////////////////////////
       /// Forward tagger:
 
-      if(part_status[i] > -2000 && part_status[i] <= -1000){
+      if(true){//part_status[i] > -2000 && part_status[i] <= -1000){
         FT_eid_charge_check[i] = FT_eid_charge_cut(i);
         FT_eid_PID_check[i] = FT_eid_PID_cut(i);
         FT_eid_FTCAL_fiducial_check[i] = FT_eid_FTCAL_fiducial_cut(i);
@@ -10126,7 +10125,7 @@ void select_electron(int run){
         if(FT_eid_FTHODO_fiducial_check[i] && FT_eid_charge_check[i] && FT_eid_PID_check[i]) 	FT_eid_FTHODO_fiducial_pass += 1;
         if(FT_eid_energy_vs_radius_check[i] && FT_eid_charge_check[i] && FT_eid_PID_check[i]) 	FT_eid_energy_vs_radius_pass += 1;
 
-        if(FT_eid_PID_check[i] ){// && FT_eid_charge_check[i] && FT_eid_FTCAL_fiducial_check[i] && FT_eid_FTTRK_fiducial_check[i] && FT_eid_FTHODO_fiducial_check[i] && FT_eid_energy_vs_radius_check[i]){
+        if(FT_eid_PID_check[i]  && FT_eid_charge_check[i] && FT_eid_FTCAL_fiducial_check[i] && FT_eid_FTTRK_fiducial_check[i] && FT_eid_FTHODO_fiducial_check[i] && FT_eid_energy_vs_radius_check[i]){
           FT_eid_all_pass += 1;
           FT_eid_all_check[i] = true;
         }
@@ -10149,10 +10148,10 @@ void select_electron(int run){
         if(k < BUFFER){
 
           if(use_own_PID_electron == true){ 
-            selector = (FD_eid_all_check[k] && part_status[i] >= -4000 && part_status[i] < -2000)|| (FT_eid_all_check[k] && part_status[i] >= -2000 && part_status[i] < -1000); 
+            selector = (FD_eid_all_check[k]);// && part_status[i] >= -4000 && part_status[i] < -2000)|| (FT_eid_all_check[k] && part_status[i] >= -2000 && part_status[i] < -1000); 
           }
           else{ 
-            selector = (FD_eid_default_PID_check[k] && part_status[i] >= -4000 && part_status[i] < -2000) || (FT_eid_PID_check[k]  && part_status[i] >= -2000 && part_status[i] < -1000); 
+            selector = (FD_eid_default_PID_check[k] );// && part_status[i] >= -4000 && part_status[i] < -2000) || (FT_eid_PID_check[k]  && part_status[i] >= -2000 && part_status[i] < -1000); 
           }       
 
           if(selector){

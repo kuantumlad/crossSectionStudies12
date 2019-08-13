@@ -568,6 +568,18 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   TH2F *hist_electron_p_vs_theta; TH2F *hist_electron_p_vs_phi; TH2F *hist_electron_theta_vs_phi;
   TH1F *hist_proton_p; TH1F *hist_proton_theta; TH1F *hist_proton_phi; 
   TH2F *hist_proton_p_vs_theta; TH2F *hist_proton_p_vs_phi; TH2F *hist_proton_theta_vs_phi;
+  TH2F *hist_el_q2_w;
+
+  std::vector<TH2F*> hist_el_q2_w_per_sect;
+  hist_el_q2_w=new TH2F("hist_electron_q2_w","hist_electron_q2_w",40, 0.9, 2.1, 20, 1.0, 6.0) ;  
+  hist_el_q2_w->GetXaxis()->SetTitle("W (GeV)");
+  hist_el_q2_w->GetYaxis()->SetTitle("Q2 (GeV^2)");
+
+  for( int ss = 0 ; ss < 6; ss++ ){
+    hist_el_q2_w_per_sect.push_back(new TH2F(Form("hist_electron_q2_w_s%d",ss+1),Form("hist_electron_q2_w_s%d",ss+1),40, 0.9, 2.1, 20, 1.0, 6.0)) ;  
+    hist_el_q2_w_per_sect[ss]->GetXaxis()->SetTitle("W (GeV)");
+    hist_el_q2_w_per_sect[ss]->GetYaxis()->SetTitle("Q2 (GeV^2)");
+  }
 
   hist_electron_p = new TH1F("hist_electron_p", "electron momentum", 500,0,Ebeam+0.3);   
   hist_electron_p->GetXaxis()->SetTitle("p /GeV");
@@ -612,8 +624,12 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   out->cd("mc");
   TH1F *hist_mc_electron_p; TH1F *hist_mc_electron_theta; TH1F *hist_mc_electron_phi;
   TH2F *hist_mc_electron_p_vs_theta; TH2F *hist_mc_electron_p_vs_phi; TH2F *hist_mc_electron_theta_vs_phi;
-
-    hist_mc_electron_p = new TH1F("hist_mc_all_electron_p", "electron momentum", 500,0,Ebeam+0.3);   
+  TH2F *hist_mc_electron_q2_vs_w;
+  hist_mc_electron_q2_vs_w = new TH2F("hist_mc_all_electron_q2_vs_w","hist_mc_all_electron_q2_vs_w",40, 0.9, 2.1, 20, 1.0, 6.0);
+  hist_mc_electron_q2_vs_w->GetXaxis()->CenterTitle();
+  hist_mc_electron_q2_vs_w->GetYaxis()->CenterTitle();
+  
+  hist_mc_electron_p = new TH1F("hist_mc_all_electron_p", "electron momentum", 500,0,Ebeam+0.3);   
   hist_mc_electron_p->GetXaxis()->SetTitle("p /GeV");
   hist_mc_electron_p->GetYaxis()->SetTitle("counts");
   hist_mc_electron_theta = new TH1F("hist_mc_all_electron_theta", "electron #Theta", 140,0,el_theta_max);   
@@ -781,6 +797,9 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   std::vector< TH2F*> h_el_pw_accp_gen;
 
   TH2F *h_el_phitheta_accp_gen = new TH2F("h_el_phitheta_accp_gen","h_el_phitheta_accp_gen", 200, -180.0, 180.0, 200, 0.0, 30.0);
+  TH2F *h_el_q2w_gen = new TH2F("h_el_q2w_gen","h_el_q2w_gen",40, 0.9, 2.1, 20, 1.0, 6.0);
+  
+
   for( int ss = 0; ss < 6; ss++ ){
     h_el_theta_accp_gen.push_back( new TH1F(Form("h_el_theta_accp_gen_s%d",ss),Form("h_el_theta_accp_gen_s%d",ss), 30, 0.0, 30.0) );
     h_el_ptheta_accp_gen.push_back( new TH2F(Form("h_el_ptheta_accp_gen_%d",ss),Form("h_el_ptheta_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 40.0) );
@@ -1212,6 +1231,9 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	    if(ele[select_ele].P() > 0) hist_electron_p_vs_phi->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].P());
 	    if(ele[select_ele].Theta() > 0 && ele[select_ele].Phi() != 0) hist_electron_theta_vs_phi->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
 
+	    hist_el_q2_w->Fill(W, Q2 ); 
+	    hist_el_q2_w_per_sect[el_sect-1]->Fill(W,Q2);
+
 	    hist_all_el_energy->Fill(delta_energy);
 	    h_el_w_sect[el_sect]->Fill( W );
 	    h_el_p_sect_final[el_sect]->Fill(ele[select_ele].P()); 
@@ -1326,11 +1348,15 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
 	h_el_theta_gen_sect[0]->Fill( mc_ele[0].Theta()*180/Pival );  
 	h_el_theta_gen->Fill( mc_ele[0].Theta()*180/Pival );
-
+	h_el_q2w_gen->Fill( gen_W, kin_Q2(mc_ele[0]) );
 
 	int phi_bin_to_fill = hist_mc_electron_theta_vs_phi->GetXaxis()->FindBin(mc_ele[0].Phi()*180/Pival) - 1;
 	//std::cout << " generated phi bin " << phi_bin_to_fill << std::endl;
 	h_el_theta_gen_per_phi[phi_bin_to_fill]->Fill( mc_ele[0].Theta()*180/Pival );
+
+	hist_mc_electron_q2_vs_w->Fill( gen_W, kin_Q2(mc_ele[0]) ); 
+	
+
 
 	if( !recon_event ){
 	  h_el_theta_rej_gen[0]->Fill(mc_ele[0].Theta()*180/Pival);

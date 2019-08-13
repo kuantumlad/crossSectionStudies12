@@ -1,6 +1,0 @@
-#!/bin/tcsh 
-
-
-rm keppel_rad.* 
-cp ../keppel_rad . 
-keppel_rad < input.inp 

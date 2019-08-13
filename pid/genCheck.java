@@ -23,7 +23,7 @@ public class genCheck{
 	hiporeader.open(new File(file_in) );
 	DataEvent event = null;
 
-	double beam = 10.6;//7.546;
+	double beam = 7.546;
 	LorentzVector lv_target = new LorentzVector(0,0,0,0.938);
 	LorentzVector lv_ebeam = new LorentzVector(0,0,beam,beam);
 
@@ -31,13 +31,13 @@ public class genCheck{
 	
 	int num_ev = 0;
 
-	H1F h_el_p = new H1F("h_el_p","h_el_p",200,0.0,13.0);
+	H1F h_el_p = new H1F("h_el_p","h_el_p",200,0.0,beam+2.0);
 	H1F h_el_theta = new H1F("h_el_theta","h_el_theta",200,0.0,30.0);
 	H1F h_el_phi = new H1F("h_el_phi","h_el_phi",300,-200.0,200.0);
-	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,2.50, 100, 0.0, 30.0);
+	H2F h_el_thetap = new H2F("h_el_thetap","h_el_thetap",100,0.0,beam+2, 100, 0.0, 30.0);
 	H2F h_el_thetaphi = new H2F("h_el_thetaphi","h_el_thetaphi",200,-180.0,180.0, 200, 0.0, 30.0);
-	H1F h_el_w = new H1F("h_el_w","h_el_w", 200, 0.0, 3.0);
-	H2F h_el_w_q2 = new H2F("h_el_w_q2","h_el_w_q2",200,0.0, 4.0, 200, 0.0, 1.90);	
+	H1F h_el_w = new H1F("h_el_w","h_el_w", 200, 0.0, 2.0);
+	H2F h_el_w_q2 = new H2F("h_el_w_q2","h_el_w_q2",200,0.0, beam-2, 200, 0.0, beam-2);	
 	
 	H1F h_pr_p = new H1F("h_pr_p","h_pr_p",200,0.0,2.0);
 	H1F h_pr_theta = new H1F("h_pr_theta","h_pr_theta",200,0.0,80.0);
@@ -48,12 +48,12 @@ public class genCheck{
 	while( num_ev < max_event ){
 	    event = (DataEvent)hiporeader.gotoEvent(num_ev);
 	    boolean runConfig_pres = event.hasBank("RUN::config");
-	    boolean mcBank_pres  = event.hasBank("REC::Particle");
+	    boolean mcBank_pres  = event.hasBank("MC::Particle");
 	    boolean rawScalerBank_pres = event.hasBank("RAW::scaler");
 	    num_ev++;
 
 	    if( mcBank_pres ){
-		DataBank mcBank = event.getBank("REC::Particle");
+		DataBank mcBank = event.getBank("MC::Particle");
 		for( int i = 0; i < mcBank.rows(); i++ ){
 		    int pid = mcBank.getInt("pid",i);
 
@@ -78,8 +78,10 @@ public class genCheck{
 			double q2 = 4.0*beam*lv_el.e() * Math.sin( lv_el.theta()/2.0) * Math.sin( lv_el.theta()/2.0);		       
 			double w = lv_eX.mass();
 
-			h_el_w.fill(w);
-			h_el_w_q2.fill(w,q2);			
+			if ( q2 > 1.0 && w > 1.0 ){
+			    h_el_w.fill(w);
+			    h_el_w_q2.fill(w,q2);			
+			}
 		    }
 		    if( pid == 2212 ){
 			double e = Math.sqrt( px*px + py*py + pz*pz + pr_mass*pr_mass );
@@ -144,7 +146,7 @@ public class genCheck{
 	c_kin.setSize(800,425);
 	c_kin.divide(2,1);
 	c_kin.cd(0);
-	c_kin.getPad(0).getAxisY().setLog(true);
+	//c_kin.getPad(0).getAxisY().setLog(true);
 	c_kin.draw(h_el_w);
 	c_kin.cd(1);
 	c_kin.getPad(1).getAxisZ().setLog(true);

@@ -90,7 +90,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 
       double q2_bins = (double)h_el_q2w_sect[ss]->GetYaxis()->GetNbins();
       double q2_min = h_el_q2w_sect[ss]->GetYaxis()->GetBinLowEdge(1);
-      double q2_max = h_el_q2w_sect[ss]->GetYaxis()->GetBinUpEdge(q_bins);
+      double q2_max = h_el_q2w_sect[ss]->GetYaxis()->GetBinUpEdge(q2_bins);
       double q2_width = (q2_max-q2_min)/q2_bins;
       double q2_center = q2b*q2_width + q2_min;
       std::cout << " Q2 Bin Center " << q2_center <<std::endl;
@@ -98,14 +98,12 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       TH1F *h_w_per_q2_per_sect = new TH1F(Form("h_w_per_q2_%d_s%d",q2b,ss), Form("h_w_per_q2_%d_s%d",q2b,ss), w_bins, w_min, w_max);
       TH1F *h_w_per_q2_per_sect_temp = new TH1F(Form("h_w_per_q2_%d_s%d_temp",q2b,ss), Form("h_w_per_q2_%d_s%d_temp",q2b,ss), w_bins, w_min, w_max);
 
-
       std::vector<double> v_wb_center;
       std::vector<double> v_wb_err;
       std::vector<double> v_cs_value;      
       std::vector<double> v_cs_err;
 
       for( int wb = 1; wb <= w_bins; wb++ ){
-
 
 	// 1 - get counts , bin center
 	double w_count = h_el_q2w_sect[ss]->GetBinContent( wb, q2b );
@@ -128,8 +126,8 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	double rad_corr = 1.0;	
 	double bin_cent_corr = 1.0;
 
-	double cs = w_count * (1.0/(q2_width * w_width * lum_factor_tot * accp * rad_corr * bin_cent_corr * pho_f ));
-	double csErr = sqrt(w_count) * (1.0/(q2_width * w_width * lum_factor_tot * accp * rad_corr * bin_cent_corr *pho_f ));
+	double cs = w_count * (1.0/(q2_width * w_width * lum_factor_ug * accp * rad_corr * bin_cent_corr * pho_f ));
+	double csErr = sqrt(w_count) * (1.0/(q2_width * w_width * lum_factor_ug * accp * rad_corr * bin_cent_corr *pho_f ));
 	double accp_err=0.0;// change later
 	double cs_err = sqrt( (csErr/accp)*(csErr/accp) + (cs*accp_err)*(cs*accp_err));
 
