@@ -78,7 +78,7 @@ public class genCheck{
 			double q2 = 4.0*beam*lv_el.e() * Math.sin( lv_el.theta()/2.0) * Math.sin( lv_el.theta()/2.0);		       
 			double w = lv_eX.mass();
 
-			if ( q2 > 1.0 && w > 1.0 ){
+			if ( q2 > 1.0 ) { //&& w > 1.0 ){
 			    h_el_w.fill(w);
 			    h_el_w_q2.fill(w,q2);			
 			}

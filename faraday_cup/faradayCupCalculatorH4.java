@@ -25,6 +25,8 @@ public class faradayCupCalculatorH4{
 	//double offset = 209.0;
 	double atten=1.0;//9.8088;
 
+	int key_diff_cut = 3;
+
 	//tot_lum = tot_lum + delta_beam_charge
 	//delta_beam_charge = beam_charge2 - beam_charge1
 	//double beam_charge1 = 0.0;
@@ -104,16 +106,27 @@ public class faradayCupCalculatorH4{
 	    int end_event = 0;
 	    double start_charge = 0;//1E9; 
 	    double end_charge = 0;
-	    
-	    while( num_ev <  max_event ){
+	    int my_counter = 0;
+
+	    while( num_ev < 200){ //max_event ){
 	    	event = (DataEvent)hiporeader.gotoEvent(num_ev);
-	
+
+
+		if(Math.random() < 0.5) {
+		    
+		    my_counter = my_counter + 5;
+		}
+		else{
+		    my_counter++;
+		}
+
+		System.out.println(" >> " + Integer.toString(my_counter) );
+		
 		boolean runConfig_pres = event.hasBank("RUN::config");
 		boolean rawScalerBank_pres = event.hasBank("RUN::scaler");       
 		boolean configBank_pres = event.hasBank("RUN::config");
 
 		int config_event = event.getBank("RUN::config").getInt("event",0);
-		//System.out.println(" >> event " + Integer.toString(config_event));
 
 		if ( config_event >  end_event ){
 		    end_event = config_event;
@@ -196,26 +209,27 @@ public class faradayCupCalculatorH4{
 		}
 		
 		*/
-		if( rawScalerBank_pres ){ 		
+		if( true ){// rawScalerBank_pres ){ 		
  		    double beam_charge = 0.0;
 		    double beam_current_ungated = 0.0;
 
-		    DataBank rawBank = event.getBank("RUN::scaler");
-		    float live_time = rawBank.getFloat("livetime",0);
-		    if(  live_time >= 0.0 ){
+		    //DataBank rawBank = event.getBank("RUN::scaler");
+		    //float live_time = rawBank.getFloat("livetime",0);
+		    //System.out.println(" >> event " + Integer.toString(config_event));
+
+		    if( true ){ // live_time >= 0.0 ){
 		    
-			double fcup_ug = rawBank.getFloat("fcup",0);
-			double fcup_g = rawBank.getFloat("fcupgated",0);
-			//System.out.println(" >> fcup ug " + Double.toString(fcup_ug) + " g " + Double.toString(fcup_g) );
+			//double fcup_ug = rawBank.getFloat("fcup",0);
+			//double fcup_g = rawBank.getFloat("fcupgated",0);
+			//double fcup_lt = fcup_ug/fcup_g;
+			//System.out.println(" >> fcup ug " + Double.toString(fcup_ug) + " g " + Double.toString(fcup_g) + " lt " + Double.toString(fcup_lt) );
 			
 			//put event number and the event's gated diff. sum later
 			//tmap_global_event_charge.put(config_event,gated_diff);//tot_beam_charge);
-			tmap_global_event_gatedcharge.put(config_event,fcup_g );
-			tmap_global_event_ungatedcharge.put(config_event,fcup_ug );			
-		    }
-
-
-
+			config_event = my_counter;
+			tmap_global_event_gatedcharge.put(config_event, my_counter*3.0 );//fcup_g );
+			tmap_global_event_ungatedcharge.put(config_event, my_counter*3.0 );//fcup_ug );			
+		    }		   
 		}
 	    }
 
@@ -249,6 +263,9 @@ public class faradayCupCalculatorH4{
 	GraphErrors fc_graph = new GraphErrors();
 	GraphErrors fcug_graph = new GraphErrors();
 	GraphErrors fcg_graph = new GraphErrors();
+	H1F h_fcg_event_diff = new H1F("h_fcg_event_diff","h_fcg_event_diff",2000, 0.0, 2000.0);
+	H1F h_fcug_event_diff = new H1F("h_fcug_event_diff","h_fcug_event_diff",2000, 0.0, 2000.0);
+	
 
 	double acc_beam_charge_sum = 0;
 	double acc_charge_g = 0;
@@ -260,17 +277,19 @@ public class faradayCupCalculatorH4{
 	    acc_beam_charge_sum= (Double)value;
 
 	    double key_temp = key.doubleValue();
-	    if( key <= 2406468 ){
+	    //if( key <= 2406468 ){
 
 	       
-		for( double last_event_in_file : v_last_event ){
+	    //	for( double last_event_in_file : v_last_event ){
 
-		    if( Math.abs(last_event_in_file - key_temp) < 500 ){
-			System.out.println(" run config event " + Integer.toString(key) + "fc gated diff " + value  + " acc charge " + acc_beam_charge_sum);
-		    }
-		}
+	    //	    if( Math.abs(last_event_in_file - key_temp) < 500 ){
+	    //		System.out.println(" run config event " + Integer.toString(key) + "fc gated diff " + value  + " acc charge " + acc_beam_charge_sum);
+	    //	    }
+	    //	}
+	    if( key < 100 ){
 		fc_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
 	    }
+	    
 	}
 	acc_beam_charge_sum=0;
 
@@ -279,6 +298,12 @@ public class faradayCupCalculatorH4{
 	System.out.println("gated Entry set values first: ");
 	System.out.println(tmap_global_event_gatedcharge.lastEntry());
 
+	
+	double true_acc_charge_sum = 0; 
+	int sub_key = tmap_global_event_gatedcharge.firstEntry().getKey();
+	double sub_val = tmap_global_event_gatedcharge.firstEntry().getValue();
+
+	ArrayList<DataLine> gap_line = new ArrayList<DataLine>();
 
 	for(Map.Entry<Integer,Double> entry :  tmap_global_event_gatedcharge.entrySet()) {
 	    Integer key = entry.getKey();
@@ -291,8 +316,79 @@ public class faradayCupCalculatorH4{
 	    //if( key > 2406466 ){ System.out.println(" gated " + Double.toString(acc_charge_g) + " event " + Integer.toString(key)); }
 	    //System.out.println(" gated " + Double.toString(acc_charge_g) + " event " + Integer.toString(key));
 	    //if( key <= 2406468 ){	       
-	    fcg_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
-	    //}
+	    if( acc_charge_g <= 0 ){
+		System.out.println(" >> problem here at event "  + Double.toString(key_temp) );
+	    }
+
+	    if ( tmap_global_event_gatedcharge.higherEntry(key) == null ) continue; 
+
+ 	    int next_key = tmap_global_event_gatedcharge.higherEntry(key).getKey();
+	    int key_diff_above = next_key - key;
+
+
+	    // dealing with the first key and the previous key to key 0 as being null
+	    int prev_key = -100;
+
+	    if( tmap_global_event_gatedcharge.lowerEntry(key) == null ){
+		prev_key = tmap_global_event_gatedcharge.firstEntry().getKey();
+		System.out.println(" >> There is no previous key to key  " + Integer.toString(key) + " setting previous key to first entry " + Integer.toString(prev_key) );
+	    }
+	    else{
+		prev_key = tmap_global_event_gatedcharge.lowerEntry(key).getKey();	
+	    }
+
+	    int key_diff_below = key - Math.abs(prev_key);
+	    
+	    boolean no_lone_point = false;
+	    //trying to skip the points with no adjacent items nearby
+	    if( (key_diff_above > key_diff_cut && key_diff_below > key_diff_cut) ||
+	        (tmap_global_event_gatedcharge.lowerEntry(key) == null && key_diff_above > key_diff_cut)  )		
+		{
+		    System.out.println(" >> should be skipping this point with no adjacent neighbors - key is " + Integer.toString(key) );
+		    sub_key = tmap_global_event_gatedcharge.higherEntry(key).getKey();
+		    no_lone_point=true;
+		    //continue;
+		}
+
+	    if( key_diff_above > key_diff_cut && no_lone_point == false){
+		System.out.println(" current event " + Integer.toString(key) );
+		System.out.print("  event lower -> ");
+		System.out.println(tmap_global_event_gatedcharge.lowerEntry(key));
+		System.out.print("  event higher -> ");
+		System.out.println(tmap_global_event_gatedcharge.higherEntry(key));
+		
+		
+		
+		
+
+		double subset_charge_sum = value - sub_val; // current - starting value in the subset of continuous events
+		System.out.println( " >> subset charge sum " + Double.toString(subset_charge_sum) + " current val " +Double.toString(value) + " - first val " + Double.toString(sub_val) ); 
+		true_acc_charge_sum = true_acc_charge_sum + subset_charge_sum;
+		System.out.println(" True acc charge " + Double.toString(true_acc_charge_sum) );
+		
+		sub_val = tmap_global_event_gatedcharge.higherEntry(key).getValue();
+		System.out.println(" setting sub_val to next entry value " + Double.toString(sub_val) );
+		System.out.println(" no break between current event " + Integer.toString(key) + " and starting event " + Integer.toString(sub_key) );
+
+		// capture points that are good
+
+		DataLine l_mark_below = new DataLine( (double)key, 0.0, (double)key, tmap_global_event_gatedcharge.lastEntry().getValue() );
+		gap_line.add(l_mark_below);
+		
+		DataLine l_mark_above = new DataLine( (double)sub_key, 0.0, (double)sub_key, tmap_global_event_gatedcharge.lastEntry().getValue() );
+		gap_line.add(l_mark_above);
+		
+		sub_key = tmap_global_event_gatedcharge.higherEntry(key).getKey();
+
+	    }
+	    System.out.println(" >> filling histogram with difference in key values " + Double.toString((double)key_diff_above));
+	    h_fcg_event_diff.fill((double)key_diff_above);
+	    
+	    
+	    if( key < 105 ){
+		fcg_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
+		
+	    }
 	}
 	acc_beam_charge_sum = 0;
 
@@ -311,11 +407,21 @@ public class faradayCupCalculatorH4{
 
 	    double key_temp = key.doubleValue();
 
+	    if ( tmap_global_event_ungatedcharge.higherEntry(key) == null || tmap_global_event_ungatedcharge.lowerEntry(key) == null ) continue;
+
+ 	    int next_key = tmap_global_event_ungatedcharge.higherEntry(key).getKey();
+	    int prev_key = tmap_global_event_ungatedcharge.lowerEntry(key).getKey();
+	    int key_diff = next_key - key;
+
 	    //if( key > 2406466 ){ System.out.println(" ungated " + Double.toString(acc_charge_ug) + " event " + Integer.toString(key)); }
 	    //System.out.println(" ungated " + Double.toString(acc_charge_ug) + " event " + Integer.toString(key)); 
 	    //if( key <= 2406468 ){
-		
+	
+	    if( key < 100 ){
+
 		fcug_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
+		h_fcug_event_diff.fill((double)key_diff);
+	    }
 		//}
 	}
 
@@ -430,7 +536,10 @@ public class faradayCupCalculatorH4{
 	fc_graph.setMarkerSize(1);
 	fc_graph.setTitleX("RUN::config event");
 	fc_graph.setTitleY("Tot. Acc. Charge");
-	c_fc.draw(fc_graph);
+	for( DataLine ll : gap_line ){
+	    c_fc.draw(ll);
+	}
+	c_fc.draw(fc_graph,"same");
 	c_fc.save("fc_graph_r"+s_run+".png");
 
 	EmbeddedCanvas c_fc2 = new EmbeddedCanvas();
@@ -440,7 +549,11 @@ public class faradayCupCalculatorH4{
 	fcg_graph.setMarkerSize(1);
 	fcg_graph.setTitleX("RUN::config event");
 	fcg_graph.setTitleY("FC Gated ");
-	c_fc2.draw(fcg_graph);
+	for( DataLine ll : gap_line ){
+	    ll.setLineColor(2);
+	    c_fc2.draw(ll);
+	}
+	c_fc2.draw(fcg_graph,"same");
 
 	c_fc2.cd(1);
 	fcug_graph.setMarkerSize(1);
@@ -470,6 +583,21 @@ public class faradayCupCalculatorH4{
 	double bcg_min = h_bcg.getMin();
 	double bcg_max = h_bcg.getMax();
 	System.out.println(" >> BCG Min: " + bcg_min + " BCG MAX: " + bcg_max );
+
+	EmbeddedCanvas c_diff = new EmbeddedCanvas();
+	c_diff.divide(2,1);
+	c_diff.setSize(800,400);	
+	c_diff.cd(0);
+	h_fcug_event_diff.setTitleY("Freq Diff");
+	h_fcg_event_diff.setTitleY("Freq Diff");
+	c_diff.getPad(0).getAxisY().setLog(true);
+	//c_diff.getPad(0).getAxisX().setLog(true);
+	c_diff.draw(h_fcug_event_diff);
+	c_diff.cd(1);
+	c_diff.getPad(1).getAxisY().setLog(true);
+	//c_diff.getPad(1).getAxisX().setLog(true);
+	c_diff.draw(h_fcg_event_diff);
+	c_diff.save("h_diff_event_numbers.png");
 
     }
 

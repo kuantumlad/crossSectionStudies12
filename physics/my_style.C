@@ -5,6 +5,9 @@
   gStyle->SetStatFont(62);  
   gStyle->SetStatBorderSize(2);
 
+
+  gStyle->SetTitleX(.20);
+  gStyle->SetTitleY(.99);
   gStyle->SetPadBottomMargin(0.1);
   gStyle->SetPadLeftMargin(0.12);   
   //gStyle->SetPadRightMargin(0.15);   

@@ -11,7 +11,7 @@
 #include "TMath.h"
 
 const static int BUFFER = 50;
-double Ebeam = 2.211;//2193;
+double Ebeam = 7.546;//2193;
 
 int ele_sector[BUFFER];
 TLorentzVector ele[BUFFER]; 
@@ -205,8 +205,8 @@ void WriteAcceptanceRatio2D(TH2F* h_rec, TH2F* h_gen, int run, const char* field
   ofstream outputAcceptance;
   ofstream outputAcceptanceError;
   std::string parentDirectory = "/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/physics/parameters/";
-  std::string f_out_name = parentDirectory+"elastic_theta_phi_acceptance_"+std::to_string(run)+"_f"+field+".txt";
-  std::string f_out_name_err = parentDirectory+"elastic_theta_phi_acceptance_error_"+std::to_string(run)+"_f"+field+".txt";
+  std::string f_out_name = parentDirectory+"dis_theta_phi_acceptance_"+std::to_string(run)+"_f"+field+".txt";
+  std::string f_out_name_err = parentDirectory+"dis_theta_phi_acceptance_error_"+std::to_string(run)+"_f"+field+".txt";
   std::cout << " Creating Acceptance output file " << f_out_name_err << std::endl;
   outputAcceptance.open(f_out_name);
   outputAcceptanceError.open(f_out_name_err);

@@ -190,7 +190,7 @@ std::map<int, std::vector<double> > GetAcceptanceFactors(const char* fileName ){
 
 
 std::vector<double> GetBinCenteringCorr(const char* fileName){
-
+ 
   std::vector< double > bin_center_corr;
   double model_theta = 9.5;
   int model_theta_bin = 0;
