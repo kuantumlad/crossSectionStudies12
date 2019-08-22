@@ -25,7 +25,7 @@ public class faradayCupCalculatorH4{
 	//double offset = 209.0;
 	double atten=1.0;//9.8088;
 
-	int key_diff_cut = 3;
+	int key_diff_cut = 520;
 
 	//tot_lum = tot_lum + delta_beam_charge
 	//delta_beam_charge = beam_charge2 - beam_charge1
@@ -46,7 +46,7 @@ public class faradayCupCalculatorH4{
 	TreeMap<Integer, Double> tmap_global_event_charge = new TreeMap<Integer, Double>();
 	TreeMap<Integer, Double> tmap_global_event_gatedcharge = new TreeMap<Integer, Double>();
 	TreeMap<Integer, Double> tmap_global_event_ungatedcharge = new TreeMap<Integer, Double>();
-	TreeMap<Integer, Double> tmap_unixtime = new TreeMap<Integer, Double>();                                                                                                         
+	TreeMap<Integer, Double> tmap_global_event_ts = new TreeMap<Integer, Double>();                                                                                                         
         Vector<Integer> v_last_event = new Vector<Integer>();
                                                                           
 	TreeMap<Integer, Double> tmap_beam_current_gated = new TreeMap<Integer,Double>();           
@@ -81,6 +81,7 @@ public class faradayCupCalculatorH4{
 	    System.out.println(" Processing File " + file_in );
 	    
 	    HipoDataSource hiporeader = new HipoDataSource();
+	    hiporeader.setTags(1);
 	    hiporeader.open(file_in);
 	    DataEvent event = null;
 
@@ -106,12 +107,13 @@ public class faradayCupCalculatorH4{
 	    int end_event = 0;
 	    double start_charge = 0;//1E9; 
 	    double end_charge = 0;
-	    int my_counter = 0;
+	    //int my_counter = 0;
 
-	    while( num_ev < 200){ //max_event ){
+	    while( num_ev < max_event ){
 	    	event = (DataEvent)hiporeader.gotoEvent(num_ev);
 
 
+		/*
 		if(Math.random() < 0.5) {
 		    
 		    my_counter = my_counter + 5;
@@ -120,11 +122,14 @@ public class faradayCupCalculatorH4{
 		    my_counter++;
 		}
 
-		System.out.println(" >> " + Integer.toString(my_counter) );
-		
+		//System.out.println(" >> " + Integer.toString(my_counter) );
+		*/
+
+
 		boolean runConfig_pres = event.hasBank("RUN::config");
 		boolean rawScalerBank_pres = event.hasBank("RUN::scaler");       
 		boolean configBank_pres = event.hasBank("RUN::config");
+		boolean eventBank_pres = event.hasBank("REC::Event");
 
 		int config_event = event.getBank("RUN::config").getInt("event",0);
 
@@ -142,93 +147,39 @@ public class faradayCupCalculatorH4{
 		    start_unix_time = event.getBank("RUN::config").getInt("unixtime",0);
 		    end_unix_time = event.getBank("RUN::config").getInt("unixtime",0);
 		    time_stamp_counter=time_stamp_counter+event.getBank("RUN::config").getLong("timestamp",0);
-		    tmap_unixtime.put(config_event,start_unix_time);		  
+ 
 
 		}
 
  		num_ev++;
 		global_event++;
 		
-		/*
-		if( event.hasBank("RAW::scaler") ){
-		    DataBank rawScalerBank  = event.getBank("RAW::scaler");
-		    rawScalerBank.show();
-		    System.out.println(" has raw scaler bank " );
-
-
-		    //I [nA] = (S [Hz] - offset ) / slope * attenuation;
-		    offset = 374.80;
-		    atten = 9.80880;
-
-		    System.out.println(" event " + Integer.toString( config_event) );
-		    System.out.println(" local event " + Integer.toString(num_ev) );
-		    //run 5038 slope = 906.20 offset = 374.80 and atten = 9.80880
-		    for(int i=0; i<rawScalerBank.rows(); i++){
-			int slot = rawScalerBank.getByte("slot",i);
-			int chan = rawScalerBank.getShort("channel",i);			
-			//offset=0;
-			if(slot==64 && chan==48){
-			    System.out.println(" scaler index " + Integer.toString(i));
-
-			    int fc_scaler = rawScalerBank.getInt("value",i);
-			    double true_freq = fc_scaler/(0.03333 - 0.0005);
-			    double delta_t = start_unix_time-1539254875;
-			    System.out.println(" >>unix time " + start_unix_time );
-
-			    double beam_current =  (fc_scaler/delta_t - offset) / 906.20  * atten; //)*atten)/906.2; // ((true_freq - offset)*atten)/906.2;
-			    System.out.println(" >> true freeq " + true_freq);
-			    //double beam_current_ungated_temp = beam_current;
-			    double beam_charge1 = (fc_scaler - (offset*delta_t) )/906.2;// beam_current * (0.03333f - 0.0005);			    
-
-			    System.out.println(" >>>>>>>>>>> UN-GATED INFO <<<<<<<<<<< " );
-			    System.out.println(" >> Slot " + slot + " Channel " + chan + " fc scaler value " + fc_scaler);
-			    System.out.println(" >> current " + beam_current);			    
-			    System.out.println( " >> fcs" + fc_scaler + " truefreq " + true_freq + " bc " + beam_current + " beamcharge " + beam_charge1+ " " +tot_beam_charge);
-			}
-			if( slot==64 && chan == 16 ){
-			    System.out.println(" scaler index " + Integer.toString(i));
-
-			    int fc_scaler = rawScalerBank.getInt("value",i);
-			    double true_freq = fc_scaler/(0.03333 - 0.0005);
-			    //double beam_current = (true_freq - offset)*atten/906.2;
-			    double beam_current = (1.0/(0.03333 - 0.0005))* (fc_scaler - (0.03333 - 0.0005)*offset) / 906.20  * atten; //*(time_stamp_counter-1539254875))*atten)/906.2; // ((true_freq - offset)*atten)/906.2;
-			    tmap_beam_current_gated.put(config_event,beam_current);
-
-			    double beam_charge0 = (0.03283*((fc_scaler/0.03283)-offset)*atten)/906.2;// beam_current * (0.03333f - 0.0005);			    
-			    System.out.println(" >>>>>>>>>>> GATED INFO <<<<<<<<<<< " );
-			    System.out.println(" >> Slot " + slot + " Channel " + chan + " fc scaler value " + fc_scaler);
-			    System.out.println(" >> current " + beam_current);			    
-			    System.out.println( " >> fcs" + fc_scaler + " truefreq " + true_freq + " bc " + beam_current + " beamcharge " + beam_charge0+ " " +tot_beam_charge);
-
-			}
-			
-		    }
-
-
-
-		}
-		
-		*/
-		if( true ){// rawScalerBank_pres ){ 		
+		if( rawScalerBank_pres ){ 		
  		    double beam_charge = 0.0;
 		    double beam_current_ungated = 0.0;
 
-		    //DataBank rawBank = event.getBank("RUN::scaler");
-		    //float live_time = rawBank.getFloat("livetime",0);
+		    DataBank rawBank = event.getBank("RUN::scaler");
+		    DataBank configBank=event.getBank("RUN::config");
+
+		    rawBank.show();
+		    float live_time = rawBank.getFloat("livetime",0);
 		    //System.out.println(" >> event " + Integer.toString(config_event));
 
-		    if( true ){ // live_time >= 0.0 ){
+		    if( live_time >= 0.0 ){
 		    
-			//double fcup_ug = rawBank.getFloat("fcup",0);
-			//double fcup_g = rawBank.getFloat("fcupgated",0);
-			//double fcup_lt = fcup_ug/fcup_g;
+			double fcup_ug = rawBank.getFloat("fcup",0);
+			double fcup_g = rawBank.getFloat("fcupgated",0);
+			double fcup_lt = fcup_ug/fcup_g;
+			double ts = configBank.getLong("timestamp",0);
+
 			//System.out.println(" >> fcup ug " + Double.toString(fcup_ug) + " g " + Double.toString(fcup_g) + " lt " + Double.toString(fcup_lt) );
 			
 			//put event number and the event's gated diff. sum later
 			//tmap_global_event_charge.put(config_event,gated_diff);//tot_beam_charge);
-			config_event = my_counter;
-			tmap_global_event_gatedcharge.put(config_event, my_counter*3.0 );//fcup_g );
-			tmap_global_event_ungatedcharge.put(config_event, my_counter*3.0 );//fcup_ug );			
+			//config_event = my_counter;
+			tmap_global_event_gatedcharge.put(config_event, fcup_g); //my_counter*3.0 );//fcup_g );
+			tmap_global_event_ungatedcharge.put(config_event, fcup_ug);//my_counter*3.0 );//fcup_ug );			
+			tmap_global_event_ts.put(config_event,ts);
 		    }		   
 		}
 	    }
@@ -263,6 +214,9 @@ public class faradayCupCalculatorH4{
 	GraphErrors fc_graph = new GraphErrors();
 	GraphErrors fcug_graph = new GraphErrors();
 	GraphErrors fcg_graph = new GraphErrors();
+	GraphErrors ts_graph = new GraphErrors();
+	
+	H2F h_fcg_ts = new H2F("h_fcg_ts","h_fcg_ts",tmap_global_event_ts.size(), 0.0, tmap_global_event_ts.size(), tmap_global_event_ts.size(), 0.0, 1.3  );
 	H1F h_fcg_event_diff = new H1F("h_fcg_event_diff","h_fcg_event_diff",2000, 0.0, 2000.0);
 	H1F h_fcug_event_diff = new H1F("h_fcug_event_diff","h_fcug_event_diff",2000, 0.0, 2000.0);
 	
@@ -286,9 +240,9 @@ public class faradayCupCalculatorH4{
 	    //		System.out.println(" run config event " + Integer.toString(key) + "fc gated diff " + value  + " acc charge " + acc_beam_charge_sum);
 	    //	    }
 	    //	}
-	    if( key < 100 ){
+	    //if( key < 100 ){
 		fc_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
-	    }
+		//}
 	    
 	}
 	acc_beam_charge_sum=0;
@@ -304,6 +258,7 @@ public class faradayCupCalculatorH4{
 	double sub_val = tmap_global_event_gatedcharge.firstEntry().getValue();
 
 	ArrayList<DataLine> gap_line = new ArrayList<DataLine>();
+
 
 	for(Map.Entry<Integer,Double> entry :  tmap_global_event_gatedcharge.entrySet()) {
 	    Integer key = entry.getKey();
@@ -381,14 +336,14 @@ public class faradayCupCalculatorH4{
 		sub_key = tmap_global_event_gatedcharge.higherEntry(key).getKey();
 
 	    }
-	    System.out.println(" >> filling histogram with difference in key values " + Double.toString((double)key_diff_above));
+	    //System.out.println(" >> filling histogram with difference in key values " + Double.toString((double)key_diff_above));
 	    h_fcg_event_diff.fill((double)key_diff_above);
 	    
 	    
-	    if( key < 105 ){
+	    //if( key < 105 ){
 		fcg_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
 		
-	    }
+		//}
 	}
 	acc_beam_charge_sum = 0;
 
@@ -417,23 +372,14 @@ public class faradayCupCalculatorH4{
 	    //System.out.println(" ungated " + Double.toString(acc_charge_ug) + " event " + Integer.toString(key)); 
 	    //if( key <= 2406468 ){
 	
-	    if( key < 100 ){
+	    //if( key < 100 ){
 
 		fcug_graph.addPoint( key_temp, acc_beam_charge_sum, 0.0, 0.0 );
 		h_fcug_event_diff.fill((double)key_diff);
-	    }
+		//}
 		//}
 	}
 
-
-	for(Map.Entry<Integer,Double> entry : tmap_unixtime.entrySet()) {
-	    Integer key = entry.getKey();
-	    Double value = entry.getValue();
-
-	    //if( key <= 2406468 ){
-		//System.out.println(" run config event " + Integer.toString(key) + " unix time " + Double.toString(value));
-	    //}
-	}
 
 
 
@@ -542,6 +488,8 @@ public class faradayCupCalculatorH4{
 	c_fc.draw(fc_graph,"same");
 	c_fc.save("fc_graph_r"+s_run+".png");
 
+
+	System.out.println(" >> NUMBER OF GAPS " + Integer.toString(gap_line.size()) );
 	EmbeddedCanvas c_fc2 = new EmbeddedCanvas();
 	c_fc2.setSize(1600,800);
 	c_fc2.divide(2,1);

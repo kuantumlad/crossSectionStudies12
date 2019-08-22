@@ -15,6 +15,22 @@ double beam_energy = 7.546;
 double pi = 3.1415926;
 int n_sectors = 6;
 
+double calculatePhotonFlux(double beamEnergy, double w, double qq){
+  double nu = (pow(w,2) - pow(proton_mass, 2) + qq)/(2*proton_mass);
+  double finalEnergy = beamEnergy - nu; 
+  double theta = 2*asin( sqrt(qq/(4 * beamEnergy * finalEnergy)) ); 
+  double epsilon = 1/(1+2*(1+pow(nu,2)/qq)*pow(tan(theta/2),2));
+
+  return (alpha/pow(pi,2)) * (finalEnergy/beamEnergy) * (pow(w,2) - pow(proton_mass,2))/(2*proton_mass)/qq * (1/(1-epsilon));
+}
+
+double calculatePhotonEpsi(double beamEnergy, double w, double qq ){
+ double nu = (pow(w,2) - pow(proton_mass, 2) + qq)/(2*proton_mass);
+  double finalEnergy = beamEnergy - nu; 
+  double theta = 2*asin( sqrt(qq/(4 * beamEnergy * finalEnergy)) ); 
+  return 1/(1+2*(1+pow(nu,2)/qq)*pow(tan(theta/2),2));
+}
+
 std::vector< std::vector<double> > GetModelValues(const char* fileName){
   
   std::map< int,  std::vector< std::vector< double > > > m_model_cs;
@@ -51,6 +67,7 @@ std::vector< std::vector<double> > GetModelValues(const char* fileName){
 	//  std::cout <<  temp_w[ww] << std::endl;
 	//  reverse_model.push_back(temp_model(w));
 	//	}
+	std::reverse(temp_model.begin(),temp_model.end()); 
 	q2w_cs_model.push_back(temp_model);
 
 	q2_bin++;
@@ -78,7 +95,7 @@ std::vector< std::vector<double> > GetModelValues(const char* fileName){
   
   for( int qq = 0; qq < q2w_cs_model.size(); qq++ ){
     for( int ww = 0; ww < q2w_cs_model[qq].size(); ww++ ){
-      std::cout << q2w_cs_model[qq][ww] << std::endl;
+      std::cout << " q2 bin " << qq << " w bin " << ww << " cs  " << q2w_cs_model[qq][ww] << std::endl;
     }
   }
 
@@ -121,6 +138,7 @@ std::vector< std::vector<double> > GetModelWCenterValues(const char* fileName){
 	//  std::cout <<  temp_w[ww] << std::endl;
 	//  reverse_model.push_back(temp_model(w));
 	//	}
+	std::reverse(temp_w.begin(),temp_w.end());
 	q2w_wcenter_model.push_back(temp_w);
 
 	q2_bin++;
@@ -198,6 +216,54 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
     h_el_q2w_sect.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_q2w_final_s%d",s) ));
   }
 
+  ////////////////
+  //get model
+  std::vector< std::vector<double> > v_cs_model =   GetModelValues("model_inclusive_q2_1-6_w_1p125-2p115_delta0p03.txt");
+  std::vector< std::vector<double> > v_wcenter_model = GetModelWCenterValues("model_inclusive_q2_1-6_w_1p125-2p115_delta0p03.txt");
+  std::vector< TGraphErrors* > v_g_model;
+  std::vector< TH1F* > v_h_model;
+  //first loop over the q2 bins 
+  double w_start = 1;
+  double w_bins = (double)h_el_q2w_sect[0]->GetXaxis()->GetNbins();
+  double w_min = h_el_q2w_sect[0]->GetXaxis()->GetBinLowEdge(1);
+  double w_max = h_el_q2w_sect[0]->GetXaxis()->GetBinUpEdge(w_bins);
+  double w_width = (w_max-w_min)/w_bins;
+  
+  TCanvas *c_model_data = new TCanvas("c_model_data","c_model_data",900,900);
+
+  for(int q2 = 1; q2<v_cs_model.size(); q2++ ){
+    //create histogram for model to aid in calculating the ratio more easily
+    std::cout << " creating model histogram  with " << w_bins << " w bins from " << w_min << " to " <<w_max << std::endl;
+    v_h_model.push_back( new TH1F(Form("h_model_q2%d",q2),Form("h_model_q2%d",q2),w_bins,w_min,w_max) );
+
+    //then the individual W bins
+    std::vector<double> temp_w_bin_num;
+    std::vector<double> temp_model_val;
+    std::vector<double> temp_w_bin_err;
+    std::vector<double> temp_model_err;    
+    std::cout << " for Q2 bin " << q2 << " the number of w model bins to loop over " << v_cs_model[q2].size() <<std::endl;
+    for( int ww = 1; ww < v_cs_model[q2].size(); ww++ ){
+      double cs_model =  v_cs_model[q2][ww];
+      double w_center_model = v_wcenter_model[q2][ww];
+      std::cout << " >>> filling MODEL Q2 bin " << q2 << " W bin " << ww << " W bin center " << w_center_model << " CS Model " << cs_model << std::endl;
+      double w_bin_center = 1;      
+      // get bin info
+      temp_w_bin_num.push_back(w_center_model);
+      temp_model_val.push_back(cs_model);
+      temp_w_bin_err.push_back(0.0);
+      temp_model_err.push_back(0.0);      
+
+      //set bin content of histogram
+      v_h_model[q2-1]->SetBinContent(ww+7,cs_model);
+      
+    }
+    TGraphErrors *g_model = new TGraphErrors(temp_w_bin_num.size(), &temp_w_bin_num[0], &temp_model_val[0], &temp_w_bin_err[0], &temp_model_err[0] );
+    g_model->SetTitle(Form("Model Q2B %d",q2));
+    v_g_model.push_back( g_model );
+  }
+  // finish getting model
+  ///////////////////////////////////////////////////////////////////
+
   
   std::map< int, std::vector< TH1F* > > h_el_q2w_cs;
   std::map< int, std::vector< std::vector< double > > > m_wb_center;
@@ -208,6 +274,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 
   std::map< int , std::vector<TGraphErrors* > > m_g_ln;
   std::map< int , std::vector<TGraphErrors* > > m_g_neln;
+  std::map< int , std::vector<TGraphErrors*> > m_g_ratio;
 
   TCanvas *c0 = new TCanvas("c0","c0",900,900);
   c0->Divide(3,2);
@@ -227,15 +294,18 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
     std::vector<TGraphErrors*> v_g_cs;
     std::vector<TGraphErrors*> v_g_rate_lum_norm;
     std::vector<TGraphErrors*> v_g_rate_nel_norm;
+    std::vector<TGraphErrors*> v_g_cs_ratio;
 
-    for( int q2b = 0; q2b <= 20; q2b++){
+    // loop over the data and model info
+    // require that we loop only over the model Q2 region - specificed by v_h_model
+    //checking outside this region doesnt aid in our effort to compare model to data
+    for( int q2b = 0; q2b < v_h_model.size(); q2b++){ 
       c1->cd(q2b+1);
       double w_bins = (double)h_el_q2w_sect[ss]->GetXaxis()->GetNbins();
       double w_min = h_el_q2w_sect[ss]->GetXaxis()->GetBinLowEdge(1);
       double w_max = h_el_q2w_sect[ss]->GetXaxis()->GetBinUpEdge(w_bins);
       double w_width = (w_max-w_min)/w_bins;
      
-
       double q2_bins = (double)h_el_q2w_sect[ss]->GetYaxis()->GetNbins();
       double q2_min = h_el_q2w_sect[ss]->GetYaxis()->GetBinLowEdge(1);
       double q2_max = h_el_q2w_sect[ss]->GetYaxis()->GetBinUpEdge(q2_bins);
@@ -258,6 +328,8 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       std::vector<double> v_cs_err;
       std::vector<double> v_nel_norm_err;
       std::vector<double> v_lum_norm_err;
+      std::vector<double> v_cs_ratio;
+      std::vector<double> v_cs_ratio_err;
 
       for( int wb = 0; wb <= w_bins; wb++ ){
 
@@ -265,17 +337,14 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	double w_count = h_el_q2w_sect[ss]->GetBinContent( wb+1, q2b+1 );
 	double w_count_err = h_el_q2w_sect[ss]->GetBinError( wb+1, q2b+1 );
 	double w_center = h_w_per_q2_per_sect->GetBinCenter(wb+1);
-	if( w_center <= 1.1 ) continue;
+	//if( w_center <= 1.1 ) continue;
 
 	//std::cout << " w bin " << wb << " center " << w_center << " content " << w_count <<  " err " << w_count_err << std::endl;
 	h_w_per_q2_per_sect->SetBinContent(wb+1, w_count );       
 	//h_w_per_q2_per_sect->Draw();
 
-	double nu = (pow(w_center,2) - pow(proton_mass,2) + q2_center)/(2*proton_mass); 
-	double del_energy = beam_energy - nu; 
-	double theta  =  2.0*asin( sqrt( q2_center/(4.0 * beam_energy * del_energy )) );
-	double epsi = 1.0/(1.0 + 2.0*(1.0 + pow(nu,2)/q2_center)*pow(tan(theta/2.0),2));
-	double pho_f = (alpha/pow(pi,2)) * (del_energy/beam_energy ) * (pow(w_center,2) - pow(proton_mass,2))/(2.0*proton_mass)/q2_center * (1.0/(1.0-epsi));
+	double pho_f = 1.0 ;//calculatePhotonFlux(beam_energy, w_center, q2_center);
+	double photon_epsi = calculatePhotonEpsi(beam_energy, w_center, q2_center); 
 	double sector_scaler = 6.0; //remember this is calculated per sector so in effect we are dividing by 6
 	double q2bin_scaler = q2_bins; 
 	double delta_phi_bins = 1.0;//
@@ -285,7 +354,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	double rad_corr = 1.0;	
 	double bin_cent_corr = 1.0;
 
-	double cs = w_count * (1.0/(q2_width * w_width * lum_factor_ug * accp * rad_corr * bin_cent_corr * pho_f * delta_phi_bins));// * sector_scaler ;
+	double cs = w_count * (1.0/(q2_width * w_width * lum_factor_ug * accp * rad_corr * bin_cent_corr * photon_epsi * delta_phi_bins)) * sector_scaler ;
 	double csErr = sqrt(w_count) * (1.0/(q2_width * w_width * lum_factor_ug * accp * rad_corr * bin_cent_corr *pho_f ));
 	double accp_err=0.0;// change later
 	double cs_err = sqrt( (csErr/accp)*(csErr/accp) + (cs*accp_err)*(cs*accp_err));
@@ -300,6 +369,11 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	double lum_norm_err = 0.0;//sqrt( ((w_count)/accp)*((w_count)/accp) + (cs*lum_err)*(cs*lum_err)); 
 	double nel_norm_err = 0.0;//sqrt( ((w_count)/accp)*((w_count)/accp) + (cs*nel_err)*(cs*nel_err)); 
 
+	//compare to model
+	std::cout << " size of v h model " << v_h_model.size() << std::endl;
+	double cs_model = v_h_model[q2b]->GetBinContent(wb+1);
+	double cs_ratio = cs/cs_model;
+
 	//pow( sqrt(w_count) * (1.0/( accp * rad_corr * bin_cent_corr * lum_factor_tot * q2_width*w_width ) ),2);
 	std::cout << " >> ------------------------------------------- << " << std::endl;
 	std::cout << " W BIN NUM    " <<  wb << std::endl;
@@ -313,6 +387,8 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	std::cout << " BIN CORR     " << bin_cent_corr << std::endl;
 	std::cout << " CS           " << cs << std::endl;
 	std::cout << " CS ERR       " << cs_err << std::endl;
+	std::cout << " CS MODEL     " << cs_model << std::endl;
+	std::cout << " CS RATIO     " << cs_ratio << std::endl;
 	std::cout << " LUM NORM     " << lum_norm << std::endl;
 	std::cout << " LUM NORMERR  " << lum_norm_err << std::endl;
 	std::cout << " NEL NORM     " << nel_norm << std::endl;
@@ -322,6 +398,11 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 	v_cs_value.push_back( cs );
 	v_wb_err.push_back(0.0);
 	v_cs_err.push_back(cs_err);
+
+	//set model to 0 if there isnt a recorded model value
+	if( cs_model == 0 ) cs_ratio = 0.0;
+	v_cs_ratio.push_back(cs_ratio);
+	v_cs_ratio_err.push_back(0.0); // change for later with real error values
 
 	// plots for monitoring
 	v_rate_lum_norm.push_back(lum_norm);
@@ -337,6 +418,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 
       v_g_rate_lum_norm.push_back( new TGraphErrors(v_wb_center.size(), &v_wb_center[0], &v_rate_lum_norm[0], &v_wb_err[0], &v_lum_norm_err[0]) );
       v_g_rate_nel_norm.push_back( new TGraphErrors(v_wb_center.size(), &v_wb_center[0], &v_rate_nel_norm[0], &v_wb_err[0], &v_nel_norm_err[0]) );
+      v_g_cs_ratio.push_back( new TGraphErrors(v_cs_ratio.size(), &v_wb_center[0], &v_cs_ratio[0], &v_wb_err[0], &v_cs_ratio_err[0] ) );
 
       v_wb_temp.push_back(v_wb_center);
       v_cs_value_temp.push_back(v_cs_value);
@@ -354,6 +436,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
     m_g_cs[ss] = v_g_cs;
     m_g_ln[ss] = v_g_rate_lum_norm;
     m_g_neln[ss] = v_g_rate_nel_norm;
+    m_g_ratio[ss]  = v_g_cs_ratio;
 
     
     c1->SaveAs(Form("h_w_per_q2_sector_%d.pdf",ss));   
@@ -375,7 +458,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       m_g_cs[ss][q2b]->GetYaxis()->SetTitle("Norm. Yields");
       m_g_cs[ss][q2b]->SetMarkerSize(2);
       //m_g_cs[ss][q2b]->Draw("AP+");      
-      m_g_cs[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.4);
+      m_g_cs[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.0);
       //m_g_cs[ss][q2b]->GetHistogram()->SetMinimum(0.0);
       //m_g_cs[ss][q2b]->GetHistogram()->SetMaximum(0.18);
       //m_g_cs[ss][q2b]->Draw("AP+");      
@@ -439,46 +522,13 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
   }
   
 	  
-  std::vector< std::vector<double> > v_cs_model =   GetModelValues("model_inclusive_q2_1-6_w_1p125-2p115_delta0p03.txt");
-  std::vector< std::vector<double> > v_wcenter_model = GetModelWCenterValues("model_inclusive_q2_1-6_w_1p125-2p115_delta0p03.txt");
-  std::vector< TGraphErrors* > v_g_model;
-  //first loop over the q2 bins 
-  double w_start = 1;
-  double w_bins = (double)h_el_q2w_sect[0]->GetXaxis()->GetNbins();
-  double w_min = h_el_q2w_sect[0]->GetXaxis()->GetBinLowEdge(1);
-  double w_max = h_el_q2w_sect[0]->GetXaxis()->GetBinUpEdge(w_bins);
-  double w_width = (w_max-w_min)/w_bins;
-  
-  TCanvas *c_model_data = new TCanvas("c_model_data","c_model_data",900,900);
-
-  for(int q2 =0; q2<v_cs_model.size(); q2++ ){
-    //then the individual W bins
-    std::vector<double> temp_w_bin_num;
-    std::vector<double> temp_model_val;
-    std::vector<double> temp_w_bin_err;
-    std::vector<double> temp_model_err;    
-    for( int ww = v_cs_model[q2].size(); ww > 0; ww-- ){
-      double cs_model =  v_cs_model[q2][ww];
-      double w_center_model = v_wcenter_model[q2][ww];
-      std::cout << " >>> filling MODEL Q2 bin " << q2 << " W bin " << ww << " W bin center " << w_center_model << " CS Model " << cs_model << std::endl;
-      double w_bin_center = 1;      
-      // get bin info
-      temp_w_bin_num.push_back(w_center_model);
-      temp_model_val.push_back(cs_model);
-      temp_w_bin_err.push_back(0.0);
-      temp_model_err.push_back(0.0);      
-    }
-    TGraphErrors *g_model = new TGraphErrors(temp_w_bin_num.size(), &temp_w_bin_num[0], &temp_model_val[0], &temp_w_bin_err[0], &temp_model_err[0] );
-    g_model->SetTitle(Form("Model Q2B %d",q2));
-    v_g_model.push_back( g_model );
-  }
 
   ////////////////////////////////////////////////////////////////////
   // draw model with data now
   for( int ss = 0; ss < n_sectors; ss++ ){
     TCanvas *c_modeldata_sect = new TCanvas(Form("c_modeldata_sect%d",ss),Form("c_modeldata_sect%d",ss),900,900);
-    c_modeldata_sect->Divide(4,5);
-    for( int q2b = 0; q2b < v_g_model.size(); q2b++ ){
+    c_modeldata_sect->Divide(1,1);
+    for( int q2b = 0; q2b < 1; q2b++ ){ //v_g_model.size(); q2b++ ){
       c_modeldata_sect->cd(q2b+1);
 
       TMultiGraph *mg_cs_result = new TMultiGraph();
@@ -489,11 +539,13 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       v_g_model[q2b]->SetMarkerColor(kRed);
       v_g_model[q2b]->SetMarkerStyle(22);
       v_g_model[q2b]->SetMarkerSize(0.4);
-
       
       mg_cs_result->Add(m_g_cs[ss][q2b]);
       mg_cs_result->Add(v_g_model[q2b]);
       mg_cs_result->SetTitle(Form("Cross Section S%d",ss));
+      mg_cs_result->Draw("APE");
+      mg_cs_result->GetXaxis()->SetLimits(0.98, 2.);
+      mg_cs_result->GetHistogram()->SetMaximum(0.095); 
       mg_cs_result->Draw("APE");
 
       //continue adding plotting style code here
@@ -501,9 +553,35 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
 
     }
   }
+  
+  //draw the ratio for the measured to the theory cs
+  
+  ////////////////////////////////////////////////////////////////////
+  // draw model with data now
+  for( int ss = 0; ss < n_sectors; ss++ ){
+    TCanvas *c_ratio_sect = new TCanvas(Form("c_ratio_sect%d",ss),Form("c_ratio_sect%d",ss),900,900);
+    c_ratio_sect->Divide(4,5);
+    for( int q2b = 0; q2b <  m_g_ratio[ss].size(); q2b++ ){
+      c_ratio_sect->cd(q2b+1);
+
+      m_g_ratio[ss][q2b]->SetMarkerColor(kBlack);
+      m_g_ratio[ss][q2b]->SetMarkerStyle(20);
+      m_g_ratio[ss][q2b]->SetMarkerSize(0.6);
+
+      m_g_ratio[ss][q2b]->SetTitle(Form("Cross Section S%d q2B%d",ss,q2b));
+      m_g_ratio[ss][q2b]->Draw("APE");
+      m_g_ratio[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.);
+      m_g_ratio[ss][q2b]->Draw("APE");
+
+      //continue adding plotting style code here
+      
+    }
+  }
+  
 
   //draw overlapping cross sections per sector
   
+
 
   return 0;
 }
