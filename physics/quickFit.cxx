@@ -37,6 +37,8 @@ using namespace std;
 
 using namespace ROOT::Math;
 
+float eBeam = 7.546;//2.221;
+
 
 double kin_W(TLorentzVector ele, float Ebeam);
 TF1 *fitHisto(TH1D *htemp);
@@ -50,7 +52,7 @@ int quickFit(const char* input_file, int model){
   int nWBins = 250;
   int nQ2Bins = 250;
   float lowBorderW = 0.80;
-  float highBorderW = 1.7;
+  float highBorderW = 1.7;  
   float lowBorderQ2 = 0.0;
   float highBorderQ2 = 1.0;
   float W, Q2;
@@ -91,7 +93,6 @@ int quickFit(const char* input_file, int model){
   std::string parentOutDirectory = " /w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/physics/parameters/";
   TFile *quick_fit_results = new TFile(Form("%squick_fit%d.root", parentOutDirectory.c_str(), model), "recreate");
 
-  float eBeam = 2.221;
   float mProton = 0.98327;
   TTree *anaTree=(TTree *) f.Get("out_tree");
   TTree *simTree=(TTree *) f.Get("mc_tree");
@@ -151,6 +152,12 @@ int quickFit(const char* input_file, int model){
   initialP.SetPxPyPzE(0, 0, 0, mProton);
 
 
+  // change histogram range before proceeding 
+  if( eBeam > 3 ){
+    highBorderW = 1.1 ;
+  }
+
+
   TH1D *wSectorExclusive[6];
   TH1D *phiEphiP[6];
 
@@ -170,7 +177,13 @@ int quickFit(const char* input_file, int model){
 
   double toRD=180.0/TMath::Pi();
   
-  for(Int_t k=0; k < anaTree->GetEntriesFast();k++){
+  int nentries = anaTree->GetEntriesFast();
+  if( nentries > 2000000 ){
+    nentries = 2000000;
+  }
+
+
+  for(Int_t k=0; k < nentries; k++){
     anaTree->GetEntry(k);
     NPart = vpart_px->size();
     if (NPart > 0 && NPart < 2){
@@ -261,6 +274,10 @@ TF1* fitHisto(TH1D* htemp){
   // Start Andrew's fitting method:
   double xlow,xhigh,histmax;
   int binlow,binhigh,binmax;
+
+  if( eBeam > 3 ){
+    htemp->Rebin(6);
+  }
   binmax = htemp->GetMaximumBin();
   histmax = htemp->GetMaximum();
   binlow=binmax;
@@ -268,8 +285,8 @@ TF1* fitHisto(TH1D* htemp){
 
   // The 0.65 parameter can be changed, this basically means start at the peak and work your way left and right
   // until you've gotten to 65% of the max amplitude.
-  while(htemp->GetBinContent(binhigh++) >= .65*histmax&&binhigh<=htemp->GetNbinsX()){};
-  while(htemp->GetBinContent(binlow--) >= .65*histmax&&binlow>=1){};
+  while(htemp->GetBinContent(binhigh++) >= 0.65*histmax&&binhigh<=htemp->GetNbinsX()){};
+  while(htemp->GetBinContent(binlow--) >= 0.65*histmax&&binlow>=1){};
     
   xlow = htemp->GetBinLowEdge(binlow);
   xhigh = htemp->GetBinLowEdge(binhigh+1);

@@ -54,12 +54,11 @@ int vertexPlotter(const char* input, int run){
     //    TCanvas *c_temp_vz = new TCanvas(Form("c_temp_vz_s%d",s),Form("c_temp_vz_s%d",s),900,600);
     TH1F *h_el_vz = (TH1F*)fIn->Get(Form("FD_PID_electron_DC_plots/DC_z_vertex_sec%d_cut_01",s));
 
-    // get hist parameters to set fit limits
-
+    // get hist parameters to set fit limits    
     double xlow,xhigh,histmax;
     int binlow,binhigh,binmax;
     binmax = h_el_vz->GetMaximumBin();
-    histmax = h_el_vz->GetMaximum();
+    histmax = h_el_vz->GetMaximum();   
     binlow=binmax;
     binhigh=binmax;
 

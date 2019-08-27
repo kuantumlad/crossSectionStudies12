@@ -48,12 +48,12 @@ public class genCheck{
 	while( num_ev < max_event ){
 	    event = (DataEvent)hiporeader.gotoEvent(num_ev);
 	    boolean runConfig_pres = event.hasBank("RUN::config");
-	    boolean mcBank_pres  = event.hasBank("MC::Particle");
+	    boolean mcBank_pres  = event.hasBank("REC::Particle");
 	    boolean rawScalerBank_pres = event.hasBank("RAW::scaler");
 	    num_ev++;
 
 	    if( mcBank_pres ){
-		DataBank mcBank = event.getBank("MC::Particle");
+		DataBank mcBank = event.getBank("REC::Particle");
 		for( int i = 0; i < mcBank.rows(); i++ ){
 		    int pid = mcBank.getInt("pid",i);
 

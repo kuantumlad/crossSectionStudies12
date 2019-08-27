@@ -313,7 +313,6 @@ int acceptanceExtractor(const char* inFileData, int run, const char* field_confi
   c1->Divide(1,1);
   c1->cd(1);
 
-
   //TCanvas *c_accPhi = new TCanvas("c_accPhi","c_accPhi",900,900);
   //c_accPhi->Divide(1,1);
   //c_accPhi->cd(1);

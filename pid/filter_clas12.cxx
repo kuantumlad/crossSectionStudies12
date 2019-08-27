@@ -79,7 +79,7 @@ int process_Events = -1;
 //float Ebeam = 6.42313;
 //float Ebeam = 2.22193;
 //float Ebeam = 10.594;
-float Ebeam = 2.221;//10.6;
+float Ebeam = 7.546;//10.6;
 
 /// select the field polarity (relevant for fiducial cuts, sampling fraction and vertex cuts)
 /// only set 1 as true!
@@ -89,7 +89,7 @@ bool outbending = false;
 
 ///
 
-bool simulation  = false;
+bool simulation  = true;
 
 ///
 

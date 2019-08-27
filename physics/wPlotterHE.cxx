@@ -11,7 +11,7 @@
 
 
 
-int crossSectionExtractorHEv0(const char* infile, int run){
+int wPlotterHE(const char* infile, int run){
 
   TFile *fIn = new TFile(infile,"");
   TFile *fOut = new TFile(Form("cs_test_run%dV2.root",run),"RECREATE");
@@ -28,10 +28,8 @@ int crossSectionExtractorHEv0(const char* infile, int run){
     h_el_wtheta_sect.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_wtheta_s%d_final",s) ) );
   }
 
-  double lumi_run = 100000;
   
   TLine *l_mp = new TLine(0.938,5.0, 0.938, 20.0);
-
 
   TCanvas *c0 = new TCanvas("c0","c0",900,900);
   c0->Divide(3,2);

@@ -212,7 +212,7 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   c2->cd(1);
   TH1D *h_data_phi = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_phi");
   TH1D *h_sim_phi = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_phi");
-  TH1D *h_mc_phi = (TH1D*)fMC->Get("hist_mc_all_electron_phi");
+  TH1D *h_mc_phi = (TH1D*)fMC->Get("mc/hist_mc_all_electron_phi");
   //c3->cd();
   gStyle->SetOptStat(0000);
 
@@ -265,7 +265,7 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   c2->cd(1);
   TH1D *h_data_p = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_p");
   TH1D *h_sim_p = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_p");
-  TH1D *h_mc_p = (TH1D*)fMC->Get("hist_mc_all_electron_p");
+  TH1D *h_mc_p = (TH1D*)fMC->Get("mc/hist_mc_all_electron_p");
   //c4->cd();
   gStyle->SetOptStat(0000);
 
@@ -318,7 +318,7 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   c2->cd(1);
   TH1D *h_data_theta = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_theta");
   TH1D *h_sim_theta = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_theta");
-  TH1D *h_mc_theta = (TH1D*)fMC->Get("hist_mc_all_electron_theta");
+  TH1D *h_mc_theta = (TH1D*)fMC->Get("mc/hist_mc_all_electron_theta");
   //c5->cd();
   gStyle->SetOptStat(0000);
 

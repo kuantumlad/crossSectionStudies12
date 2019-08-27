@@ -6,10 +6,10 @@ set num_lund_files=$2
 set num_events_per_file=$3
 set rad_status=$4
 #set output_lund_dir="/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/elastic/lund_${rad_status}/elastic_delta005"
-set output_lund_dir="/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/elastic/radcorr/${rad_status}"
+set output_lund_dir="/w/hallb-scifs17exp/clas12/bclary/CLAS12/electron_studies/elastic/radcorr/${rad_status}/${beam_energy}GeV/"
 
 # check if input file exists
-if (-f "input$beam_energy.inp") then
+if (-f "input${beam_energy}${rad_status}.inp") then
     #change number of events generated per lund file
     echo " Changing number of events per file to " $num_events_per_file
     rm test_input${beam_energy}${rad_status}.inp

@@ -84,8 +84,8 @@ float Ebeam = 7.564; //6.42313;    //7.546;//= 6.42313;
 /// select the field polarity (relevant for fiducial cuts, sampling fraction and vertex cuts)
 /// only set 1 as true!
 
-bool inbending  = true;//false;//true;
-bool outbending = false;//false;
+bool inbending  = false;//false;//true;
+bool outbending = true;//false;
 
 ///
 
@@ -218,8 +218,8 @@ const static int BUFFER = 60;   // increased from 40
    vector<float>          *vBCG      = 0;     // FCUP scaler
    vector<float>          *vSTTime   = 0;     // Event Start Time (ns)
    vector<float>          *vRFTime   = 0;     // RF Time (ns)
-   vector<short>          *vHelic    = 0;     // helicity
-
+//vector<short>          *vHelic    = 0;     // helicity
+   Int_t vHelic ;
    // REC::Particle
 
    vector<int>    *vpart_pid     = 0;   
@@ -1573,11 +1573,11 @@ Int_t filter_clas12H4( Char_t *inFile, Char_t *outputfile, int run)
       anaTree->SetBranchAddress("REC_Event_Helic", &vHelic);
     */
 
-    anaTree->SetBranchAddress("REC_Event_beamCharge", &vBCG);
-   anaTree->SetBranchAddress("REC_Event_liveTime", &vEVNTime);
-   anaTree->SetBranchAddress("REC_Event_startTime", &vSTTime);
-   anaTree->SetBranchAddress("REC_Event_RFTime",&vRFTime);
-   anaTree->SetBranchAddress("REC_Event_helicity", &vHelic);
+    //anaTree->SetBranchAddress("REC_Event_beamCharge", &vBCG);
+    //anaTree->SetBranchAddress("REC_Event_liveTime", &vEVNTime);
+    //anaTree->SetBranchAddress("REC_Event_startTime", &vSTTime);
+    ///anaTree->SetBranchAddress("REC_Event_RFTime",&vRFTime);
+    anaTree->SetBranchAddress("REC_Event_helicity", &vHelic);
 
 
    anaTree->SetBranchAddress("REC_Particle_pid", &vpart_pid);
@@ -4813,7 +4813,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries =anaTree->GetEntriesFast();
+ int nentries = 500000;//anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 
@@ -9747,7 +9747,7 @@ void get_event_properties(void){
   //if(vEVNTime->size() > 0) EVNTime = vNEVENT->at(0);
   //if(vTYPE->size() > 0)    TYPE = vTYPE->at(0);
   //if(vTRG->size() > 0)     TRG = vNEVENT->at(0);
-  if(vBCG->size() > 0)     BCG = vBCG->at(0);
+  //if(vBCG->size() > 0)     BCG = vBCG->at(0);
 
   //if(vNRUN->size() > 0)    NRUN = 0;//vNRUN->at(0);
   //if(vNEVENT->size() > 0)  NEVENT = 0;//vNEVENT->at(0);
@@ -9755,9 +9755,10 @@ void get_event_properties(void){
   //if(vTYPE->size() > 0)    TYPE = 0;//vTYPE->at(0);
   //if(vTRG->size() > 0)     TRG = 0;//vNEVENT->at(0);
   //if(vBCG->size() > 0)     BCG = 0;//v->at(0);
-  if(vSTTime->size() > 0)  STTime = vSTTime->at(0);
-  if(vRFTime->size() > 0)  RFTime = vRFTime->at(0);
-  if(vHelic->size() > 0)   Helic = vHelic->at(0);
+  //if(vSTTime->size() > 0)  STTime = vSTTime->at(0);
+  //if(vRFTime->size() > 0)  RFTime = vRFTime->at(0);
+  //if(vHelic->size() > 0)   
+  Helic = vHelic;
 
 }
 
@@ -10069,7 +10070,7 @@ void select_electron(int run){
       /// ////////////////////////////////////////////////////////////////////////////////////////////
       /// Forward detector:
 
-      if(true){//part_status[i] > -4000 && part_status[i] <= 0 ){//-2000){
+      if(part_status[i] > -4000 && part_status[i] <= -2000){
 
         // PID checks:
 
@@ -10099,9 +10100,10 @@ void select_electron(int run){
         if(FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			FD_eid_DC_hit_position_region3_fiducial_pass += 1;
         if(FD_eid_DC_z_vertex_check[i] && FD_eid_charge_check[i] && FD_eid_default_PID_check[i]) 			        	FD_eid_DC_z_vertex_pass += 1;
 
-        if(FD_eid_default_PID_check[i] ){// && FD_eid_charge_check[i] ) {//&& FD_eid_EC_hit_position_fiducial_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i]
-	  //&& FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] ){// && FD_eid_DC_z_vertex_check[i] ){
-
+        if(FD_eid_default_PID_check[i] && FD_eid_charge_check[i] && FD_eid_EC_hit_position_fiducial_check[i] && FD_eid_EC_outer_vs_EC_inner_check[i] && 
+	   FD_eid_EC_sampling_fraction_check[i] && FD_eid_EC_hit_position_fiducial_check[i] &&
+	   FD_eid_DC_hit_position_region1_fiducial_check[i] && FD_eid_DC_hit_position_region2_fiducial_check[i] && FD_eid_DC_hit_position_region3_fiducial_check[i] && FD_eid_DC_z_vertex_check[i] ){
+	  
           FD_eid_all_pass += 1;
           FD_eid_all_check[i] = true;
         }
@@ -10110,7 +10112,7 @@ void select_electron(int run){
       /// ////////////////////////////////////////////////////////////////////////////////////////////
       /// Forward tagger:
 
-      if(true){//part_status[i] > -2000 && part_status[i] <= -1000){
+      if(part_status[i] > -2000 && part_status[i] <= -1000){
         FT_eid_charge_check[i] = FT_eid_charge_cut(i);
         FT_eid_PID_check[i] = FT_eid_PID_cut(i);
         FT_eid_FTCAL_fiducial_check[i] = FT_eid_FTCAL_fiducial_cut(i);
@@ -10148,10 +10150,10 @@ void select_electron(int run){
         if(k < BUFFER){
 
           if(use_own_PID_electron == true){ 
-            selector = (FD_eid_all_check[k]);// && part_status[i] >= -4000 && part_status[i] < -2000)|| (FT_eid_all_check[k] && part_status[i] >= -2000 && part_status[i] < -1000); 
+            selector = (FD_eid_all_check[k] && part_status[i] >= -4000 && part_status[i] < -2000)|| (FT_eid_all_check[k] && part_status[i] >= -2000 && part_status[i] < -1000); 
           }
           else{ 
-            selector = (FD_eid_default_PID_check[k] );// && part_status[i] >= -4000 && part_status[i] < -2000) || (FT_eid_PID_check[k]  && part_status[i] >= -2000 && part_status[i] < -1000); 
+            selector = (FD_eid_default_PID_check[k] && part_status[i] >= -4000 && part_status[i] < -2000) || (FT_eid_PID_check[k]  && part_status[i] >= -2000 && part_status[i] < -1000); 
           }       
 
           if(selector){
