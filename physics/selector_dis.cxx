@@ -684,6 +684,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   std::vector< TH1F* > h_el_p_sect_final;
   std::vector< TH1F* > h_el_theta_sect_final;
   std::vector< TH1F* > h_el_phi_sect_final;
+  std::vector< TH1F* > h_el_w_sect_final;
 
   std::vector< TH2F* > h_el_ptheta_sect_final;
   std::vector< TH2F* > h_el_phitheta_sect_final;
@@ -695,6 +696,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
   for( int s = 0; s < 7; s++ ){
     h_el_w_sect.push_back( new TH1F(Form("h_el_w_s%d",s),Form("h_el_w_s%d",s), 100, 0.9, 3.5) );
+    h_el_w_sect_final.push_back( new TH1F(Form("h_el_w_final_s%d",s),Form("h_el_w_final_s%d",s), 100, 0.9, 3.5) );
     h_el_theta_sect.push_back( new TH1F(Form("h_el_theta_s%d",s),Form("h_el_theta_s%d",s), 100, 0.0, 40.0) );
    
     //dmriser binning 
@@ -1196,7 +1198,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	hist_W_vs_theta->Fill(W,ele[select_ele].Theta()*180/Pival);  
 
 	//if( W > w_cut_min && W < 1.1 ) { ///w_cut_max ){
-
+	h_el_w_sect[el_sect]->Fill( W );
 	bool w_cut = W > 1.0;
 	bool y_cut = y < 0.8;
 	bool q2_cut= Q2 > 1.0;
@@ -1235,7 +1237,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	    hist_el_q2_w_per_sect[el_sect-1]->Fill(W,Q2);
 
 	    hist_all_el_energy->Fill(delta_energy);
-	    h_el_w_sect[el_sect]->Fill( W );
+	    h_el_w_sect_final[el_sect]->Fill( W );
 	    h_el_p_sect_final[el_sect]->Fill(ele[select_ele].P()); 
 	    h_el_theta_sect_final[el_sect]->Fill(ele[select_ele].Theta()*180.0/Pival); 
 	    h_el_phi_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180.0/Pival);

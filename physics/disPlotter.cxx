@@ -126,6 +126,7 @@ void disPlotter(const char* infile, const char* config, int run){
     g_w_ratio->SetMarkerStyle(2);
     g_w_ratio->SetMarkerSize(0.8);
     g_w_ratio->GetHistogram()->SetMaximum(0.24);
+    g_w_ratio->GetHistogram()->SetMinimum(0.0);
     g_w_ratio->GetXaxis()->SetTitle("W (GeV)");
     g_w_ratio->Draw("AP");
     l_ratio->Draw("same");

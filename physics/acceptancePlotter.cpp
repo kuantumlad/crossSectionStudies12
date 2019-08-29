@@ -72,6 +72,10 @@ int acceptancePlotter(const char* inFileMC, int run, const char* field_config ){
     std::cout << " Plotting momentum purity plot with bin size " << p_bin_size << std::endl;
     v_h_el_purity_p[bb]->SetTitle(Form("P Purity #Delta %f GeV",p_bin_size));
     v_h_el_purity_p[bb]->GetXaxis()->SetTitle("Mntm (GeV)");
+    v_h_el_purity_p[bb]->GetYaxis()->SetTitle("Purity");
+    v_h_el_purity_p[bb]->Draw();    
+    v_h_el_purity_p[bb]->SetMaximum(1.01);
+    v_h_el_purity_p[bb]->SetMinimum(0.825);
     v_h_el_purity_p[bb]->Draw();    
   }
   c_p->SaveAs(Form("h_el_purity_p_%s_r%d.pdf",field_config,run));
@@ -82,10 +86,15 @@ int acceptancePlotter(const char* inFileMC, int run, const char* field_config ){
     c_th->cd(bb+1);
     double bin_size = getBinSize(v_h_el_purity_theta[bb]);
     std::cout << " >. title " << v_h_el_purity_theta[bb]->GetTitle() << std::endl;
-    std::cout << " Plotting momentum purity plot with bin size " << bin_size << std::endl;
+    std::cout << " Plotting theta purity plot with bin size " << bin_size << std::endl;
     v_h_el_purity_theta[bb]->SetTitle(Form("Theta Purity #Delta %f deg",bin_size));
     v_h_el_purity_theta[bb]->GetXaxis()->SetTitle("#theta (deg)");
+    v_h_el_purity_theta[bb]->GetYaxis()->SetTitle("Purity");
     v_h_el_purity_theta[bb]->Draw();    
+    v_h_el_purity_theta[bb]->SetMaximum(1.01);
+    v_h_el_purity_theta[bb]->SetMinimum(0.825);
+    v_h_el_purity_theta[bb]->Draw();    
+
   }
   c_th->SaveAs(Form("h_el_purity_theta_%s_r%d.pdf",field_config,run));
 
@@ -95,10 +104,15 @@ int acceptancePlotter(const char* inFileMC, int run, const char* field_config ){
     c_phi->cd(bb+1);
     double bin_size = getBinSize(v_h_el_purity_phi[bb]);
     std::cout << " >. title " << v_h_el_purity_phi[bb]->GetTitle() << std::endl;
-    std::cout << " Plotting momentum purity plot with bin size " << bin_size << std::endl;
+    std::cout << " Plotting phi purity plot with bin size " << bin_size << std::endl;
     v_h_el_purity_phi[bb]->SetTitle(Form("Phi Purity #Delta %f deg",bin_size));
     v_h_el_purity_phi[bb]->GetXaxis()->SetTitle("phi (deg)");
+    v_h_el_purity_phi[bb]->GetYaxis()->SetTitle("Purity");
     v_h_el_purity_phi[bb]->Draw();    
+    v_h_el_purity_phi[bb]->SetMaximum(1.01);
+    v_h_el_purity_phi[bb]->SetMinimum(0.825);
+    v_h_el_purity_phi[bb]->Draw();    
+
   }
   c_phi->SaveAs(Form("h_el_purity_phi_%s_r%d.pdf",field_config,run));
 

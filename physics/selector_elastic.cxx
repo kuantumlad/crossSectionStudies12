@@ -515,8 +515,17 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   ///  SET histograms
   /// ///////////////////////////////////////////////////////////////////////////// 
 
+  double el_theta_min = 0.0;
   double el_theta_max = 30.0;
   double pr_theta_max = 50.0;
+  int ntheta_bin= 30;
+
+  if( Ebeam > 3 ){
+    ntheta_bin=60;
+    el_theta_max = 20.0;
+    el_theta_min= 5.0;
+  }
+
 
   TH1F *hist_all_electron_p; TH1F *hist_all_electron_theta; TH1F *hist_all_electron_phi;
   TH2F *hist_all_electron_p_vs_theta; TH2F *hist_all_electron_p_vs_phi; TH2F *hist_all_electron_theta_vs_phi;
@@ -541,7 +550,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   hist_all_electron_p_vs_phi = new TH2F("hist_all_electron_p_vs_phi", "electron p vs #phi", 180,-180,180, 500,0,Ebeam+0.3);   
   hist_all_electron_p_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_all_electron_p_vs_phi->GetYaxis()->SetTitle("p /GeV");
-  hist_all_electron_theta_vs_phi = new TH2F("hist_all_electron_theta_vs_phi", "electron #Theta vs #phi", 73, -180,180, 30 , 0, el_theta_max);   
+  hist_all_electron_theta_vs_phi = new TH2F("hist_all_electron_theta_vs_phi", "electron #Theta vs #phi", 73, -180,180, ntheta_bin, el_theta_min,el_theta_max);
   hist_all_electron_theta_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_all_electron_theta_vs_phi->GetYaxis()->SetTitle("#Theta /deg");
   hist_all_el_energy = new TH1F("hist_all_el_energy","hist_all_el_energy",200, -0.5, 0.8 );
@@ -577,7 +586,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   hist_electron_p = new TH1F("hist_electron_p", "electron momentum", 500,0,Ebeam+0.3);   
   hist_electron_p->GetXaxis()->SetTitle("p /GeV");
   hist_electron_p->GetYaxis()->SetTitle("counts");
-  hist_electron_theta = new TH1F("hist_electron_theta", "electron #Theta", 140,0,40);   
+  hist_electron_theta = new TH1F("hist_electron_theta", "electron #Theta", 140,el_theta_min,el_theta_max);   
   hist_electron_theta->GetXaxis()->SetTitle("#Theta /deg");
   hist_electron_theta->GetYaxis()->SetTitle("counts");
   hist_electron_phi = new TH1F("hist_electron_phi", "electron #phi", 73,-180,180);   
@@ -589,7 +598,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   hist_electron_p_vs_phi = new TH2F("hist_electron_p_vs_phi", "electron p vs #phi", 180,-180,180, 500,0,Ebeam+0.3);   
   hist_electron_p_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_electron_p_vs_phi->GetYaxis()->SetTitle("p /GeV");
-  hist_electron_theta_vs_phi = new TH2F("hist_electron_theta_vs_phi", "electron #Theta vs phi", 73,-180,180, 30,0,el_theta_max);   
+  hist_electron_theta_vs_phi = new TH2F("hist_electron_theta_vs_phi", "electron #Theta vs phi", 73,-180,180, ntheta_bin, el_theta_min,el_theta_max);   
   hist_electron_theta_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_electron_theta_vs_phi->GetYaxis()->SetTitle("#Theta /deg");
 
@@ -633,11 +642,19 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   hist_mc_electron_p_vs_phi = new TH2F("hist_all_electron_p_vs_phi", "electron p vs #phi", 180,-180,180, 500,0,Ebeam+0.3);   
   hist_mc_electron_p_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_mc_electron_p_vs_phi->GetYaxis()->SetTitle("p /GeV");
-  hist_mc_electron_theta_vs_phi = new TH2F("hist_mc_all_electron_theta_vs_phi", "electron #Theta vs #phi", 73, -180,180, 30 , 0, el_theta_max);   
+  hist_mc_electron_theta_vs_phi = new TH2F("hist_mc_all_electron_theta_vs_phi", "electron #Theta vs #phi", 73, -180,180, ntheta_bin, el_theta_min,el_theta_max);
   hist_mc_electron_theta_vs_phi->GetXaxis()->SetTitle("#phi /deg");
   hist_mc_electron_theta_vs_phi->GetYaxis()->SetTitle("#Theta /deg");
 
+  TH2F *h_mc_el_wtheta = new TH2F("h_mc_el_wtheta","h_mc_el_wtheta", 60, 0.0, 1.4, 60, 5.0, 20.0 );
+  h_mc_el_wtheta->GetXaxis()->SetTitle("W (GeV)");
+  h_mc_el_wtheta->GetYaxis()->SetTitle("#theta (deg)");
+  
+  std::vector< TH2F* > h_mc_el_wtheta_sect;
 
+  for( int ss = 0; ss < 6; ss ++ ){
+    h_mc_el_wtheta_sect.push_back( new TH2F(Form("h_mc_el_wtheta_s%d_final",ss), Form("h_mc_el_wtheta_s%d_final",ss),  60, 0.0, 1.4, 60, 5.0, 20.0 ) ); // theta bin of 0.25  
+  }
 
   out->mkdir("kinematics");				
   out->cd ("kinematics");
@@ -676,7 +693,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH2F* > h_el_ptheta_sect_final;
   std::vector< TH2F* > h_el_phitheta_sect_final;
 
-  TH2F *h_el_phitheta_final = new TH2F(Form("h_el_phitheta_final_run%d",run), Form("h_el_phitheta_final_run%d",run), 73, -180.0, 180.0, 30, 0.0, el_theta_max );
+  TH2F *h_el_phitheta_final = new TH2F(Form("h_el_phitheta_final_run%d",run), Form("h_el_phitheta_final_run%d",run), 73, -180.0, 180.0, ntheta_bin, el_theta_min,el_theta_max);
   hist_W_vs_y  = new TH2F(Form("hist_W_vs_y_final_run%d",run), Form("hist_W_vs_y_final_run%d",run), 100, 0.9, 1.2, 100, 0.0, 1.1);
   
   hist_W_vs_theta = new TH2F("hist_W_vs_theta","hist_W_vs_theta", 60, 0.0, 2.0, 60, 5.0, 20.0 ); // theta bin of 0.25
@@ -689,11 +706,12 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     h_el_ptheta_sect.push_back( new TH2F(Form("h_el_ptheta_s%d",s),Form("h_el_ptheta_s%d",s), 200, 0.0, 2.5, 200, 0.0, 40.0) );
     
     h_el_p_sect_final.push_back( new TH1F(Form("h_el_p_s%d_final",s),Form("h_el_p_s%d_final",s),100, 0.0, Ebeam+0.5) );
-    h_el_theta_sect_final.push_back( new TH1F(Form("h_el_theta_s%d_final",s),Form("h_el_theta_s%d_final",s),30, 0.0, el_theta_max) );
+    h_el_theta_sect_final.push_back( new TH1F(Form("h_el_theta_s%d_final",s),Form("h_el_theta_s%d_final",s),ntheta_bin, el_theta_min,el_theta_max));
     h_el_phi_sect_final.push_back( new TH1F(Form("h_el_phi_s%d_final",s),Form("h_el_phi_s%d_final",s), 73, -180.0, 180.0 ) );
 
     h_el_ptheta_sect_final.push_back( new TH2F(Form("h_el_ptheta_s%d_final",s),Form("h_el_ptheta_s%d_final",s), 200, 0.0, Ebeam+0.5, 200, 0.0, el_theta_max) );
-    h_el_phitheta_sect_final.push_back( new TH2F(Form("h_el_phitheta_s%d_final",s),Form("h_el_phitheta_s%d_final",s), 73, -180.0, 180.0, 30, 0.0, el_theta_max) );
+
+    h_el_phitheta_sect_final.push_back( new TH2F(Form("h_el_phitheta_s%d_final",s),Form("h_el_phitheta_s%d_final",s), 73, -180.0, 180.0, ntheta_bin, el_theta_min,el_theta_max) );
 
     h_el_W_vs_y_sect.push_back( new TH2F(Form("h_el_W_vs_y_s%d_final",s),Form("h_el_W_vs_y_s%d_final",s), 100, 0.9, 1.2, 100, 0.0, 1.10) );
     
@@ -706,18 +724,18 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   TH1F *h_el_theta_gen; 
   TH1F *h_el_theta_accp;
   
-  h_el_theta_rec = new TH1F("h_el_theta_rec","h_el_theta_rec_int", 30.0, 0.0, 30.0);
-  h_el_theta_gen = new TH1F("h_el_theta_gen","h_el_theta_gen_int", 30.0, 0.0, 30.0);
-  h_el_theta_accp = new TH1F("h_el_theta_accp","h_el_theta_accp_int", 30.0, 0.0, 30.0);
+  h_el_theta_rec = new TH1F("h_el_theta_rec","h_el_theta_rec_int", ntheta_bin, el_theta_min,el_theta_max);
+  h_el_theta_gen = new TH1F("h_el_theta_gen","h_el_theta_gen_int", ntheta_bin, el_theta_min,el_theta_max);
+  h_el_theta_accp = new TH1F("h_el_theta_accp","h_el_theta_accp_int", ntheta_bin, el_theta_min,el_theta_max);
   
 
   std::vector< TH1F* > h_el_theta_rec_sect;
   std::vector< TH1F* > h_el_theta_gen_sect;
   std::vector< TH1F* > h_el_theta_accp_sect;
   for ( int ss = 0; ss < 6; ss++){
-    h_el_theta_rec_sect.push_back( new TH1F(Form("h_el_theta_rec_s%d",ss), Form("h_el_theta_rec_s%d",ss), 30, 0.0, el_theta_max) );
-    h_el_theta_gen_sect.push_back( new TH1F(Form("h_el_theta_gen_s%d",ss), Form("h_el_theta_gen_s%d",ss), 30, 0.0, el_theta_max) );
-    h_el_theta_accp_sect.push_back( new TH1F(Form("h_el_theta_accp_s%d",ss), Form("h_el_theta_accp_s%d",ss), 30, 0.0, el_theta_max) );
+    h_el_theta_rec_sect.push_back( new TH1F(Form("h_el_theta_rec_s%d",ss), Form("h_el_theta_rec_s%d",ss), ntheta_bin, el_theta_min,el_theta_max));
+    h_el_theta_gen_sect.push_back( new TH1F(Form("h_el_theta_gen_s%d",ss), Form("h_el_theta_gen_s%d",ss), ntheta_bin, el_theta_min,el_theta_max));
+    h_el_theta_accp_sect.push_back( new TH1F(Form("h_el_theta_accp_s%d",ss), Form("h_el_theta_accp_s%d",ss), ntheta_bin, el_theta_min,el_theta_max) );
   }
 
   std::vector< TH1F* > h_el_theta_rec_per_phi;
@@ -725,9 +743,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH1F* > h_el_theta_accp_per_phi;
   
   for( int pp = 0; pp < 73; pp++ ){
-    h_el_theta_rec_per_phi.push_back( new TH1F(Form("h_el_theta_rec_phi%d",pp),Form("h_el_theta_rec_phi%d",pp), 30, 0.0, 30.0) );
-    h_el_theta_gen_per_phi.push_back( new TH1F(Form("h_el_theta_gen_phi%d",pp),Form("h_el_theta_gen_phi%d",pp), 30, 0.0, 30.0) );
-    h_el_theta_accp_per_phi.push_back( new TH1F(Form("h_el_theta_accp_phi%d",pp),Form("h_el_theta_acp_phi%d",pp), 30, 0.0, 30.0) );
+    h_el_theta_rec_per_phi.push_back( new TH1F(Form("h_el_theta_rec_phi%d",pp),Form("h_el_theta_rec_phi%d",pp), ntheta_bin, el_theta_min,el_theta_max));
+    h_el_theta_gen_per_phi.push_back( new TH1F(Form("h_el_theta_gen_phi%d",pp),Form("h_el_theta_gen_phi%d",pp), ntheta_bin, el_theta_min,el_theta_max) );
+    h_el_theta_accp_per_phi.push_back( new TH1F(Form("h_el_theta_accp_phi%d",pp),Form("h_el_theta_acp_phi%d",pp), ntheta_bin, el_theta_min,el_theta_max) );
   }
 
   std::vector< TH1F* > h_el_purity_p_num;
@@ -763,7 +781,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
      
   for( int ss = 0; ss < 6; ss++ ){
     h_el_accp_mat_p.push_back(new TH2F(Form("h_el_accp_mat_p_s%d",ss), Form("h_el_accp_mat_p_s%d",ss), 50,  0.0, Ebeam, 50,  0.0, Ebeam ) );
-    h_el_accp_mat_theta.push_back( new TH2F(Form("h_el_accp_mat_theta_s%d",ss), Form("h_el_accp_mat_theta_s%d",ss), 30, 0.0, 30.0,  30, 0.0, 30.0) );
+    h_el_accp_mat_theta.push_back( new TH2F(Form("h_el_accp_mat_theta_s%d",ss), Form("h_el_accp_mat_theta_s%d",ss), ntheta_bin, el_theta_min,el_theta_max, ntheta_bin, el_theta_min,el_theta_max));
     h_el_accp_mat_phi.push_back( new TH2F(Form("h_el_accp_mat_phi_s%d",ss), Form("h_el_accp_mat_phi_s%d",ss), 72, -180.0, 180.0, 72, -180.0, 180.0) );
   }
   
@@ -771,23 +789,23 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   int n_bins_mntm = 20;
   TH1F *h_p_bins = new TH1F("h_p_bins","h_p_bins",n_bins_mntm, 1.3, 2.5);			    
   for( int bb = 0; bb < n_bins_mntm; bb++ ){
-    h_el_theta_phi_per_mntm.push_back( new TH2F(Form("h_el_theta_phi_per_mntm_b%d",bb), Form("h_el_theta_phi_per_mntm_b%d",bb), 219, -180.0, 180.0, 30, 0.0, el_theta_max ) );
+    h_el_theta_phi_per_mntm.push_back( new TH2F(Form("h_el_theta_phi_per_mntm_b%d",bb), Form("h_el_theta_phi_per_mntm_b%d",bb), 219, -180.0, 180.0, ntheta_bin, el_theta_min,el_theta_max));
   }
 
   std::vector< TH2F* > h_el_theta_phi_per_vz;
   int n_bins_vz = 50;
   TH1F *h_vz_bins = new TH1F("h_vz_bins","h_vz_bins",n_bins_vz, 0.0, 10.0 );			    
   for( int bb = 0; bb< n_bins_vz; bb++ ){
-    h_el_theta_phi_per_vz.push_back( new TH2F(Form("h_el_theta_phi_per_vz_b%d",bb), Form("h_el_theta_phi_per_vz_b%d",bb), 219, -180.0, 180.0, 30, 0.0, el_theta_max ) );  
+    h_el_theta_phi_per_vz.push_back( new TH2F(Form("h_el_theta_phi_per_vz_b%d",bb), Form("h_el_theta_phi_per_vz_b%d",bb), 219, -180.0, 180.0, ntheta_bin, el_theta_min,el_theta_max));
   }
   
   std::vector< TH2F* > h_el_theta_phi_sect;
   std::vector< std::vector< TH2F* > > h_el_theta_phi_sect_per_p;
   for( int ss = 0; ss < 6; ss++ ){
-    h_el_theta_phi_sect.push_back( new TH2F(Form("h_el_theta_phi_s%d",ss), Form("h_el_theta_phi_s%d",ss), 30, 0.0, el_theta_max, 60, -30.0, 30.0 ) );  
+    h_el_theta_phi_sect.push_back( new TH2F(Form("h_el_theta_phi_s%d",ss), Form("h_el_theta_phi_s%d",ss), ntheta_bin, el_theta_min,el_theta_max, 60, -30.0, 30.0 ) );  
     std::vector< TH2F*> h2_temp_theta_phi_sect_per_p;
     for( int bb = 0; bb < n_bins_mntm; bb++ ){       
-      h2_temp_theta_phi_sect_per_p.push_back( new TH2F(Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), 30, 0.0, el_theta_max, 60, -30.0, 30.0 ) );   
+      h2_temp_theta_phi_sect_per_p.push_back( new TH2F(Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), ntheta_bin, el_theta_min,el_theta_max, 60, -30.0, 30.0 ) );   
   }
     h_el_theta_phi_sect_per_p.push_back(h2_temp_theta_phi_sect_per_p);
   }
@@ -819,7 +837,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
   TH2F *h_el_phitheta_accp_gen = new TH2F("h_el_phitheta_accp_gen","h_el_phitheta_accp_gen", 200, -180.0, 180.0, 200, 0.0, 30.0);
   for( int ss = 0; ss < 6; ss++ ){
-    h_el_theta_accp_gen.push_back( new TH1F(Form("h_el_theta_accp_gen_s%d",ss),Form("h_el_theta_accp_gen_s%d",ss), 30, 0.0, 30.0) );
+    h_el_theta_accp_gen.push_back( new TH1F(Form("h_el_theta_accp_gen_s%d",ss),Form("h_el_theta_accp_gen_s%d",ss), ntheta_bin, el_theta_min,el_theta_max) );
     h_el_ptheta_accp_gen.push_back( new TH2F(Form("h_el_ptheta_accp_gen_%d",ss),Form("h_el_ptheta_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 40.0) );
     h_el_wtheta_accp_gen.push_back( new TH2F(Form("h_el_wtheta_accp_gen_%d",ss), Form("h_el_wtheta_accp_gen_%d",ss),200, 0.0, 1.5, 200, 0.0, 40.0) );
     h_el_wphi_accp_gen.push_back( new TH2F(Form("h_el_wphi_accp_gen_%d",ss), Form("h_el_wphi_accp_gen_%d",ss),200, -180.0, 180.0 , 200, 0.0, 2.0) ); 
@@ -1201,10 +1219,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	h_el_q2w_sect[el_sect]->Fill( W, Q2 );
 	h_el_theta_sect[el_sect]->Fill(ele[select_ele].Theta()*180/Pival);
 	h_el_W_vs_y_sect[el_sect]->Fill(W, y);
-	h_el_wtheta_sect[el_sect]->Fill(W,ele[select_ele].Theta()*180/Pival);
 	
-	double w_cut_min = lowWValueCut[el_sect-1];
-	double w_cut_max = highWValueCut[el_sect-1];
+	double w_cut_min = 0.948 - 3.0*0.0222721;
+	double w_cut_max =  0.948 + 3.0*0.0222721;//highWValueCut[el_sect-1];
 
 	double calculated_energy = Ebeam/( 1 + (Ebeam/0.938)*(1 - cos(ele[select_ele].Theta())) );
 	double measured_energy = ele[select_ele].E();
@@ -1215,7 +1232,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 
 	if( W > w_cut_min && W < w_cut_max ){
 	  //if( W < 1.1 ) { 
-	  if( (ele[select_ele].Theta()*180/Pival) > 6.0 ){
+	  if( (ele[select_ele].Theta()*180/Pival) > 5.0 ){
 	    recon_event=true;
 
 	    // Fill best electron
@@ -1229,6 +1246,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    px_ele = ele[select_ele].Px();
 	    py_ele = ele[select_ele].Py();
 	    pz_ele = ele[select_ele].Pz();
+
+	    h_el_wtheta_sect[el_sect]->Fill(W,ele[select_ele].Theta()*180/Pival);
+
 
 	    E_ele_mc  = mc_ele[0].E();
 	    px_ele_mc = mc_ele[0].Px();
@@ -1361,10 +1381,17 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	hist_mc_electron_p_vs_theta->Fill(mc_ele[0].Theta()*180/Pival, mc_ele[0].P());
 	hist_mc_electron_p_vs_phi->Fill(mc_ele[0].Phi()*180/Pival, mc_ele[0].P());
 	hist_mc_electron_theta_vs_phi->Fill(mc_ele[0].Phi()*180/Pival, mc_ele[0].Theta()*180/Pival);
-
+	
+	
+	//////////////////////////////////////////////////////////////	
+	//needed for elastic CS acceptance for beam energy > 6
+	h_mc_el_wtheta->Fill(gen_W, mc_ele[0].Theta()*180/Pival);
+	//h_mc_el_wtheta_sect[mc_el_sect]->Fill( gen_W, mc_ele[0].Theta()*180/Pival);
+	//////////////////////////////////////////////////////////////
 	h_el_theta_gen_sect[0]->Fill( mc_ele[0].Theta()*180/Pival );  
 	h_el_theta_gen->Fill( mc_ele[0].Theta()*180/Pival );
 
+	
 
 	int phi_bin_to_fill = hist_mc_electron_theta_vs_phi->GetXaxis()->FindBin(mc_ele[0].Phi()*180/Pival) - 1;
 	//std::cout << " generated phi bin " << phi_bin_to_fill << std::endl;

@@ -46,7 +46,7 @@ int comparisonPlotter( const char* inFileData, const char* inFileMC, int run , c
 
   cout << "Reading from File: " << inFileData << " and " << inFileMC << endl;
   
-  TH2D *h_data_ec_pcal_hit_position_final = (TH2D*)fData->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_09");
+  /*  TH2D *h_data_ec_pcal_hit_position_final = (TH2D*)fData->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_09");
   TH2D *h_sim_ec_pcal_hit_position_final = (TH2D*)fMC->Get("FD_PID_electron_EC_plots/EC_PCAL_hit_position_cut_09");
 
   TCanvas *c1 = new TCanvas("C1","c1",920, 470);
@@ -72,7 +72,7 @@ int comparisonPlotter( const char* inFileData, const char* inFileMC, int run , c
   h_sim_ec_pcal_hit_position_final->Draw("colz");
 
   c1->SaveAs(Form("h2_r%d_f%s_comparison_pid_electron_ec_pcal_hit_position_cut09.pdf",run,field_config));
-
+  */
   TCanvas *c2 = new TCanvas("c2","c2",600,900);
   c2->Divide(2,3);
   for( int s = 0; s < 6; s++ ){

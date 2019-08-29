@@ -13,7 +13,7 @@ double alpha = 0.007299270;
 double proton_mass = 0.93827203;
 double beam_energy = 7.546;
 double pi = 3.1415926;
-int n_sectors = 6;
+int n_sectors = 1;
 
 double calculatePhotonFlux(double beamEnergy, double w, double qq){
   double nu = (pow(w,2) - pow(proton_mass, 2) + qq)/(2*proton_mass);
@@ -457,11 +457,11 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       m_g_cs[ss][q2b]->GetXaxis()->SetTitle("W (GeV)");
       m_g_cs[ss][q2b]->GetYaxis()->SetTitle("Norm. Yields");
       m_g_cs[ss][q2b]->SetMarkerSize(2);
-      //m_g_cs[ss][q2b]->Draw("AP+");      
+      m_g_cs[ss][q2b]->Draw("AP+");      
       m_g_cs[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.0);
-      //m_g_cs[ss][q2b]->GetHistogram()->SetMinimum(0.0);
-      //m_g_cs[ss][q2b]->GetHistogram()->SetMaximum(0.18);
-      //m_g_cs[ss][q2b]->Draw("AP+");      
+      m_g_cs[ss][q2b]->GetHistogram()->SetMinimum(0.0);
+      m_g_cs[ss][q2b]->GetHistogram()->SetMaximum(0.0082);
+      m_g_cs[ss][q2b]->Draw("AP+");      
       c_cs_sect->Update();
     }
     c_cs_sect->SaveAs(Form("h_el_q2s_cs_s%d_%s.pdf",ss,config));
@@ -485,12 +485,12 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       m_g_ln[ss][q2b]->GetYaxis()->SetTitle("Lum. Norm. Yields");
       m_g_ln[ss][q2b]->SetMarkerStyle(20);
       m_g_ln[ss][q2b]->SetMarkerSize(0.75);
-      //m_g_ln[ss][q2b]->Draw("AP+");      
-      //m_g_ln[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.4);
-      //m_g_ln[ss][q2b]->GetHistogram()->SetMinimum(0.0);
-      //m_g_ln[ss][q2b]->GetHistogram()->SetMaximum(0.18);
-      //m_g_ln[ss][q2b]->Draw("AP+");      
-      //c_ln_sect->Update();
+      m_g_ln[ss][q2b]->Draw("AP+");      
+      m_g_ln[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.0);
+      m_g_ln[ss][q2b]->GetHistogram()->SetMinimum(0.0);
+      m_g_ln[ss][q2b]->GetHistogram()->SetMaximum(0.000001);
+      m_g_ln[ss][q2b]->Draw("AP+");      
+      c_ln_sect->Update();
     }
     c_ln_sect->SaveAs(Form("h_el_q2s_lumnorm_s%d_%s.pdf",ss,config));
   }
@@ -511,12 +511,12 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       m_g_neln[ss][q2b]->GetYaxis()->SetTitle("N_{el} Norm. Yields");
       m_g_neln[ss][q2b]->SetMarkerStyle(20);
       m_g_neln[ss][q2b]->SetMarkerSize(0.75);
-      //m_g_neln[ss][q2b]->Draw("AP+");      
-      //m_g_ln[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.4);
-      //m_g_ln[ss][q2b]->GetHistogram()->SetMinimum(0.0);
-      //m_g_ln[ss][q2b]->GetHistogram()->SetMaximum(0.18);
-      //m_g_neln[ss][q2b]->Draw("AP+");      
-      //c_neln_sect->Update();
+      m_g_neln[ss][q2b]->Draw("AP+");      
+      m_g_neln[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.);
+      m_g_neln[ss][q2b]->GetHistogram()->SetMinimum(0.0);
+      m_g_neln[ss][q2b]->GetHistogram()->SetMaximum(4.58963e+06);
+      m_g_neln[ss][q2b]->Draw("AP+");      
+      c_neln_sect->Update();
     }
     c_neln_sect->SaveAs(Form("h_el_q2s_nelnorm_s%d_%s.pdf",ss,config));
   }
@@ -541,11 +541,11 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       v_g_model[q2b]->SetMarkerSize(0.4);
       
       mg_cs_result->Add(m_g_cs[ss][q2b]);
-      mg_cs_result->Add(v_g_model[q2b]);
+      //mg_cs_result->Add(v_g_model[q2b]);
       mg_cs_result->SetTitle(Form("Cross Section S%d",ss));
       mg_cs_result->Draw("APE");
       mg_cs_result->GetXaxis()->SetLimits(0.98, 2.);
-      mg_cs_result->GetHistogram()->SetMaximum(0.095); 
+      mg_cs_result->GetHistogram()->SetMaximum(0.002); 
       mg_cs_result->Draw("APE");
 
       //continue adding plotting style code here

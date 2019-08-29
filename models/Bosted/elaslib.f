@@ -24,7 +24,8 @@ c       n = 40
 
 	  theta_temp = theta
 c          cross =  elasrad(2.036, theta, 0.0024, 0.964); !tight cut
-          cross =  elasrad(2.221, theta_temp, 0.0057, 1.05); !loose cut
+c          cross =  elasrad(2.221, theta_temp, 0.0057, 1.05); !loose cut
+          cross =  elasrad(7.546, theta_temp, 0.0057, 1.05); !loose cut
 c          cross =  elas(2.221, theta_temp)
 	  theta = theta + theta_step
 

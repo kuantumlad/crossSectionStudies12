@@ -1,1 +1,94 @@
   Radiative elastic scattering
+ Incident electron energy =  7.546 GeV
+ Minimum accepted scattered electron energy is  0.500 GeV
+ Target thickness = 0.0058 (r.l.)
+ Each event in the bos bank contains 3 particles
+ Electron scattering angles range from   6.0 to  60.0 degrees
+  Elastic peak included
+ Start time Wed Aug 28 08:19:01 2019    
+ ntries =  16563007,  successes =   10001, mcall_max = 554
+ Elapsed CPU time =     0.11 minutes
+ distribution of mcall values in the inelastic tail region   1
+ fraction of tail calculation spent here: 0.250
+   3441    171     53     24     14      3      6      4      0      0
+      1      0      0      0      0      1      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+
+ distribution of mcall values in the inelastic tail region   2
+ fraction of tail calculation spent here: 0.250
+   1133      5      0      0      1      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+
+ distribution of mcall values in the inelastic tail region   3
+ fraction of tail calculation spent here: 0.050
+    104      6      5      9      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      1      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      1      1      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+
+ distribution of mcall values in the inelastic tail region   4
+ fraction of tail calculation spent here: 0.150
+    183      6      4      1      1      0      1      1      0      1
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+
+ distribution of mcall values in the inelastic tail region   5
+ fraction of tail calculation spent here: 0.300
+    320     29     23      9      8      2      2      5      2      0
+      0      0      0      1      2      1      1      2      0      1
+      2      0      0      0      0      0      1      0      0      1
+      0      0      0      0      0      0      0      1      1      0
+      1      0      0      0      0      0      0      0      0      0
+      0      0      0      1      0      0      0      0      0      0
+      0      0      0      1      0      0      0      0      0      0
+      0      0      0      0      0      0      1      0      0      0
+      0      1      0      0      0      0      0      0      0      0
+      1      0      0      0      0      0      0      0      0      3
+
+ distribution of mcall values in the elastic peak
+ fraction of total integration spent here: 0.800
+   1552      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+      0      0      0      0      0      0      0      0      0      0
+
+ number of successes per cpu second =*******
+ Quality factor for the run =   2.61628
+ Reference differential cross section was  0.002047
+ Integrated cross section (direct)=   0.11854 micro-barns
+ Integrated cross section (from successes)=   0.11860 micro-barns
+ Beam time at Luminosity =1.0E34 =   8.432 seconds
