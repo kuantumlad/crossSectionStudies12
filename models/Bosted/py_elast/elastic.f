@@ -1,40 +1,5 @@
-        program elaslib
-	real cross
-	double precision theta
-	real theta_temp
-	double precision :: theta_step, theta_max
-	double precision  theta_start
-	integer :: i ,n
-
-
-        integer j
-	character(len=32) :: arg
-
-	Real :: x, y
-
-	theta_start = 5.05D0
-	theta_max = 20
-	theta_step = 0.1D0
-
-	theta = theta_start
-	n = 350
-c       n = 40
-	do i=0, n+1
-
-
-	  theta_temp = theta
-c          cross =  elasrad(2.036, theta, 0.0024, 0.964); !tight cut
-c          cross =  elasrad(2.221, theta_temp, 0.0057, 1.05); !loose cut
-          cross =  elasrad(7.546, theta_temp, 0.0057, 1.05); !loose cut
-c          cross =  elas(7.546, theta_temp, 0.0057, 1.05)
-c         2.221, theta_temp)
-	  theta = theta + theta_step
-
-	write(*,*)  theta_temp, cross	
-	enddo
-	end
       real function elas(eb,theta)
-      
+      implicit none
 c     Returns the e-p differential cross section
 c     as a function of the electron scattering angle theta.
 
@@ -44,118 +9,56 @@ c     theta: scattering angle (deg)
       real e_prime              !Energy of the scattered electron
       real gep                  !Electric form factor of proton
       real gmp                  !Magnetic form factor of proton
-      real q2,q1	        !Momentum transfer squared
+      real q2,q1        !Momentum transfer squared
       real alpha                !Mott scattering constant, = e^2/4pi
       real tau                  !q^2/4M^2
-      real eb			!beam energy
+      real eb!beam energy
       real theta                !electron scattering angle
-      real rm_p			!proton mass
+      real rm_p!proton mass
       real s2,c2,theta2
+      real corr1,corr2,rmott
 
       data rm_p/.938/
 
       theta2 = theta*3.1415/180./2.
       s2 = sin(theta2)
       c2 = cos(theta2)
-      
-c     Energy of the scattered electron from recoil of the target: 
+
+c     Energy of the scattered electron from recoil of the target:
       e_prime=eb/(1.+(2.*eb/rm_p)*s2**2)
 
 c     Q squared, neglecting electron mass:
       q2=4.*eb*e_prime*s2**2
       q1=sqrt(q2)
-      
+
 c     Gep and Gmn dipole:
-c      gep=1./(1.+q2/0.71)**2
-c      gmp=2.793*gep
-      
+      gep=1./(1.+q2/0.71)**2
+      gmp=2.793*gep
+
 c     Bosted parameterization of form factors
 c     Phys. Rev. C 51, 409
-      corr1	= 1+0.62*q1+0.68*q2+2.8*q1**3+0.83*q1**4
-      corr2	= 1+0.35*q1+2.44*q2+0.5*q1**3+1.04*q1**4+0.34*q1**5
-      gep	= 1./corr1
-      gmp	= 2.7928/corr2
-      
+
+c      corr1= 1+0.62*q1+0.68*q2+2.8*q1**3+0.83*q1**4
+c      corr2= 1+0.35*q1+2.44*q2+0.5*q1**3+1.04*q1**4+0.34*q1**5
+c      gep= 1./corr1
+c      gmp= 2.7928/corr2
+
 c     Mott
-      rmott=389*(1./137.)**2/(4.*eb**2*s2**4)	! microbarns/sr
-      
-c     Recoil correction 
+      rmott=389*(1./137.)**2/(4.*eb**2*s2**4)! microbarns/sr
+
+c     Recoil correction
       rmott=rmott*(e_prime/eb)
-      
+
 c     Form factor
       tau=q2/(4.*rm_p**2)
       elas=rmott*
      $     ( ((gep**2+tau*gmp**2)/(1.+tau))*c2**2 +
      $     2.*tau*gmp**2*s2**2)
-      
-      return
-      end
-      
-      double precision function spence(x)
-      
-      double precision x
-      
-      if (abs(x).lt.0.1) then
-        spence = x+x**2/4.
-      elseif (x.gt.0.99.and.x.lt.1.01) then
-        spence = pi*pi/6.
-      elseif (x.gt.-1.01.and.x.lt.-0.99) then
-        spence = -pi*pi/12.
-      elseif (x.gt.0) then
-        spence = 0.1025+sintp(x)
-      else
-        spence = -0.0975+sintn(x)
-      endif
-      
-      end
-      
-      double precision function sintp(x)
-      implicit none
-      double precision x
-      double precision xstep,sum,y,arg
-      integer i
 
-      xstep	= (x-.1)/100.
-      sum	= 0.
-      y		= 0.1-xstep/2.
-      do i=1,100
-        y   	= y+xstep
-        arg 	= abs(1.-y)
-        sum 	= sum-dlog(arg)/y
-      enddo
-      sintp	= sum*xstep
-      
-      end
-
-      double precision function sintn(x)
-      implicit none
-      double precision x,xa,ystep,y,sum
-      integer i
-
-      xa	= abs(x)
-      ystep	= (xa-0.1)/100.
-      sum	= 0.
-      y		= 0.1-ystep/2.
-      do i=1,100
-        y	= y+ystep
-        sum	= sum-dlog(1.+y)/y
-      enddo
-      sintn	= sum*ystep
-      
-      end
-      
-      real function bfunc(z)
-      implicit none
-      real z,xi
-
-      xi = log(1440.)-2.*alog(z)/3.
-      xi = xi/(alog(183.)-alog(z)/3.)
-      bfunc = (4./3.)*(1.+((z+1.)/(z+xi))/(alog(183.)-alog(z)/3.)/9.)
-      
-      end
+c      return
+      end      
       
       real function elasrad( es, theta_d, t, wcut )  
-      
 c     Returns radiated cross section using equation II.6 of
 c     Mo and Tsai, Rev. Mod. Phys. 41, 205-235 (1969).
 
@@ -165,22 +68,27 @@ c     t: target thickness (radiation lengths)
 c     wcut: upper limit of W (should be > 0.938+W resolution - e.g. 1.0) (GeV)
 
 c     This program calls function elas defined above.
-      double precision spence,arg,sintp,sintn
+      implicit none
+c      real spence,arg
+
+      real arg
       real me,mp,pi,alpha,z,t,es,theta_d,theta,delta,wcut
       real b,cst1,eta,bt,sigunp,sigel,eel,qs
       real mpi
       real znuc,deltac(27),del_mo,delta_t,idel
       real arg11,arg15,arg19,arg23
       real epr,e1,e3,e4,gamma4,beta4
-      real radcor
+      real radcor, epcut
       real snth
-      real bfunc
+c      real bfunc
+      integer jdel 
 
       data pi/3.1415926/
       data mp/.9382/
       data mpi/.13957/
       data me/0.000511/
       data alpha/7.2993e-3/
+
 
 c      write(6,*) 'Hello' 
 c      write(6,*) 'Received ', es, theta_d, t, wcut
@@ -264,8 +172,8 @@ c      write(6,*) 'Received ', es, theta_d, t, wcut
       deltac(27)=znuc**2*spence(-arg)/beta4
 
       del_mo  = 0.
-      do idel=1,2
-         del_mo = del_mo + deltac(idel)
+      do jdel=1,2
+         del_mo = del_mo + deltac(jdel)
       enddo
       del_mo  = -alpha*del_mo/pi
 
@@ -279,5 +187,134 @@ c      print *, qs,del_mo,delta_t
 c      radcor  = 1.+del_mo+delta_t
       radcor = exp(del_mo+delta_t)
       elasrad = radcor*sigunp
+
+      contains 
+      real function spence(x)
+      implicit none     
+      real x
+      real pi
+      data pi/3.1415926/
+
+      if (abs(x).lt.0.1) then
+        spence = x+x**2/4.
+      elseif (x.gt.0.99.and.x.lt.1.01) then
+        spence = pi*pi/6.
+      elseif (x.gt.-1.01.and.x.lt.-0.99) then
+        spence = -pi*pi/12.
+      elseif (x.gt.0) then
+        spence = sintp(x) +0.1025
+      else
+        spence = sintn(x)-0.0975
+      endif
+      
       end
 
+      
+      real function sintp(x)
+      implicit none
+      real x
+      real xstep,sum,y,arg
+
+      integer i
+
+      xstep	= (x-.1)/100.
+      sum	= 0.
+      y		= 0.1-xstep/2.
+      do i=1,100
+        y   	= y+xstep
+        arg 	= abs(1.-y)
+        sum 	= sum-alog(arg)/y
+      enddo
+      sintp	= sum*xstep
+      
+      end
+
+      real function sintn(x)
+      implicit none
+      real x,xa,ystep,y,sum
+      integer i
+
+      xa	= abs(x)
+      ystep	= (xa-0.1)/100.
+      sum	= 0.
+      y		= 0.1-ystep/2.
+      do i=1,100
+        y	= y+ystep
+        sum	= sum-alog(1.+y)/y
+      enddo
+      sintn	= sum*ystep
+      
+      end 
+      
+      real function bfunc(z)
+      implicit none
+      real z,xi
+
+      xi = log(1440.)-2.*alog(z)/3.
+      xi = xi/(alog(183.0)-alog(z)/3.)
+      bfunc = (4./3.)*(1.+((z+1.)/(z+xi))/(alog(183.)-alog(z)/3.)/9.)      
+      end
+      real function elas(eb,theta)
+      implicit none
+c     Returns the e-p differential cross section
+c     as a function of the electron scattering angle theta.
+
+c     eb: beam energy (GeV)
+c     theta: scattering angle (deg)
+
+      real e_prime              !Energy of the scattered electron
+      real gep                  !Electric form factor of proton
+      real gmp                  !Magnetic form factor of proton
+      real q2,q1        !Momentum transfer squared
+      real alpha                !Mott scattering constant, = e^2/4pi
+      real tau                  !q^2/4M^2
+      real eb!beam energy
+      real theta                !electron scattering angle
+      real rm_p!proton mass
+      real s2,c2,theta2
+      real corr1,corr2,rmott
+
+      data rm_p/.938/
+
+      theta2 = theta*3.1415/180./2.
+      s2 = sin(theta2)
+      c2 = cos(theta2)
+
+c     Energy of the scattered electron from recoil of the target:
+      e_prime=eb/(1.+(2.*eb/rm_p)*s2**2)
+
+c     Q squared, neglecting electron mass:
+      q2=4.*eb*e_prime*s2**2
+      q1=sqrt(q2)
+
+c     Gep and Gmn dipole:
+       gep=1./(1.+q2/0.71)**2
+       gmp=2.793*gep
+
+c     Bosted parameterization of form factors
+c     Phys. Rev. C 51, 409
+
+c     corr1= 1+0.62*q1+0.68*q2+2.8*q1**3+0.83*q1**4
+c     corr2= 1+0.35*q1+2.44*q2+0.5*q1**3+1.04*q1**4+0.34*q1**5
+c     gep= 1./corr1
+c     gmp= 2.7928/corr2
+
+c     Mott
+      rmott=389*(1./137.)**2/(4.*eb**2*s2**4)! microbarns/sr
+
+c     Recoil correction
+      rmott=rmott*(e_prime/eb)
+
+c     Form factor
+      tau=q2/(4.*rm_p**2)
+      elas=rmott*
+     $     ( ((gep**2+tau*gmp**2)/(1.+tau))*c2**2 +
+     $     2.*tau*gmp**2*s2**2)
+
+c      return
+      end      
+      
+      end
+      
+
+ 

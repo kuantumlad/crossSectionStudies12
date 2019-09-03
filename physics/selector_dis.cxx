@@ -335,7 +335,6 @@ double kin_epkXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp);
 double kin_epKpKmXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp, TLorentzVector km);
 
 
-
 /// /////////////////////////////////////////////////////////////////////////////////////////////////////
 /// /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
@@ -571,12 +570,12 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   TH2F *hist_el_q2_w;
 
   std::vector<TH2F*> hist_el_q2_w_per_sect;
-  hist_el_q2_w=new TH2F("hist_electron_q2_w","hist_electron_q2_w",40, 0.9, 2.1, 20, 1.0, 6.0) ;  
+  hist_el_q2_w=new TH2F("hist_electron_q2_w","hist_electron_q2_w", 50, 0.8, 2.3, 24, 0.0, 6.0) ;  
   hist_el_q2_w->GetXaxis()->SetTitle("W (GeV)");
   hist_el_q2_w->GetYaxis()->SetTitle("Q2 (GeV^2)");
 
   for( int ss = 0 ; ss < 6; ss++ ){
-    hist_el_q2_w_per_sect.push_back(new TH2F(Form("hist_electron_q2_w_s%d",ss+1),Form("hist_electron_q2_w_s%d",ss+1),40, 0.9, 2.1, 20, 1.0, 6.0)) ;  
+    hist_el_q2_w_per_sect.push_back(new TH2F(Form("hist_electron_q2_w_s%d",ss+1),Form("hist_electron_q2_w_s%d",ss+1), 50, 0.8, 2.3, 24, 0.0, 6.0));  
     hist_el_q2_w_per_sect[ss]->GetXaxis()->SetTitle("W (GeV)");
     hist_el_q2_w_per_sect[ss]->GetYaxis()->SetTitle("Q2 (GeV^2)");
   }
@@ -625,7 +624,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   TH1F *hist_mc_electron_p; TH1F *hist_mc_electron_theta; TH1F *hist_mc_electron_phi;
   TH2F *hist_mc_electron_p_vs_theta; TH2F *hist_mc_electron_p_vs_phi; TH2F *hist_mc_electron_theta_vs_phi;
   TH2F *hist_mc_electron_q2_vs_w;
-  hist_mc_electron_q2_vs_w = new TH2F("hist_mc_all_electron_q2_vs_w","hist_mc_all_electron_q2_vs_w",40, 0.9, 2.1, 20, 1.0, 6.0);
+  hist_mc_electron_q2_vs_w = new TH2F("hist_mc_all_electron_q2_vs_w","hist_mc_all_electron_q2_vs_w", 50, 0.8, 2.3, 24, 0.0, 6.0);
   hist_mc_electron_q2_vs_w->GetXaxis()->CenterTitle();
   hist_mc_electron_q2_vs_w->GetYaxis()->CenterTitle();
   
@@ -700,16 +699,16 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
     h_el_theta_sect.push_back( new TH1F(Form("h_el_theta_s%d",s),Form("h_el_theta_s%d",s), 100, 0.0, 40.0) );
    
     //dmriser binning 
-    h_el_q2w_sect.push_back( new TH2F(Form("h_el_q2w_s%d",s),Form("h_el_q2w_s%d",s), 40, 0.9, 2.1, 20, 1.0, 6.0) );
-    h_el_q2w_sect_final.push_back( new TH2F(Form("h_el_q2w_final_s%d",s),Form("h_el_q2w_final_s%d",s), 40, 0.9, 2.1, 20, 1.0, 6.0) );
+    h_el_q2w_sect.push_back( new TH2F(Form("h_el_q2w_s%d",s),Form("h_el_q2w_s%d",s), 50, 0.8, 2.3, 24, 0.0, 6.0) );
+    h_el_q2w_sect_final.push_back( new TH2F(Form("h_el_q2w_final_s%d",s),Form("h_el_q2w_final_s%d",s), 50, 0.8, 2.3, 24, 0.0, 6.0) );
 
-    h_el_ptheta_sect.push_back( new TH2F(Form("h_el_ptheta_s%d",s),Form("h_el_ptheta_s%d",s), 200, 0.0, 2.5, 200, 0.0, 40.0) );
+    h_el_ptheta_sect.push_back( new TH2F(Form("h_el_ptheta_s%d",s),Form("h_el_ptheta_s%d",s), 200, 0.0, Ebeam+0.5, 200, 0.0, 40.0) );
     
-    h_el_p_sect_final.push_back( new TH1F(Form("h_el_p_s%d_final",s),Form("h_el_p_s%d_final",s),100, 0.0, 2.5) );
+    h_el_p_sect_final.push_back( new TH1F(Form("h_el_p_s%d_final",s),Form("h_el_p_s%d_final",s),100, 0.0, Ebeam+0.5) );
     h_el_theta_sect_final.push_back( new TH1F(Form("h_el_theta_s%d_final",s),Form("h_el_theta_s%d_final",s),30, 0.0, el_theta_max) );
     h_el_phi_sect_final.push_back( new TH1F(Form("h_el_phi_s%d_final",s),Form("h_el_phi_s%d_final",s), 73, -180.0, 180.0 ) );
 
-    h_el_ptheta_sect_final.push_back( new TH2F(Form("h_el_ptheta_s%d_final",s),Form("h_el_ptheta_s%d_final",s), 200, 0.0, 2.5, 200, 0.0, el_theta_max) );
+    h_el_ptheta_sect_final.push_back( new TH2F(Form("h_el_ptheta_s%d_final",s),Form("h_el_ptheta_s%d_final",s), 200, 0.0, Ebeam+0.5, 200, 0.0, el_theta_max) );
     h_el_phitheta_sect_final.push_back( new TH2F(Form("h_el_phitheta_s%d_final",s),Form("h_el_phitheta_s%d_final",s), 73, -180.0, 180.0, 30, 0.0, el_theta_max) );
 
     h_el_W_vs_y_sect.push_back( new TH2F(Form("h_el_W_vs_y_s%d_final",s),Form("h_el_W_vs_y_s%d_final",s), 100, 0.9, 4.0, 100, 0.0, 1.10) );
@@ -750,7 +749,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
   std::vector< TH2F* > h_el_theta_phi_per_mntm;
   int n_bins_mntm = 20;
-  TH1F *h_p_bins = new TH1F("h_p_bins","h_p_bins",n_bins_mntm, 1.3, 2.5);			    
+  TH1F *h_p_bins = new TH1F("h_p_bins","h_p_bins",n_bins_mntm, 1.3, Ebeam+0.5);			    
   for( int bb = 0; bb < n_bins_mntm; bb++ ){
     h_el_theta_phi_per_mntm.push_back( new TH2F(Form("h_el_theta_phi_per_mntm_b%d",bb), Form("h_el_theta_phi_per_mntm_b%d",bb), 219, -180.0, 180.0, 30, 0.0, el_theta_max ) );
   }
@@ -772,7 +771,48 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   }
     h_el_theta_phi_sect_per_p.push_back(h2_temp_theta_phi_sect_per_p);
   }
+
+  TH2F *h2_wq2_accp_rec = new TH2F("h2_wq2_accp_rec","h2_wq2_accp_rec",50, 0.8, 2.3, 24, 0.0, 6.0);
+  TH2F *h2_wq2_accp_gen = new TH2F("h2_wq2_accp_gen","h2_wq2_accp_gen",50, 0.8, 2.3, 24, 0.0, 6.0);
   
+  std::vector< TH2F* > v_wq2_accp_rec_sect;
+  for( int ss = 0; ss < 6; ss++ ){
+    v_wq2_accp_rec_sect.push_back( new TH2F(Form("h_wq2_accp_rec_s%d",ss),Form("h_wq2_accp_rec_s%d",ss),50, 0.8, 2.3, 24, 0.0, 6.0) );
+  }
+
+  //std::cout << " bitwiser 4&3 " << 4 & 3 << std::endl;
+
+  // use for acceptance
+
+  std::vector< TH2F* > v_wq2_accp_rec;
+  std::vector< TH2F* > v_wq2_accp_gen;
+  std::vector< TH2F* > v_wq2_accp_accp;
+
+  // use for acceptance 
+  std::vector< std::vector< TH2F* > > h_el_purity_wq2_num;
+  std::vector< std::vector< TH2F* > > h_el_purity_wq2_denom;
+
+  for( int ii = 0; ii < 20; ii++ ){
+    //50, 0.8, 2.3, 24, 0.0, 6.0
+    v_wq2_accp_rec.push_back( new TH2F(Form("h_el_wq2_bb%d_rec",ii), Form("h_el_wq2_bb%d_rec",ii), (ii+1)*6, 0.80, 2.3, 24, 0.0, 6.0 ) );
+    v_wq2_accp_gen.push_back( new TH2F(Form("h_el_wq2_bb%d_gen",ii), Form("h_el_wq2_bb%d_gen",ii), (ii+1)*6, 0.80, 2.3, 24, 0.0, 6.0 ) );
+    v_wq2_accp_accp.push_back( new TH2F(Form("h_el_wq2_bb%d_accp",ii), Form("h_el_wq2_bb%d_acpp",ii), (ii+1)*6, 0.80, 2.3, 24, 0.0, 6.0 ) );
+
+    std::vector< TH2F* > temp_config_qq_num;
+    std::vector< TH2F* > temp_config_qq_denom;
+    for( int yy = 0; yy < 5; yy++ ){
+      temp_config_qq_num.push_back( new TH2F(Form("h_el_wq2_purity_num_q2config%d_wconfig%d",ii,yy),Form("h_el_wq2_purity_num_q2config%d_wconfig%d",ii,yy), (ii+1)*6, 0.80, 2.3, (yy+1)*6, 0.0, 6.0 ) );
+      temp_config_qq_denom.push_back( new TH2F(Form("h_el_wq2_purity_denom_q2config%d_wconfig%d",ii,yy),Form("h_el_wq2_purity_denom_q2config%d_wconfig%d",ii,yy), (ii+1)*6, 0.80, 2.3, (yy+1)*6, 0.0, 6.0 ) );    
+    }
+    h_el_purity_wq2_num.push_back( temp_config_qq_num );
+    h_el_purity_wq2_denom.push_back(temp_config_qq_denom);   
+  }
+
+
+  
+
+
+   
   out->mkdir("accecpted_rejected");				
   out->cd("accecpted_rejected");
   std::vector< TH1F*> h_el_theta_rej_gen;
@@ -785,10 +825,10 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   for( int ss = 0; ss < 6; ss++ ){
 
     h_el_theta_rej_gen.push_back( new TH1F(Form("h_el_theta_rej_gen_s%d",ss),Form("h_el_theta_rej_gen_s%d",ss), 30, 0.0, 30.0) );
-    h_el_ptheta_rej_gen.push_back( new TH2F(Form("h_el_ptheta_rej_gen_%d",ss),Form("h_el_ptheta_rej_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 40.0) );
+    h_el_ptheta_rej_gen.push_back( new TH2F(Form("h_el_ptheta_rej_gen_%d",ss),Form("h_el_ptheta_rej_gen_%d",ss), 200, 0.0, Ebeam+0.5, 200, 0.0, 40.0) );
     h_el_wtheta_rej_gen.push_back( new TH2F(Form("h_el_wtheta_rej_gen_%d",ss), Form("h_el_wtheta_rej_gen_%d",ss),200, 0.0, 1.5, 200, 0.0, 40.0) );
     h_el_wphi_rej_gen.push_back( new TH2F(Form("h_el_wphi_rej_gen_%d",ss), Form("h_el_wphi_rej_gen_%d",ss),200, -180.0, 180.0 , 200, 0.0, 2.0) ); 
-    h_el_pw_rej_gen.push_back( new TH2F(Form("h_el_pw_rej_gen_%d",ss), Form("h_el_pw_rej_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 2.0 ) );
+    h_el_pw_rej_gen.push_back( new TH2F(Form("h_el_pw_rej_gen_%d",ss), Form("h_el_pw_rej_gen_%d",ss), 200, 0.0, Ebeam+0.5, 200, 0.0, 2.0 ) );
 
   }
 
@@ -799,15 +839,14 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   std::vector< TH2F*> h_el_pw_accp_gen;
 
   TH2F *h_el_phitheta_accp_gen = new TH2F("h_el_phitheta_accp_gen","h_el_phitheta_accp_gen", 200, -180.0, 180.0, 200, 0.0, 30.0);
-  TH2F *h_el_q2w_gen = new TH2F("h_el_q2w_gen","h_el_q2w_gen",40, 0.9, 2.1, 20, 1.0, 6.0);
+  TH2F *h_el_q2w_gen = new TH2F("h_el_q2w_gen","h_el_q2w_gen",50, 0.8, 2.3, 24, 0.0, 6.0);
   
-
   for( int ss = 0; ss < 6; ss++ ){
     h_el_theta_accp_gen.push_back( new TH1F(Form("h_el_theta_accp_gen_s%d",ss),Form("h_el_theta_accp_gen_s%d",ss), 30, 0.0, 30.0) );
-    h_el_ptheta_accp_gen.push_back( new TH2F(Form("h_el_ptheta_accp_gen_%d",ss),Form("h_el_ptheta_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 40.0) );
-    h_el_wtheta_accp_gen.push_back( new TH2F(Form("h_el_wtheta_accp_gen_%d",ss), Form("h_el_wtheta_accp_gen_%d",ss),200, 0.0, 1.5, 200, 0.0, 40.0) );
+    h_el_ptheta_accp_gen.push_back( new TH2F(Form("h_el_ptheta_accp_gen_%d",ss),Form("h_el_ptheta_accp_gen_%d",ss), 200, 0.0, Ebeam+0.5, 200, 0.0, 40.0) );
+    h_el_wtheta_accp_gen.push_back( new TH2F(Form("h_el_wtheta_accp_gen_%d",ss), Form("h_el_wtheta_accp_gen_%d",ss),200, 0.0, Ebeam+0.5, 200, 0.0, 40.0) );
     h_el_wphi_accp_gen.push_back( new TH2F(Form("h_el_wphi_accp_gen_%d",ss), Form("h_el_wphi_accp_gen_%d",ss),200, -180.0, 180.0 , 200, 0.0, 2.0) ); 
-    h_el_pw_accp_gen.push_back( new TH2F(Form("h_el_pw_accp_gen_%d",ss), Form("h_el_pw_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 2.0 ) );
+    h_el_pw_accp_gen.push_back( new TH2F(Form("h_el_pw_accp_gen_%d",ss), Form("h_el_pw_accp_gen_%d",ss), 200, 0.0, Ebeam+0.5, 200, 0.0, 2.0 ) );
   }
 
 
@@ -871,7 +910,7 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
   for(int s = 0; s < 6; s++ ){   
     h_el_vz_sect.push_back( new TH1D(Form("h_el_vz_s%d",s), Form("h_el_vz_s%d",s), 100, -40.0, 40.0) );
-    h2_el_vz_p_sect.push_back( new TH2D(Form("h2_el_vz_p_s%d", s), Form("h2_el_vz_p_s%d", s), 100, -40.0, 40.0, 100, 0.0, 2.6) );
+    h2_el_vz_p_sect.push_back( new TH2D(Form("h2_el_vz_p_s%d", s), Form("h2_el_vz_p_s%d", s), 100, -40.0, 40.0, 100, 0.0,Ebeam+0.5) );
   }
 
   for( int bb = 0; bb < n_bins_mntm ; bb ++ ){
@@ -1199,9 +1238,9 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
 	//if( W > w_cut_min && W < 1.1 ) { ///w_cut_max ){
 	h_el_w_sect[el_sect]->Fill( W );
-	bool w_cut = W > 1.0;
+	bool w_cut = W > 0.0;//1.0;
 	bool y_cut = y < 0.8;
-	bool q2_cut= Q2 > 1.0;
+	bool q2_cut= Q2 > 0.0;
 	bool p_cut =  ele[select_ele].P() > 1.0 ;
 
 	if( w_cut && y_cut && q2_cut && p_cut ){
@@ -1225,6 +1264,15 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	    py_ele_mc = mc_ele[0].Py();
 	    pz_ele_mc = mc_ele[0].Pz();
 	    out_tree1.Fill();
+
+
+	    // acceptance stuff for inclusive 
+	    for( int ii = 0; ii < v_wq2_accp_rec.size(); ii++){
+	      v_wq2_accp_rec[ii]->Fill(W,Q2);
+	    }
+	    h2_wq2_accp_rec->Fill(W,Q2);
+	    v_wq2_accp_rec_sect[el_sect-1]->Fill(W,Q2);
+
 	   
 	    if(ele[select_ele].P() > 0) hist_electron_p->Fill(ele[select_ele].P());
 	    if(ele[select_ele].Theta() > 0) hist_electron_theta->Fill(ele[select_ele].Theta()*180/Pival);
@@ -1358,6 +1406,22 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
 	hist_mc_electron_q2_vs_w->Fill( gen_W, kin_Q2(mc_ele[0]) ); 
 	
+	double gen_y = kin_y(mc_ele[0]);
+	double gen_q2 = kin_Q2(mc_ele[0]);
+	double gen_p = mc_ele[0].P();
+	
+	
+	bool gen_w_cut = gen_W > 0.0;//1.0;
+	bool gen_y_cut = gen_y < 0.8;
+	bool gen_q2_cut= gen_q2 > 0.0;
+	bool gen_p_cut =  gen_p > 1.0 ;
+
+	if( gen_w_cut && gen_y_cut && gen_q2_cut && gen_p_cut ){	  
+	  h2_wq2_accp_gen->Fill(gen_W, gen_q2);
+	  for( int ii = 0; ii < v_wq2_accp_gen.size(); ii++){
+	    v_wq2_accp_gen[ii]->Fill(gen_W, gen_q2);
+	  }
+	}
 
 
 	if( !recon_event ){
@@ -1388,6 +1452,23 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 	    double resolution_theta = ele[select_ele].Theta()*180/Pival - mc_ele[0].Theta()*180/Pival;
 	    p_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta, 1.0);
 	    h_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta);
+
+
+
+	    for( int xx = 0; xx < h_el_purity_wq2_num.size(); xx++ ){
+	      for( int yy = 0; yy < h_el_purity_wq2_denom[xx].size(); yy++ ){
+ 		int gen_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(gen_W,gen_q2);
+ 		int rec_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(kin_W(ele[select_ele]), kin_Q2(ele[select_ele]));
+		if( gen_bin_purity_q2w == rec_bin_purity_q2w ){
+		  h_el_purity_wq2_num[xx][yy]->SetBinContent( rec_bin_purity_q2w, h_el_purity_wq2_num[xx][yy]->GetBinContent(rec_bin_purity_q2w) + 1);
+		  //std::cout << " for bin config " << xx << " " << yy << " rec bin " << rec_bin_purity_q2w  << " gen bin " << gen_bin_purity_q2w << std::endl;
+		}
+		h_el_purity_wq2_denom[xx][yy]->SetBinContent( gen_bin_purity_q2w, h_el_purity_wq2_denom[xx][yy]->GetBinContent(gen_bin_purity_q2w) + 1);
+	      }
+	    }
+	    
+	    
+
  	    if( gen_bin == rec_bin ){
 	      h_mig_el_theta[bg-1]->SetBinContent(rec_bin, h_mig_el_theta[bg-1]->GetBinContent(rec_bin)+1);
 	    }
@@ -1412,14 +1493,18 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
   }
 
 
-  TCanvas *c_per_phi_bin = new TCanvas("c_per_phi_bin","c_per_phi_bin",1000, 1000);
-  c_per_phi_bin->Divide(8,10);
+  //TCanvas *c_per_phi_bin = new TCanvas("c_per_phi_bin","c_per_phi_bin",1000, 1000);
+  //c_per_phi_bin->Divide(8,10);
   for( int bp = 0; bp < h_el_theta_gen_per_phi.size(); bp++ ){
-    c_per_phi_bin->cd(bp);
+    //  c_per_phi_bin->cd(bp);
     h_el_theta_accp_per_phi[bp]->Divide(h_el_theta_rec_per_phi[bp], h_el_theta_gen_per_phi[bp], 1.0, 1.0);
-    h_el_theta_accp_per_phi[bp]->Draw();
+    //h_el_theta_accp_per_phi[bp]->Draw();
   }
 
+  
+  for( int ii = 0; ii < v_wq2_accp_accp.size(); ii++ ){
+    v_wq2_accp_accp[ii]->Divide(v_wq2_accp_rec[ii], v_wq2_accp_gen[ii], 1.0, 1.0);
+  }
 
 
   cout << endl;

@@ -4813,7 +4813,7 @@ cout << "Analysing Tree: " << inTree << endl;
 cout << "Event Loop starting ... " << endl;
 cout << endl;
 
- int nentries = 500000;//anaTree->GetEntriesFast();
+ int nentries = anaTree->GetEntriesFast();
 
 for(Int_t k=0; k<nentries;k++){    
 

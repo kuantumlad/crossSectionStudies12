@@ -25,6 +25,7 @@ TH1F* AcceptanceRatio(TH1F*,TH1F*);
 TH2F* AcceptanceRatio2D(TH2F*,TH2F*);
 TH2F* WriteAcceptanceRatio2D(TH2F*,TH2F*, bool);
 void  WriteAcceptanceProjectionY( TH2F*, TH2F*, int, const char*, int );
+void AceptanceRatioProjectionX( TH2F, TH2F*, bool);
 
 TH1F* AcceptanceRatio(TH1F *h_rec, TH1F *h_gen ){
 
@@ -217,6 +218,57 @@ TGraphErrors* AcceptanceProjectionY( TH2F *hr, TH2F *hg, bool per_sector ){
 
 }
 
+//TGraphErrors* AcceptanceProjectionX( TH2F *hr, TH2F *hg, bool per_sector ){
+std::map<int, TGraphErrors*> AcceptanceProjectionX( TH2F *hr, TH2F *hg, bool per_sector ){
+
+  //int is y slice, graph is the X   
+  std::map<int, TGraphErrors* > accp_projX;
+
+  std::cout << " Getting Acceptance for " << hr->GetTitle() << " along X " <<  std::endl; 
+  int nbinY = hr->GetYaxis()->GetNbins();
+  std::cout << " scanning along " << nbinY << " Y bins " << std::endl;
+  for( int yy = 1; yy < nbinY ; yy++ ){    
+    std::cout << " Y BIN " << yy << std::endl;
+
+    TH1D *hrx = hr->ProjectionX(Form("%s_yb%d",hr->GetTitle(),yy), yy,yy);
+    TH1D *hgx = hg->ProjectionX(Form("%s_yb%d",hg->GetTitle(),yy), yy,yy);
+
+    int nbin = hrx->GetNbinsX();
+    std::cout << " number of bins along projectionX " << nbin << std::endl;
+
+    std::vector<double> v_b_center;
+    std::vector<double> v_accp;
+    std::vector<double> v_b_center_err;
+    std::vector<double> v_accp_err;
+
+    int sector_scale = 6.0;
+    if( !per_sector ) sector_scale = 1.0;
+    std::cout << " setting sector scale to " << sector_scale << std::endl;
+
+    for( int ii =0; ii <nbin; ii++ ){
+      double hr_count = (double)hrx->GetBinContent(ii);
+      // divide gen by 6 to get approximate generted events per sector
+      double hg_count = (double)hgx->GetBinContent(ii);///sector_scale;
+      double accp = (hr_count/hg_count) * ( sector_scale);
+      double accp_ratio_err =1.0/hgx->GetBinContent(ii)  * sqrt( hrx->GetBinContent(ii)*hrx->GetBinContent(ii) / hgx->GetBinContent(ii) + hrx->GetBinContent(ii)); 
+      std::cout << " bin " << ii << " rec bin center " << hrx->GetBinCenter(ii) << " hr_count " << hr_count << " gen bin center " << hgx->GetBinCenter(ii) <<"  hg_count "<< hg_count << " accp " << accp  << " err " << accp_ratio_err << std::endl;      
+      if( hr_count == 0 || hg_count == 0 ){ accp=0.0; accp_ratio_err=0.0; }
+      if( hrx->GetBinCenter(ii) < 0.99 ) continue;
+      
+      v_b_center.push_back(hrx->GetBinCenter(ii) );
+      v_accp.push_back(accp);
+      v_b_center_err.push_back(0.0);
+      v_accp_err.push_back(accp_ratio_err);
+    }
+    TGraphErrors *graph = new TGraphErrors(v_b_center.size(), &v_b_center[0], &v_accp[0], &v_b_center_err[0], &v_accp_err[0] );
+    graph->SetTitle(Form("accp_slice_y%d",yy));
+    accp_projX[yy] = graph;
+    //return graph;
+  }
+  std::cout << " size of map is " << accp_projX.size() << std::endl;
+  return accp_projX;
+}
+
 void WriteAcceptanceProjectionY( TH2F *hr, TH2F *hg, int run, const char* field, int sector ){
   
 
@@ -319,7 +371,7 @@ void WriteAcceptanceRatio2D(TH2F* h_rec, TH2F* h_gen, int run, const char* field
 }
 
 
-int acceptanceExtractorHE(const char* inFileData, int run, const char* field_config ){ // const char* outfile, int run ){
+int acceptanceExtractorDISv0(const char* inFileData, int run, const char* field_config ){ // const char* outfile, int run ){
 
  
   TFile *fData; 
@@ -506,18 +558,31 @@ int acceptanceExtractorHE(const char* inFileData, int run, const char* field_con
   //WriteAcceptanceRatio2D(h_rc_all_el_theta_vs_phi, h_mc_all_el_theta_vs_phi, run, field_config);
 
 
-
   TCanvas *c_g_accp_s = new TCanvas("c_g_accp_s","c_g_accp_s",1200,800);
   c_g_accp_s->Divide(2,3);  
   for ( int s = 0; s < 6; s++ ){
     c_g_accp_s->cd(s+1);
-    TH2F *h_rec_temp  = (TH2F*)fData->Get(Form("kinematics/h_el_wtheta_s%d_final",s+1));
-    TH2F *h_gen_temp = (TH2F*)fData->Get("mc/h_mc_el_wtheta_cut");
+    TH2F *h_rec_temp  = (TH2F*)fData->Get(Form("acceptance/h_wq2_accp_rec_s%d",s));
+    TH2F *h_gen_temp = (TH2F*)fData->Get("acceptance/h2_wq2_accp_gen");
     std::cout << " getting acceptance for sector " << s << std::endl;
-    TGraphErrors *g_accp_sector = AcceptanceProjectionY(h_rec_temp, h_gen_temp, true);   
-    WriteAcceptanceProjectionY( h_rec_temp, h_gen_temp, run, field_config, s );
-    g_accp_sector->SetTitle(Form(" Acceptance Sector %d",s+1));
-    g_accp_sector->Draw("AP");
+    std::map<int, TGraphErrors*> m_g_acc =  AcceptanceProjectionX(h_rec_temp, h_gen_temp, true);   
+    std::cout << " map of wq2 accep size is " << m_g_acc.size() << std::endl;
+    TCanvas *c_temp = new TCanvas(Form("accp_slice_sect%d",s),Form("accp_slice_sect%d",s), 1000, 1000 );
+    c_temp->Divide(5,5);
+    
+    for( int yy = 1; yy < m_g_acc.size(); yy++ ){
+      std::cout << " drawing slice " << yy << std::endl;
+      c_temp->cd(yy+1);
+      m_g_acc[yy]->GetXaxis()->SetLimits(0.97,2.5);
+      m_g_acc[yy]->GetHistogram()->SetMaximum(1.0);
+      m_g_acc[yy]->GetHistogram()->SetMinimum(0.0);
+      m_g_acc[yy]->GetXaxis()->SetTitle("W (GeV)");      
+      m_g_acc[yy]->Draw("AP");
+      //WriteAcceptanceProjectionY( h_rec_temp, h_gen_temp, run, field_config, s );
+      //g_accp_sector->SetTitle(Form(" Acceptance Sector %d",s+1));
+      //g_accp_sector->Draw("AP");
+    }
+    c_temp->SaveAs(Form("g_accp_q2bins_w_s%d_%s.pdf",s,field_config));
   }
   c_g_accp_s->SaveAs(Form("g_accp_theta_per_sector%s.pdf",field_config));
 
@@ -528,15 +593,34 @@ int acceptanceExtractorHE(const char* inFileData, int run, const char* field_con
   c_g_accp_bb->Divide(4,5);  
   for( int bb = 0; bb < 20; bb++ ){
     c_g_accp_bb->cd(bb+1);
-    TH2F *h_rec = (TH2F*)fData->Get(Form("acceptance/h_el_wtheta_bb%d_rec",bb));
-    TH2F *h_gen = (TH2F*)fData->Get(Form("acceptance/h_el_wtheta_bb%d_gen",bb));
-    TGraphErrors *g_accp_bb = AcceptanceProjectionY(h_rec, h_gen, false);
-    g_accp_bb->SetTitle(Form("Theta Accp B%d",bb));
-    g_accp_bb->SetMarkerStyle(20);
-    g_accp_bb->SetMarkerSize(0.7);
-    g_accp_bb->Draw("AP");
+    TH2F *h_rec = (TH2F*)fData->Get(Form("acceptance/h_el_wq2_bb%d_rec",bb));
+    TH2F *h_gen = (TH2F*)fData->Get(Form("acceptance/h_el_wq2_bb%d_gen",bb));
+    //    TGraphErrors *g_accp_bb = AcceptanceProjectionY(h_rec, h_gen, false);
+
+    std::map<int, TGraphErrors*> m_g_acc =  AcceptanceProjectionX(h_rec, h_gen, false);   
+    std::cout << " map of wq2 accep size is " << m_g_acc.size() << std::endl;
+    TCanvas *c_temp = new TCanvas(Form("accp_slice_bb%d",bb),Form("accp_slice_bb%d",bb), 1000, 1000 );
+    c_temp->Divide(5,5);
+    
+    for( int yy = 1; yy < m_g_acc.size(); yy++ ){
+      std::cout << " drawing slice " << yy << std::endl;
+      c_temp->cd(yy+1);
+      m_g_acc[yy]->GetXaxis()->SetLimits(0.97,2.5);
+      m_g_acc[yy]->GetHistogram()->SetMaximum(1.05);
+      m_g_acc[yy]->GetHistogram()->SetMinimum(0.0);
+      m_g_acc[yy]->GetXaxis()->SetTitle("W (GeV)");      
+      m_g_acc[yy]->Draw("AP");
+      //WriteAcceptanceProjectionY( h_rec_temp, h_gen_temp, run, field_config, s );
+      //g_accp_sector->SetTitle(Form(" Acceptance Sector %d",s+1));
+      //g_accp_sector->Draw("AP");
+    }
+    c_temp->SaveAs(Form("g_accp_q2w_bb%d_%s.pdf",bb,field_config));
+    //g_accp_bb->SetTitle(Form("W Accp B%d",bb));
+    //g_accp_bb->SetMarkerStyle(20);
+    //g_accp_bb->SetMarkerSize(0.7);
+    //g_accp_bb->Draw("AP");
   }
-  c_g_accp_bb->SaveAs(Form("g_accp_Nthetabins_%s.pdf",field_config));
+  //c_g_accp_bb->SaveAs(Form("g_accp_Nthetabins_%s.pdf",field_config));
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

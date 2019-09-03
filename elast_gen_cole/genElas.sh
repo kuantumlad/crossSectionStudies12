@@ -21,8 +21,10 @@ endif
 set fNumber = 0
  while ( $fNumber <= $num_lund_files) 
  echo " creating lund file " $fNumber
- elast_gen < test_input${beam_energy}${rad_status}.inp
+ ./elast_gen < test_input${beam_energy}${rad_status}.inp
  mv clas12.lund ${output_lund_dir}/clas12_${beam_energy}GeV_${fNumber}.lund
  mv elast_gen.rz ${output_lund_dir}/elast_gen_${beam_energy}GeV_${fNumber}.rz
+ #mv clas12.lund clas12_${beam_energy}GeV_${fNumber}.lund
+ #mv elast_gen.rz elast_gen_${beam_energy}GeV_${fNumber}.rz
 @ fNumber++
  end

@@ -31,7 +31,7 @@
 // TO USE :
 
 //selectorComparisonPlotter("elastic_out_clas12_002587.10.99.root","mc_selector_clas12_2GeV.0.100_tm06sm06.root","sim_elastic_clas12_2GeV.0.100_tm06sm06.root",2587,"tm06sm06")
-
+double Ebeam = 7.546;
 
 int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, const char* inFileSim, int run , const char* field_config ){
 
@@ -53,12 +53,18 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   cout << "Reading from File: " << inFileData << " and " << inFileMC << " "  << inFileSim << endl;
   
   bool printAll = false;
+  bool setMinZero = true;
+  double pmin = Ebeam-2.0;
+  if( !setMinZero ) pmin = 0.0;
 
   TCanvas *c0 = new TCanvas("c0","c0",900,900);
   c0->cd(1);
   TH1D *h_data_final_p = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_p");
   TH1D *h_sim_final_p = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_p");
   double scale_p_factor = h_data_final_p->GetMaximum()/h_sim_final_p->GetMaximum();
+  std::cout << " data events " << h_data_final_p->GetEntries() << std::endl;
+  std::cout << " sim events " << h_sim_final_p->GetEntries() << std::endl;
+
   h_sim_final_p->Scale(scale_p_factor);
   
   h_data_final_p->SetLineColor(kRed); 
@@ -67,12 +73,12 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   h_data_final_p->GetXaxis()->CenterTitle();
 
   h_sim_final_p->Draw("HIST");
-  h_sim_final_p->GetXaxis()->SetRangeUser(1.25,2.5);
+  h_sim_final_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_sim_final_p->Draw("HIST");
 
 
   h_data_final_p->Draw("HIST SAME");
-  h_data_final_p->GetXaxis()->SetRangeUser(1.25,2.5);
+  h_data_final_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_data_final_p->Draw("HIST SAME");
 
 
@@ -102,6 +108,9 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   TH1D *h_data_final_phi = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_phi");
   TH1D *h_sim_final_phi = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_phi");
   double scale_phi_factor = h_data_final_phi->GetMaximum()/h_sim_final_phi->GetMaximum();
+  std::cout << " data events " << h_data_final_phi->GetEntries() << std::endl;
+  std::cout << " sim events " << h_sim_final_phi->GetEntries() << std::endl;
+
   h_sim_final_phi->Scale(scale_phi_factor);
   
   h_data_final_phi->SetLineColor(kRed); 
@@ -125,6 +134,10 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
 
     double scale_factor = h_data_p->GetMaximum()/h_sim_p->GetMaximum();
     std::cout << " Total number of entries in p data histogram " << scale_factor << std::endl;
+    std::cout << " data events " << h_data_p->GetEntries() << std::endl;
+    std::cout << " sim events " << h_sim_p->GetEntries() << std::endl;
+
+
     //h_data_p->Scale(1.0/scale_factor);
     h_sim_p->Scale(scale_factor);
 
@@ -133,13 +146,13 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
 
     h_data_p->SetTitle(Form("Electron Momentum S%d",s+1));
     h_data_p->Draw("HIST SAME");
-    h_data_p->GetXaxis()->SetRangeUser(1.5,2.5);
+    h_data_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
     h_data_p->GetXaxis()->SetTitle("Momentum [GeV]");
     h_data_p->GetXaxis()->CenterTitle();
     h_data_p->Draw("HIST SAME");
 
     h_sim_p->Draw("HIST SAME");
-    h_sim_p->GetXaxis()->SetRangeUser(1.5, 2.5); 
+    h_sim_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
     h_sim_p->Draw("HIST SAME");
 
     TLegend *l1 = new TLegend(0.11,0.7,0.48,0.89);
@@ -228,17 +241,17 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
 
   h_data_phi->SetTitle("Reconstructed vs Generated Electron #phi");
   h_data_phi->Draw("HIST SAME");
-  h_data_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
+  //h_data_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
   h_data_phi->GetXaxis()->SetTitle("#phi [deg]");
   h_data_phi->GetXaxis()->CenterTitle();
   h_data_phi->Draw("HIST SAME");
 
   h_sim_phi->Draw("HIST SAME");
-  h_sim_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
+  //h_sim_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
   h_sim_phi->Draw("HIST SAME");
 
   h_mc_phi->Draw("HIST SAME");
-  h_mc_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
+  //h_mc_phi->GetYaxis()->SetRangeUser(0.0, 40000.0);
   h_mc_phi->Draw("HIST SAME");
 
   TLegend *l3 = new TLegend(0.11,0.7,0.48,0.89);
@@ -285,13 +298,13 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
 
   h_data_p->SetTitle("Data vs Sim. Electron Momentum");
   h_data_p->Draw("HIST SAME");
-  h_data_p->GetXaxis()->SetRangeUser(1.5,2.5);
+  h_data_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_data_p->GetXaxis()->SetTitle("Momentum [GeV]");
   h_data_p->GetXaxis()->CenterTitle();  
   h_data_p->Draw("HIST SAME");
 
   h_sim_p->Draw("HIST SAME");
-  h_sim_p->GetXaxis()->SetRangeUser(1.5,2.5);
+  h_sim_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_sim_p->Draw("HIST SAME");
 
   TLegend *l4 = new TLegend(0.11,0.7,0.48,0.89);
@@ -407,14 +420,14 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
   gPad->SetLogy();
   h_mc_p->SetTitle("Simulated vs Generated Electron Momentum");
   h_mc_p->Draw("HIST SAME");  
-  h_mc_p->GetXaxis()->SetRangeUser(1.5,2.5);
+  h_mc_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_mc_p->GetXaxis()->SetTitle("Momentum [GeV]");
   h_mc_p->GetXaxis()->CenterTitle();
   h_mc_p->Draw("HIST SAME");  
 
   h_sim_p->Scale(1.0/p_scale_factor);
   h_sim_p->Draw("HIST SAME");
-  h_sim_p->GetXaxis()->SetRangeUser(1.5,2.5);
+  h_sim_p->GetXaxis()->SetRangeUser(pmin,Ebeam);
   h_sim_p->SetLineStyle(1);
   h_sim_p->Draw("HIST SAME");
 

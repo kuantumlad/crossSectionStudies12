@@ -649,6 +649,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   TH2F *h_mc_el_wtheta = new TH2F("h_mc_el_wtheta","h_mc_el_wtheta", 60, 0.0, 1.4, 60, 5.0, 20.0 );
   h_mc_el_wtheta->GetXaxis()->SetTitle("W (GeV)");
   h_mc_el_wtheta->GetYaxis()->SetTitle("#theta (deg)");
+
+  TH2F *h_mc_el_wtheta_cut = new TH2F("h_mc_el_wtheta_cut","h_mc_el_wtheta_cut", 60, 0.0, 1.4, 60, 5.0, 20.0 );
+  h_mc_el_wtheta->GetXaxis()->SetTitle("W (GeV)");
+  h_mc_el_wtheta->GetYaxis()->SetTitle("#theta (deg)");
   
   std::vector< TH2F* > h_mc_el_wtheta_sect;
 
@@ -685,6 +689,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   std::vector< TH2F* > h_el_ptheta_sect;
   std::vector< TH2F* > h_el_W_vs_y_sect;
   std::vector< TH2F* > h_el_wtheta_sect;
+  std::vector<TH2F*> h_el_wtheta_sect_nocut;
 
   std::vector< TH1F* > h_el_p_sect_final;
   std::vector< TH1F* > h_el_theta_sect_final;
@@ -716,6 +721,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     h_el_W_vs_y_sect.push_back( new TH2F(Form("h_el_W_vs_y_s%d_final",s),Form("h_el_W_vs_y_s%d_final",s), 100, 0.9, 1.2, 100, 0.0, 1.10) );
     
     h_el_wtheta_sect.push_back( new TH2F(Form("h_el_wtheta_s%d_final",s), Form("h_el_wtheta_s%d_final",s),  60, 0.0, 1.4, 60, 5.0, 20.0 ) ); // theta bin of 0.25  
+    h_el_wtheta_sect_nocut.push_back( new TH2F(Form("h_el_wtheta_s%d_nocut",s), Form("h_el_wtheta_s%d_nocut",s),  60, 0.0, 1.4, 60, 5.0, 20.0 ) ); // theta bin of 0.25  
   }
 
   out->mkdir("acceptance");				
@@ -808,6 +814,15 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
       h2_temp_theta_phi_sect_per_p.push_back( new TH2F(Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), Form("h_el_theta_phi_s%d_mntm_b%d",ss,bb), ntheta_bin, el_theta_min,el_theta_max, 60, -30.0, 30.0 ) );   
   }
     h_el_theta_phi_sect_per_p.push_back(h2_temp_theta_phi_sect_per_p);
+  }
+
+  std::vector< TH2F* > v_wtheta_accp_rec;
+  std::vector< TH2F* > v_wtheta_accp_gen;
+  std::vector< TH2F* > v_wtheta_accp_accp;
+  for( int ii = 0; ii < 20; ii++ ){
+    v_wtheta_accp_rec.push_back( new TH2F(Form("h_el_wtheta_bb%d_rec",ii), Form("h_el_wtheta_bb%d_rec",ii), 60, 0.0, 1.4, (ii+1)*6, 5.0, 20.0 ) );
+    v_wtheta_accp_gen.push_back( new TH2F(Form("h_el_wtheta_bb%d_gen",ii), Form("h_el_wtheta_bb%d_gen",ii), 60, 0.0, 1.4, (ii+1)*6, 5.0, 20.0 ) );
+    v_wtheta_accp_accp.push_back( new TH2F(Form("h_el_wtheta_bb%d_accp",ii), Form("h_el_wtheta_bb%d_acpp",ii), 60, 0.0, 1.4, (ii+1)*6, 5.0, 20.0 ) );
   }
   
   out->mkdir("accecpted_rejected");				
@@ -1229,6 +1244,7 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
        
 	hist_W_vs_y->Fill(W,y);
 	hist_W_vs_theta->Fill(W,ele[select_ele].Theta()*180/Pival);  
+	h_el_wtheta_sect_nocut[el_sect]->Fill(W,ele[select_ele].Theta()*180/Pival);
 
 	if( W > w_cut_min && W < w_cut_max ){
 	  //if( W < 1.1 ) { 
@@ -1248,6 +1264,9 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    pz_ele = ele[select_ele].Pz();
 
 	    h_el_wtheta_sect[el_sect]->Fill(W,ele[select_ele].Theta()*180/Pival);
+	    for( int ii = 0; ii < v_wtheta_accp_rec.size(); ii++){
+	      v_wtheta_accp_rec[ii]->Fill(W,ele[select_ele].Theta()*180/Pival);
+	    }
 
 
 	    E_ele_mc  = mc_ele[0].E();
@@ -1386,6 +1405,17 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	//////////////////////////////////////////////////////////////	
 	//needed for elastic CS acceptance for beam energy > 6
 	h_mc_el_wtheta->Fill(gen_W, mc_ele[0].Theta()*180/Pival);
+	
+	//temp solution to select the same kin. region as reconstructed events
+	//okay-ish bc of stable resolution and mean in simulation over theta
+	double w_cut_min = 0.948 - 3.0*0.0222721;
+	double w_cut_max =  0.948 + 3.0*0.0222721;
+	if( gen_W > w_cut_min && gen_W < w_cut_max ){
+	  h_mc_el_wtheta_cut->Fill(gen_W, mc_ele[0].Theta()*180/Pival);
+	  for( int ii = 0; ii < v_wtheta_accp_gen.size(); ii++){
+	    v_wtheta_accp_gen[ii]->Fill(gen_W, mc_ele[0].Theta()*180/Pival);
+	  }
+	}
 	//h_mc_el_wtheta_sect[mc_el_sect]->Fill( gen_W, mc_ele[0].Theta()*180/Pival);
 	//////////////////////////////////////////////////////////////
 	h_el_theta_gen_sect[0]->Fill( mc_ele[0].Theta()*180/Pival );  
@@ -1486,6 +1516,10 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     // c_per_phi_bin->cd(bp);
     h_el_theta_accp_per_phi[bp]->Divide(h_el_theta_rec_per_phi[bp], h_el_theta_gen_per_phi[bp], 1.0, 1.0);
     // h_el_theta_accp_per_phi[bp]->Draw();
+  }
+
+  for( int ii = 0; ii < v_wtheta_accp_accp.size(); ii++ ){
+    v_wtheta_accp_accp[ii]->Divide(v_wtheta_accp_rec[ii],v_wtheta_accp_gen[ii],1.0, 1.0);
   }
 
 

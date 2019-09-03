@@ -14,7 +14,7 @@ int rcCorrPlotter(){
 
   ifstream infile;
   std::string line;
-  infile.open("/work/clas12/bclary/CLAS12/electron_studies/rad_corr/elasrcV3_toplot.txt");
+  infile.open("/work/clas12/bclary/CLAS12/electron_studies/rad_corr/elastic_gen_7GeV_CORRECTION_FINAL.txt");
   
   std::vector<double> bin_center;
   std::vector<double> rc;
@@ -31,7 +31,7 @@ int rcCorrPlotter(){
     ss >> n0 >> n1 ;
     std::cout << n0 << " " << n1  << std::endl;
 
-    if ( n0 > 9 ){
+    //if ( n0 > 9 ){
       bin_center.push_back(n0);
       rc.push_back(n1);
 
@@ -39,7 +39,7 @@ int rcCorrPlotter(){
       
       bin_center_err.push_back(0.0);
       rc_err.push_back(0.0);
-    }
+      //}
   }
 
   TGraphErrors *g_rc = new TGraphErrors(bin_center.size(), &(bin_center[0]), &(rc[0]), &(bin_center_err[0]), &(rc_err[0]));
@@ -53,11 +53,11 @@ int rcCorrPlotter(){
   g_rc->GetYaxis()->CenterTitle();  
   g_rc->SetMarkerStyle(8);
   g_rc->SetMarkerSize(0.75);
-  g_rc->GetHistogram()->SetMaximum(2.5);
-  g_rc->GetHistogram()->SetMinimum(0.2);
+  g_rc->GetHistogram()->SetMaximum(5.5);
+  g_rc->GetHistogram()->SetMinimum(0.0);//2);
   g_rc->Draw("AP");
 
-  c_rc->SaveAs("g_rc_values.pdf");
+  c_rc->SaveAs("g_rc7GeV_values.pdf");
 
   return 0;
 }

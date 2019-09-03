@@ -195,15 +195,16 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
   double ns_to_s = 1e-9;
 
   double n_el_g =  1.2782884631348472E15;// (tot_beam_charge * nC_to_C)/el_charge;
-  double n_el_ug = 1.1344064006348862E15;
+  //double n_el_ug = 1.1344064006348862E15;
+  double n_el_ug = (14800.72308 * nC_to_C ) / el_charge; //1.1344064006348862E15;
+  std::cout << " n_el_ug " << n_el_ug << std::endl;
   double n_el = n_el_g + n_el_ug;
   double n_pr = ( ( target_length * target_density * avogado_const ) / atomic_mass_hydrogen ) ;       	
   double lum_factor_g = (n_el_g*n_pr)/cm_to_microbarn;       	
   double lum_factor_ug = (n_el_ug*n_pr)/cm_to_microbarn;       	
   double lum_factor_tot = (n_el*n_pr)/cm_to_microbarn;       	
   std::cout << " gated lumi " << lum_factor_g << std::endl;
-  std::cout << " ungated lumi " << lum_factor_ug << std::endl;
-  
+  std::cout << " ungated lumi " << lum_factor_ug << std::endl; 
 
   std::vector<TH2F*> h_el_wtheta_sect;
   for( int s = 1; s <= 6; s++ ){
@@ -515,6 +516,7 @@ int crossSectionExtractorDIS(const char* infile, int run, const char* config){
       m_g_neln[ss][q2b]->GetXaxis()->SetLimits(0.98, 2.);
       m_g_neln[ss][q2b]->GetHistogram()->SetMinimum(0.0);
       m_g_neln[ss][q2b]->GetHistogram()->SetMaximum(4.58963e+06);
+      std::cout << " TEST max " << m_g_neln[ss][q2b]->GetHistogram()->GetMaximum() << std::endl;
       m_g_neln[ss][q2b]->Draw("AP+");      
       c_neln_sect->Update();
     }

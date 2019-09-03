@@ -27,8 +27,8 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
   std::vector<TH2F*> h_el_wtheta_sect;
   std::vector<TH2F*> mc_h_el_wtheta_sect;
   for( int s = 1; s <= 6; s++ ){
-    h_el_wtheta_sect.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_wtheta_s%d_final",s) ) );
-    mc_h_el_wtheta_sect.push_back( (TH2F*)fMC->Get(Form("/kinematics/h_el_wtheta_s%d_final",s) ) );
+    h_el_wtheta_sect.push_back( (TH2F*)fIn->Get(Form("/kinematics/h_el_wtheta_s%d_nocut",s) ) );
+    mc_h_el_wtheta_sect.push_back( (TH2F*)fMC->Get(Form("/kinematics/h_el_wtheta_s%d_nocut",s) ) );
   }
 
   int n_sectors =6;
@@ -238,7 +238,7 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
     s_sim_sig[ss]->SetMarkerStyle(20);
     s_sim_sig[ss]->SetMarkerSize(0.8);
     s_sim_sig[ss]->SetMarkerColor(kBlue);
-    v_mg_sig[ss]->SetTitle(Form("Data vs Sim Mean S%d",ss));
+    v_mg_sig[ss]->SetTitle(Form("Data vs Sim Sigma S%d",ss));
     v_mg_sig[ss]->GetXaxis()->SetTitle("Theta (deg)");
     v_mg_sig[ss]->GetYaxis()->SetTitle("Sigma (GeV)");
     v_mg_sig[ss]->Add(s_data_sig[ss]);
