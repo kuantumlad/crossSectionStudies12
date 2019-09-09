@@ -10,7 +10,8 @@
 #include <TLine.h>
 
 TH1D* GetModel(std::string);
-TGraphErrors* GetCSRatio( TH2F*, std::map< int , std::vector<double> >, std::map< int , std::vector<double> >, std::vector<double>, double, TH1D*);
+TGraphErrors* GetCSRatio( TH2F*, std::map< int , std::vector<double> >, std::map< int , std::vector<double> >, std::vector<double>, double, TH1D*, std::vector<double>);
+
 
 std::vector<double> GetRadiativeCorr(const char* fileName){
   //theta range is from 5 to 30
@@ -40,6 +41,38 @@ std::vector<double> GetRadiativeCorr(const char* fileName){
     }
   }
   return v_rad_corr;
+}
+
+std::vector<double> GetBackgroundSubtractedCounts(const char* fileName){
+  //theta range is from 5 to 30
+  std::cout << " getting 'true counts' " << std::endl;
+  std::vector< double > v_signal;
+  double model_theta = 5.5;
+  int model_theta_bin = 6;
+  double signal;
+  double bin_center;
+  
+  std::string parentDir = "/work/clas12/bclary/CLAS12/electron_studies/physics/";
+  string line;
+  ifstream readFromF(parentDir+fileName);
+  if( readFromF.is_open() ){
+    std::cout << " OPENED FILES " << std::endl;	
+    while(readFromF >> bin_center >> signal ) {
+      //if ( model_theta < 9 ) {/
+      //std::cout << " dont plot model theta " << std::endl;
+      //}
+      //else{
+      std::cout << " bin center " << bin_center << " SIGNAL " << signal << std::endl;
+      v_signal.push_back(signal);
+      //}
+      //std::cout << " MODEL THETA " << model_theta <<  " >> BIN CORRECTION " << rad_corr << std::endl;
+      model_theta+=1.0;
+      model_theta_bin+=1;    
+    }
+  }
+  std::cout << " done " << std::endl;
+  readFromF.close();
+  return v_signal;
 }
 
 
@@ -114,15 +147,14 @@ std::map< int , std::vector<double> > GetWRangePerSector( const char* fName ){
 
   return s_cutrange;
 
-
 }
 
 
-TGraphErrors* GetCrossSectionPerSector( TH2F *hin, std::map< int , std::vector<double> > m_accp, std::map< int , std::vector<double> > m_range, std::vector<double> v_rc, double lum_factor_ug ){
+TGraphErrors* GetCrossSectionPerSector( TH2F *hin, std::map< int , std::vector<double> > m_accp, std::map< int , std::vector<double> > m_range, std::vector<double> v_rc, double lum_factor_ug, std::vector<double> temp_s ){
 
   int n_bins_w = hin->GetNbinsX();    
   int n_bins_theta = hin->GetNbinsY();    
-  //std::cout << " w bins " << n_bins_w << " theta bins " << n_bins_theta <<std::endl;
+  std::cout << " w bins " << n_bins_w << " theta bins " << n_bins_theta <<std::endl;
   
   std::vector<double> v_bc;
   std::vector<double> v_cs;
@@ -143,16 +175,20 @@ TGraphErrors* GetCrossSectionPerSector( TH2F *hin, std::map< int , std::vector<d
 	  	 	 	
 	  h_w_per_theta->SetBinContent(wb, w_bin_content);		
 	}
+	std::cout << " test 1a " << std::endl;
 
-	double mean = m_range[tb][0];
-	double sig = m_range[tb][1];
-	double upper_cut = mean + 2.0*sig;
-	double lower_cut = mean - 2.0*sig;
+	//double mean = m_range[tb][0];
+	//double sig = m_range[tb][1];
+	//double upper_cut = mean + 2.0*sig;
+	//double lower_cut = mean - 2.0*sig;
+	std::cout << " test 1b " << std::endl;
+
 	//std::cout << " theta center " << bcy << " mean " << mean << " sig " << sig << std::endl;
 	//std::cout << " upper cut " << upper_cut << " lower cut " << lower_cut << std::endl;
-	int b_up = h_w_per_theta->FindBin(upper_cut);
-	int b_low = h_w_per_theta->FindBin(lower_cut);
-	int w_integral = h_w_per_theta->Integral() * 0.5;//b_up, b_low);       
+	int b_up = 0;// h_w_per_theta->FindBin(upper_cut);
+	int b_low = 0;//h_w_per_theta->FindBin(lower_cut);
+	std::cout << " original signal " << h_w_per_theta->Integral() << " vs background removed signal " <<  temp_s[tb-1] << std::endl;
+	int w_integral = temp_s[tb-1];// * 0.5;//b_up, b_low);       
 	//std::cout << " bin up " << b_up << " b_low " << b_low << " integral " << w_integral << std::endl;
 
 	double accp = m_accp[tb][0];
@@ -197,7 +233,7 @@ TGraphErrors* GetCrossSectionPerSector( TH2F *hin, std::map< int , std::vector<d
 }
 
 
-int crossSectionExtractorHEv0(const char* infile, int run){
+int crossSectionExtractorHEv1(const char* infile, int run){
 
   TFile *fIn = new TFile(infile,"");
   TFile *fOut = new TFile(Form("cs_test_run%dV2.root",run),"RECREATE");
@@ -208,6 +244,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
     return 0;
   }
 
+  int n_sectors = 6;
 
   ///////////////////////////////////////////////////////////////
   // load model for given beam energy
@@ -255,7 +292,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
 
   TCanvas *c0 = new TCanvas("c0","c0",900,900);
   c0->Divide(3,2);
-  for( int s  = 0; s < 6; s++ ){ 
+  for( int s  = 0; s < n_sectors; s++ ){ 
     c0->cd(s+1);
 
     h_el_wtheta_sect[s]->SetTitle(Form(" #theta vs W S%d",s+1));
@@ -273,7 +310,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
   std::vector<TGraphErrors*> v_cs_sectors;
   std::vector<TGraphErrors*> v_csratio_sectors;
   
-  for( int s  = 0; s < 6; s++ ){
+  for( int s  = 0; s < n_sectors; s++ ){
     int n_bins_w = h_el_wtheta_sect[s]->GetNbinsX();    
     int n_bins_theta = h_el_wtheta_sect[s]->GetNbinsY();    
 
@@ -288,9 +325,15 @@ int crossSectionExtractorHEv0(const char* infile, int run){
     std::string file_wrange = "whe_cut_limits_run570011_s"+s_sector+".txt";
     std::map< int , std::vector<double> > m_s_accp_corr = GetAcceptancePerSector(file_accp.c_str());
     std::map< int , std::vector<double> > m_s_wrange = GetWRangePerSector(file_wrange.c_str());
+    std::vector<double> v_signal = GetBackgroundSubtractedCounts("w_bg_elastic_s0.txt");
+    std::cout << " got coutsn " << std::endl;
 
-    TGraphErrors *g_cs_sector = GetCrossSectionPerSector(h_el_wtheta_sect[s], m_s_accp_corr, m_s_wrange, v_rad_corr, lum_factor_ug);
-    TGraphErrors *g_ratio_sector = GetCSRatio(h_el_wtheta_sect[s], m_s_accp_corr, m_s_wrange, v_rad_corr, lum_factor_ug, h_model_cs);
+    for( int ii = 0; ii < v_signal.size() ; ii++ ){
+      std::cout << v_signal[ii] << std::endl;
+    }
+
+    TGraphErrors *g_cs_sector = GetCrossSectionPerSector(h_el_wtheta_sect[s], m_s_accp_corr, m_s_wrange, v_rad_corr, lum_factor_ug, v_signal);
+    TGraphErrors *g_ratio_sector = GetCSRatio(h_el_wtheta_sect[s], m_s_accp_corr, m_s_wrange, v_rad_corr, lum_factor_ug, h_model_cs, v_signal);
     
     v_cs_sectors.push_back(g_cs_sector);
     v_csratio_sectors.push_back(g_ratio_sector);
@@ -352,7 +395,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
   std::vector<TMultiGraph*> v_mg_cs;
   TCanvas *c_cs = new TCanvas("cs","cs",900,900);
   c_cs->Divide(2,3);
-  for( int ss = 0; ss < 6; ss++){
+  for( int ss = 0; ss < n_sectors; ss++){
 
     c_cs->cd(ss+1);
     v_cs_sectors[ss]->SetTitle(Form("Elastic CS S%d",ss));
@@ -373,7 +416,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
   std::vector<TMultiGraph*> v_mg_cs_logy;
   TCanvas *c_cs_logy = new TCanvas("cs_logy","cs_logy",900,900);
   c_cs_logy->Divide(2,3);
-  for( int ss = 0; ss < 6; ss++){
+  for( int ss = 0; ss < n_sectors; ss++){
 
     c_cs_logy->cd(ss+1);
     gPad->SetLogy();
@@ -395,7 +438,7 @@ int crossSectionExtractorHEv0(const char* infile, int run){
 
   TCanvas *c_csr = new TCanvas("csr","csr",900,900);
   c_csr->Divide(2,3);
-  for( int ss = 0; ss < 6; ss++){
+  for( int ss = 0; ss < n_sectors; ss++){
 
     c_csr->cd(ss+1);
     v_csratio_sectors[ss]->SetTitle(Form("Elastic CS S%d RATIO",ss));
@@ -460,7 +503,7 @@ TH1D* GetModel( std::string in_file ){
 
 }
 
-TGraphErrors* GetCSRatio( TH2F *hin, std::map< int , std::vector<double> > m_accp, std::map< int , std::vector<double> > m_range, std::vector<double> v_rc, double lum_factor_ug, TH1D *h_model ){
+TGraphErrors* GetCSRatio( TH2F *hin, std::map< int , std::vector<double> > m_accp, std::map< int , std::vector<double> > m_range, std::vector<double> v_rc, double lum_factor_ug, TH1D *h_model, std::vector<double> temp_s ){
 
   int n_bins_w = hin->GetNbinsX();    
   int n_bins_theta = hin->GetNbinsY();    
@@ -488,16 +531,16 @@ TGraphErrors* GetCSRatio( TH2F *hin, std::map< int , std::vector<double> > m_acc
 
 	double cs_model=h_model->GetBinContent(tb);
 
-	double mean = m_range[tb][0];
-	double sig = m_range[tb][1];
-	double upper_cut = mean + 2.0*sig;
-	double lower_cut = mean - 2.0*sig;
+	//double mean = m_range[tb][0];
+	//double sig = m_range[tb][1];
+	//double upper_cut = mean + 2.0*sig;
+	//double lower_cut = mean - 2.0*sig;
 	//std::cout << " theta center " << bcy << " mean " << mean << " sig " << sig << std::endl;
 	//std::cout << " upper cut " << upper_cut << " lower cut " << lower_cut << std::endl;
-	int b_up = h_w_per_theta->FindBin(upper_cut);
-	int b_low = h_w_per_theta->FindBin(lower_cut);
-	int w_integral = h_w_per_theta->Integral() * 0.5;//b_up, b_low);       
-	std::cout << " bin up " << b_up << " b_low " << b_low << " integral " << w_integral << std::endl;
+	int b_up = 0;// h_w_per_theta->FindBin(upper_cut);
+	int b_low = 0;// h_w_per_theta->FindBin(lower_cut);
+	int w_integral = temp_s[tb-1];//h_w_per_theta->Integral() * 0.5;//b_up, b_low);       
+	//std::cout << " bin up " << b_up << " b_low " << b_low << " integral " << w_integral << std::endl;
 
 	double accp = m_accp[tb][0];
 	double w_bin_width = 1.0;//h_w_per_theta->GetBinWidth(1);
@@ -516,8 +559,8 @@ TGraphErrors* GetCSRatio( TH2F *hin, std::map< int , std::vector<double> > m_acc
 	std::cout << " CROSS SECTION ERR     " << cs_err << std::endl;
 	std::cout << " CROSS SECTION MODEL   " << cs_model << std::endl;
 	std::cout << " CROSS SECTION RATIO   " << cs/cs_model << std::endl;
-	std::cout << " W INTEGRAL RANGE LOW  " << lower_cut << std::endl;
-	std::cout << " W INTEGRAL RANGE UP   " << upper_cut << std::endl;
+	//std::cout << " W INTEGRAL RANGE LOW  " << lower_cut << std::endl;
+	//std::cout << " W INTEGRAL RANGE UP   " << upper_cut << std::endl;
 	std::cout << " W INTEGRAL BIN LOW    " << b_low  << std::endl;
 	std::cout << " W INTEGRAL BIN UP     " << b_up  <<  std::endl;
 	std::cout << " W INTEGRAL SUM        " << w_integral << std::endl;

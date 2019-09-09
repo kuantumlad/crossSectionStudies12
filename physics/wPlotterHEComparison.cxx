@@ -31,7 +31,7 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
     mc_h_el_wtheta_sect.push_back( (TH2F*)fMC->Get(Form("/kinematics/h_el_wtheta_s%d_nocut",s) ) );
   }
 
-  int n_sectors =6;
+  int n_sectors = 1;
 
   ////////////////
   /// containers to plot the mean and sigma per theta per sector
@@ -40,7 +40,9 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
   std::vector<TGraphErrors* > s_sim_sig;
   std::vector<TGraphErrors* > s_data_mean;
   std::vector<TGraphErrors* > s_data_sig;
-  
+  std::vector<TGraphErrors* > s_data_snr;
+  std::vector<TGraphErrors* > s_data_bg;
+  std::vector<TGraphErrors* > s_data_signal;
 
   TLine *l_mp = new TLine(0.938,5.0, 0.938, 20.0);
 
@@ -63,6 +65,7 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
 
   ofstream outputWCuts;
   ofstream outputWCuts2;
+  ofstream outputBG;
 
   for( int s  = 0; s < n_sectors; s++ ){
     int n_bins_w = h_el_wtheta_sect[s]->GetNbinsX();    
@@ -77,6 +80,7 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
     std::cout << " Creating W cuts output file " << f_out_w_name2 << std::endl;
     outputWCuts2.open(f_out_w_name2);
 
+    outputBG.open("w_bg_elastic_s"+std::to_string(s)+".txt");
 
     std::cout << " w bins " << n_bins_w << " theta bins " << n_bins_theta <<std::endl;
     
@@ -84,13 +88,13 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
 
     c_tb->Divide(5,8);
     
-
-
-
-
     //containers for grapherrors 
     TH1F *h_temp_theta_wmean = new TH1F(Form("h_temp_theta_wmean_s%d",s),Form("h_temp_theta_wmean_s%d",s),n_bins_theta,h_el_wtheta_sect[s]->GetYaxis()->GetBinLowEdge(1),h_el_wtheta_sect[s]->GetYaxis()->GetBinUpEdge(n_bins_theta) );
     TH1F *h_temp_theta_wsig = new TH1F(Form("h_temp_theta_wsig_s%d",s),Form("h_temp_theta_wsig_s%d",s),n_bins_theta,h_el_wtheta_sect[s]->GetYaxis()->GetBinLowEdge(1),h_el_wtheta_sect[s]->GetYaxis()->GetBinUpEdge(n_bins_theta) );
+    TH1F *h_temp_theta_bg = new TH1F(Form("h_temp_theta_bg_s%d",s),Form("h_temp_theta_bg_s%d",s),n_bins_theta,h_el_wtheta_sect[s]->GetYaxis()->GetBinLowEdge(1),h_el_wtheta_sect[s]->GetYaxis()->GetBinUpEdge(n_bins_theta) );
+
+    
+
     std::vector<double> s_tc;
     std::vector<double> s_tc_er;
     std::vector<double> s_me;
@@ -104,7 +108,16 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
     std::vector<double> s_mc_si;
     std::vector<double> s_mc_me_er;
     std::vector<double> s_mc_si_er;
+
+    std::vector<double> s_bgr;
+    std::vector<double> s_bgr_err;
     
+    std::vector<double> s_bg;
+    std::vector<double> s_bg_err;
+
+    std::vector<double> s_signal;
+    std::vector<double> s_signal_err;
+
 
     for( int tb = 0; tb < n_bins_theta; tb++ ){
       
@@ -164,9 +177,37 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
 	//fit_mean->Draw("same");	
 
 	TF1* fit_data = fitHistogramRange(h_w_per_theta, 10, 6);
+        //TF1* fit_data2 = new TF1("fit_data2","gaus(0)+pol1(3)",fit_data->GetMin(),
 	h_w_per_theta->Fit(fit_data,"R");
 	TF1* fit_sim = fitHistogramRange(h_w_per_theta_mc, 5, 5);
 	h_w_per_theta_mc->Fit(fit_sim,"R");
+
+	double d_amp = fit_data->GetParameter(0);
+	double d_mu = fit_data->GetParameter(1);
+	double d_sig = fit_data->GetParameter(2);
+
+	double d_poly1a = fit_data->GetParameter(3);
+	double d_poly1b = fit_data->GetParameter(4);
+	std::cout << " poly1 parameter a " << d_poly1a << std::endl;
+	std::cout << " poly1 parameter b " << d_poly1b << std::endl;
+	TF1* fit_poly1 = new TF1("fit_poly","pol1", 0.80, 1.06);
+	fit_poly1->SetParameter(0, d_poly1a);
+	fit_poly1->SetParameter(1, d_poly1b);
+
+	std::cout << fit_poly1->Integral(0.80, 1.06) << std::endl;
+	double bg = fit_poly1->Integral(0.80, 1.06);
+	double signal = fit_data->Integral(0.80, 1.06);
+	std::cout << " signal " <<  signal << " bg " << bg << std::endl;
+
+	s_bgr.push_back(signal/bg);
+	s_bgr_err.push_back(0.0);
+	s_bg.push_back(bg);
+	s_bg_err.push_back(sqrt(bg));
+	s_signal.push_back(signal);
+	s_signal_err.push_back(sqrt(signal));
+
+	fit_poly1->SetLineColor(kViolet);
+	fit_poly1->Draw("same");
 	
 	fit_data->SetLineColor(kRed);
 	fit_sim->SetLineColor(kBlue);
@@ -191,15 +232,21 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
 	outputWCuts << tb << " " << fit_data->GetParameter(1) << " " << fit_data->GetParameter(2) << std::endl;
 	outputWCuts2 << tb << " " << fit_sim->GetParameter(1) << " " << fit_sim->GetParameter(2) << std::endl;
 
+	outputBG << tb << " " << signal - bg << std::endl;
+
       }
     }
     s_data_mean.push_back( new TGraphErrors(s_tc.size(), &s_tc[0], &s_me[0], &s_tc_er[0], &s_me_er[0]) );
     s_data_sig.push_back( new TGraphErrors(s_tc.size(), &s_tc[0], &s_si[0], &s_tc_er[0], &s_si_er[0]) );
     s_sim_mean.push_back( new TGraphErrors(s_mc_tc.size(), &s_mc_tc[0], &s_mc_me[0], &s_mc_tc_er[0], &s_mc_me_er[0]) );
     s_sim_sig.push_back( new TGraphErrors(s_mc_tc.size(), &s_mc_tc[0], &s_mc_si[0], &s_mc_tc_er[0], &s_mc_si_er[0]) );
+    s_data_snr.push_back( new TGraphErrors(s_tc.size(), &s_tc[0], &s_bgr[0], &s_tc_er[0], &s_bgr_err[0]) );
+    s_data_bg.push_back( new TGraphErrors(s_tc.size(), &s_tc[0], &s_bg[0], &s_tc_er[0], &s_bg_err[0]) );
+    s_data_signal.push_back( new TGraphErrors(s_tc.size(), &s_tc[0], &s_signal[0], &s_tc_er[0], &s_signal_err[0]) );
+
     outputWCuts.close();
     outputWCuts2.close();
-
+    outputBG.close();
     c_tb->SaveAs(Form("h_el_w_per_theta_bin_sect%d_r%d.pdf",s,run));
   }
 
@@ -210,19 +257,25 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
   for(int ss = 0; ss<s_data_mean.size(); ss++ ){
     c_mean->cd(ss+1);
     v_mg_mean.push_back(new TMultiGraph() );
-    s_data_mean[ss]->SetTitle(Form("S%d Mean",ss));
+    s_data_mean[ss]->SetTitle(Form("S%d Mean",ss+1));
     s_data_mean[ss]->SetMarkerStyle(20);
     s_data_mean[ss]->SetMarkerSize(0.8);    
     s_data_mean[ss]->SetMarkerColor(kRed);
     s_sim_mean[ss]->SetMarkerStyle(20);
     s_sim_mean[ss]->SetMarkerSize(0.8);
     s_sim_mean[ss]->SetMarkerColor(kBlue);
-    v_mg_mean[ss]->SetTitle(Form("Data vs Sim Mean S%d",ss));
+
+    v_mg_mean[ss]->SetTitle(Form("Data vs Sim Mean S%d",ss+1));
     v_mg_mean[ss]->GetXaxis()->SetTitle("Theta (deg)");
     v_mg_mean[ss]->GetYaxis()->SetTitle("Mean (GeV)");
     v_mg_mean[ss]->Add(s_data_mean[ss]);
     v_mg_mean[ss]->Add(s_sim_mean[ss]);
     v_mg_mean[ss]->Draw("APE");
+    gPad->Modified();
+    v_mg_mean[ss]->GetXaxis()->SetLimits(4.0, 18.0);
+    v_mg_mean[ss]->SetMinimum(0.8);
+    v_mg_mean[ss]->SetMaximum(1.1);
+    //v_mg_mean[ss]->Draw("APE");
   }
   c_mean->SaveAs(Form("g_w_fit_mean_r%d.pdf",run));
 
@@ -231,21 +284,62 @@ int wPlotterHEComparison(const char* infile, const char* infileMC, int run){
   for(int ss = 0; ss<s_data_sig.size(); ss++ ){
     c_sigma->cd(ss+1);
     v_mg_sig.push_back(new TMultiGraph() );
-    s_data_sig[ss]->SetTitle(Form("S%d Sig",ss));
+    s_data_sig[ss]->SetTitle(Form("S%d Sig",ss+1));
     s_data_sig[ss]->SetMarkerStyle(20);
     s_data_sig[ss]->SetMarkerSize(0.8);    
     s_data_sig[ss]->SetMarkerColor(kRed);
     s_sim_sig[ss]->SetMarkerStyle(20);
     s_sim_sig[ss]->SetMarkerSize(0.8);
     s_sim_sig[ss]->SetMarkerColor(kBlue);
-    v_mg_sig[ss]->SetTitle(Form("Data vs Sim Sigma S%d",ss));
+    v_mg_sig[ss]->SetTitle(Form("Data vs Sim Sigma S%d",ss+1));
     v_mg_sig[ss]->GetXaxis()->SetTitle("Theta (deg)");
     v_mg_sig[ss]->GetYaxis()->SetTitle("Sigma (GeV)");
     v_mg_sig[ss]->Add(s_data_sig[ss]);
     v_mg_sig[ss]->Add(s_sim_sig[ss]);
     v_mg_sig[ss]->Draw("APE"); 
+    gPad->Modified();
+    v_mg_sig[ss]->GetXaxis()->SetLimits(4.0, 18.0);
+    v_mg_sig[ss]->SetMinimum(0.0);
+    v_mg_sig[ss]->SetMaximum(0.3);
   }
   c_sigma->SaveAs(Form("g_w_fit_sigma_r%d.pdf",run));
+
+  TCanvas *c_snr = new TCanvas("c_snr","c_snr",900,900);
+  c_snr->Divide(2,3);
+  for( int s = 0 ; s < s_data_snr.size(); s++ ){
+    s_data_snr[s]->SetTitle(Form("Signal to Background S%d",s));
+    s_data_snr[s]->GetXaxis()->SetTitle("#theta (deg)");
+    s_data_snr[s]->GetYaxis()->SetTitle("Ratio");
+    s_data_snr[s]->SetMarkerStyle(20);
+    s_data_snr[s]->SetMarkerSize(0.8);    
+    s_data_snr[s]->Draw("AP");
+    gPad->Modified();
+    s_data_snr[s]->GetXaxis()->SetLimits(4.0, 18.0);
+    s_data_snr[s]->SetMinimum(0.0);
+    s_data_snr[s]->SetMaximum(15.0);
+  }
+  c_snr->SaveAs(Form("g_w_snr_r%d.pdf",run));
+
+  std::vector<TMultiGraph*> v_mg_sgbg;
+
+  TCanvas *c_bg = new TCanvas("c_bg","c_bg",900,900);
+  c_bg->Divide(2,3);
+  for( int s = 0 ; s < s_data_bg.size(); s++ ){
+    v_mg_sgbg.push_back( new TMultiGraph());
+    v_mg_sgbg[s]->SetTitle(Form("Background S%d",s));
+    v_mg_sgbg[s]->GetXaxis()->SetTitle("#theta (deg)");
+    v_mg_sgbg[s]->GetYaxis()->SetTitle("Ratio");
+    s_data_bg[s]->SetMarkerStyle(20);
+    s_data_bg[s]->SetMarkerSize(0.8);    
+    s_data_bg[s]->SetMarkerColor(kBlue);
+    s_data_signal[s]->SetMarkerColor(kRed);
+    s_data_signal[s]->SetMarkerStyle(20);
+    s_data_signal[s]->SetMarkerSize(0.8);    
+    v_mg_sgbg[s]->Add(s_data_bg[s]);
+    v_mg_sgbg[s]->Add(s_data_signal[s]);
+    v_mg_sgbg[s]->Draw("AP");
+  }
+  c_bg->SaveAs(Form("g_w_bg_r%d.pdf",run));
 
   return 0;
 }
@@ -273,13 +367,14 @@ TF1 *fitHistogramRange(TH1D *h_temp, int s_min, int s_max){
   // The 0.65 parameter can be changed, this basically means start at the peak and work your way left and right
   // until you've gotten to 65% of the max amplitude.
   while(h_temp->GetBinContent(binhigh++) >= .65*histmax&&binhigh<=h_temp->GetNbinsX()){};
-  while(h_temp->GetBinContent(binlow--) >= .65*histmax&&binlow>=1){};
+  while(h_temp->GetBinContent(binlow--) >= .20*histmax&&binlow>=1){};
     
   xlow = h_temp->GetBinLowEdge(binlow);
   xhigh = h_temp->GetBinLowEdge(binhigh+1);
 
   std::cout << " xlow " << xlow << " xhigh " << xhigh << std::endl;
-  TF1 *fit_mean = new TF1("fit_mean_data","gaus", xlow, xhigh);
+  TF1 *fit_mean = new TF1("fit_mean_data","gaus(0)+pol1(3)", xlow, xhigh);
+  fit_mean->SetParameters(histmax, 1, 0.07, 1, 1);
   return fit_mean;
 }
 

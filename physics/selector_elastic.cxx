@@ -334,7 +334,7 @@ double Phi_Mass(TLorentzVector kaonP, TLorentzVector kaonM);
 double kin_epkXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp);
 double kin_epKpKmXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp, TLorentzVector km);
 
-
+//data type is DATA or SIM
 
 /// /////////////////////////////////////////////////////////////////////////////////////////////////////
 /// /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +342,7 @@ double kin_epKpKmXMass(TLorentzVector el, TLorentzVector pr, TLorentzVector kp, 
 /// main
 ///
 
-Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string data_type = "DATA")
+Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string data_type )
 {
 		
   Char_t *inTree="out_tree";
@@ -534,6 +534,40 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
   TH2F *hist_all_proton_p_vs_theta; TH2F *hist_all_proton_p_vs_phi; TH2F *hist_all_proton_theta_vs_phi;
 
   TH1F *hist_all_el_energy;
+  TH1F *hist_all_el_delta_theta;
+  TH2F *hist_all_el_delta_theta_p;
+  TH2F *hist_all_el_delta_p_theta;
+  TH2F *hist_all_el_delta_theta_theta;
+  TH1F *hist_all_el_meas_beam;
+  
+
+
+  hist_all_el_delta_theta = new TH1F("hist_all_el_delta_theta","hist_all_el_delta_theta",300, -15, 15);
+  hist_all_el_delta_theta_p = new TH2F("hist_all_el_delta_theta_p","hist_all_el_delta_theta_p", 300, 0.0, Ebeam+0.5, 300, -15, 15);
+  hist_all_el_delta_p_theta = new TH2F("hist_all_el_delta_p_theta","hist_all_el_delta_p_theta", 300, 0.0, Ebeam+0.5, 300, -15, 15);
+  hist_all_el_delta_theta_theta = new TH2F("hist_all_el_delta_theta_theta","hist_all_el_delta_theta_theta", 300, 0.0, 30.0, 300, -15, 15);
+  hist_all_el_meas_beam = new TH1F("hist_all_el_meas_beam","hist_all_el_meas_beam",300,Ebeam-2.0, Ebeam+2.0);
+
+  std::vector< TH2F* > h_el_delta_theta_sect; // delta theta vs theta
+  std::vector< TH2F* > h_el_delta_p_sect; // delta p vs p
+  //final cut histos
+  std::vector< TH2F* > h_el_delta_theta_sect_final; // delta theta vs theta
+  std::vector< TH2F* > h_el_delta_p_sect_final; // delta p vs p
+  
+  std::vector<TH1F*> h_el_meas_beam_sect_final;
+
+  for( int ss = 0; ss < 6; ss++ ){
+    h_el_delta_theta_sect.push_back( new TH2F(Form("h_el_delta_theta_s%d",ss),Form("h_el_delta_theta_s%d",ss), 300, 0.0, 30.0, 300, -6, 6) );
+    h_el_delta_p_sect.push_back( new TH2F(Form("h_el_delta_p_s%d",ss),Form("h_el_delta_p_s%d",ss), 300, 0.0, Ebeam+0.5, 300, -1, 1 ));
+    //passing final cuts
+    h_el_delta_theta_sect_final.push_back( new TH2F(Form("h_el_delta_theta_s%d_final",ss),Form("h_el_delta_theta_s%d_final",ss), 300, 0.0, 30.0, 300, -2, 2) );
+    h_el_delta_p_sect_final.push_back( new TH2F(Form("h_el_delta_p_s%d_final",ss),Form("h_el_delta_p_s%d_final",ss), 300, 0.0, Ebeam+0.5, 300, -0.2, 0.2 ));
+
+    h_el_meas_beam_sect_final.push_back( new TH1F(Form("h_el_meas_beam_s%d_final",ss),Form("h_el_meas_beam_s%d_final",ss), 300,Ebeam-2.0, Ebeam+2.0) );
+  }
+  
+
+
 
   hist_all_electron_p = new TH1F("hist_all_electron_p", "electron momentum", 500,0,Ebeam+0.3);   
   hist_all_electron_p->GetXaxis()->SetTitle("p /GeV");
@@ -859,15 +893,34 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
     h_el_pw_accp_gen.push_back( new TH2F(Form("h_el_pw_accp_gen_%d",ss), Form("h_el_pw_accp_gen_%d",ss), 200, 0.0, 2.5, 200, 0.0, 2.0 ) );
   }
 
+  out->mkdir("kin_resolution");
+  out->cd("kin_resolution");
+  
+
+  std::vector< TH1F* > h_res_el_theta;
+  std::vector< TH2F* > h_res_el_theta_p;
+  std::vector< TH1F* > h_res_el_phi;
+  std::vector< TH2F* > h2_res_el_phi_vs_p;
+  for( int ss = 0; ss < 6; ss++ ){
+    
+    h_res_el_theta.push_back( new TH1F(Form("h_res_el_theta_s%d",ss),Form("h_res_el_theta_s%d",ss), 500, -0.2, 0.2) ); 
+    h_res_el_phi.push_back( new TH1F(Form("h_res_el_phi_s%d",ss),Form("h_res_el_phi_s%d",ss), 500, -3.0, 3.0) ); 
+    h2_res_el_phi_vs_p.push_back( new TH2F(Form("h2_res_el_phi_vs_p_s%d",ss),Form("h2_res_el_phi_vs_p_s%d",ss), 500, 0.0, Ebeam+0.5, 500, -3.0, 3.0) ); 
+    h_res_el_theta_p.push_back( new TH2F(Form("h_res_el_thetap_s%d",ss),Form("h_res_el_thetap_s%d",ss), 500, -0.2, 0.2, 500, 0.0, Ebeam+0.5));
+  }
 
   out->mkdir("bin_migration");
   out->cd("bin_migration");
+  
+  
   std::vector< TH1F* > h_mig_el_theta;
   std::vector< TH1F* > h_mig_el_q2;
   std::vector< TH2F* > h_mig_resolution_gen;
   std::vector< TProfile* > p_mig_resolution_gen;
 
   std::vector<TH2F*> h_mig_recon_gen_el_theta;
+
+
 
   double theta_bin_width_start = 0.1;
   for( int bb = 1; bb <= 20; bb++ ){
@@ -1238,9 +1291,30 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	double w_cut_min = 0.948 - 3.0*0.0222721;
 	double w_cut_max =  0.948 + 3.0*0.0222721;//highWValueCut[el_sect-1];
 
+	//getting data resolution
 	double calculated_energy = Ebeam/( 1 + (Ebeam/0.938)*(1 - cos(ele[select_ele].Theta())) );
 	double measured_energy = ele[select_ele].E();
 	double delta_energy = calculated_energy - measured_energy;
+
+	double calc_theta = TMath::ACos( 1 + (0.938/Ebeam)*(1 - Ebeam/ele[select_ele].E())) * (180.0/Pival);
+	double meas_theta = ele[select_ele].Theta() * (180.0/Pival);
+	double delta_theta = calc_theta - meas_theta;
+
+
+	//std::cout << "calc theta " << calc_theta << " meas theta " << meas_theta << std::endl;
+	hist_all_el_delta_theta->Fill(delta_theta);
+	hist_all_el_delta_theta_p->Fill(ele[select_ele].P(), delta_theta);
+	//hist_all_el_delta_p_theta->Fill(ele[select_ele].E(), delta_energy);
+
+	hist_all_el_delta_theta_theta->Fill(meas_theta, delta_theta);
+	hist_all_el_delta_p_theta->Fill(meas_theta, delta_energy);
+
+	// measured resolution per sector
+ 	h_el_delta_theta_sect[el_sect-1]->Fill( meas_theta, delta_theta );
+	h_el_delta_p_sect[el_sect-1]->Fill( measured_energy, delta_energy );
+     
+	hist_all_el_energy->Fill(delta_energy);
+
        
 	hist_W_vs_y->Fill(W,y);
 	hist_W_vs_theta->Fill(W,ele[select_ele].Theta()*180/Pival);  
@@ -1282,7 +1356,6 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    if(ele[select_ele].P() > 0) hist_electron_p_vs_phi->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].P());
 	    if(ele[select_ele].Theta() > 0 && ele[select_ele].Phi() != 0) hist_electron_theta_vs_phi->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
 
-	    hist_all_el_energy->Fill(delta_energy);
 	    h_el_w_sect[el_sect]->Fill( W );
 	    h_el_p_sect_final[el_sect]->Fill(ele[select_ele].P()); 
 	    h_el_theta_sect_final[el_sect]->Fill(ele[select_ele].Theta()*180.0/Pival); 
@@ -1290,6 +1363,16 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	    h_el_ptheta_sect_final[el_sect]->Fill( ele[select_ele].P(), ele[select_ele].Theta()*180/Pival );   
 	    h_el_phitheta_sect_final[el_sect]->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival);
 	    h_el_phitheta_final->Fill(ele[select_ele].Phi()*180/Pival, ele[select_ele].Theta()*180/Pival); 	    
+
+	    // measured resolution per sector final events
+	    h_el_delta_theta_sect_final[el_sect-1]->Fill( meas_theta, delta_theta );
+	    h_el_delta_p_sect_final[el_sect-1]->Fill( measured_energy, delta_energy );
+
+	    double meas_beam_energy =  1.0/( (1.0/ele[select_ele].E()) + (1.0/(m_p))*(1.0 - cos(ele[select_ele].Theta()) ) );
+	    //std::cout << " meas beam energy " << meas_beam_energy <<  std::endl;
+	    hist_all_el_meas_beam->Fill(meas_beam_energy);
+	    h_el_meas_beam_sect_final[el_sect-1]->Fill(meas_beam_energy);
+	    
 	    //
 
 	    // acceptance related plots to define fiducial regions
@@ -1443,6 +1526,11 @@ Int_t selector_elastic( Char_t *inFile, Char_t *outputfile, int run, std::string
 	  h_el_pw_accp_gen[0]->Fill(mc_ele[0].P(),gen_W);
 	  h_el_phitheta_accp_gen->Fill(mc_ele[0].Phi()*180/Pival, mc_ele[0].Theta()*180/Pival);	 
 
+	  //adding resolution plots here
+	  int rec_sect = ele_sector[select_ele];
+	  h_res_el_theta[rec_sect-1]->Fill( ele[select_ele].Theta()*180/Pival - mc_ele[0].Theta()*180/Pival ); 
+	  h_res_el_phi[rec_sect-1]->Fill( ele[select_ele].Phi()*180/Pival - mc_ele[0].Phi()*180/Pival ); 
+	  h2_res_el_phi_vs_p[rec_sect-1]->Fill(mc_ele[0].P(), ele[select_ele].Phi()*180/Pival - mc_ele[0].Phi()*180/Pival ); 
 
 	  // adding bin migration information here
 	  for( int bg = 1; bg <= 20; bg++ ){

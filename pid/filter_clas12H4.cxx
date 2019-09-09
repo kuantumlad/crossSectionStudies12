@@ -76,7 +76,7 @@ using namespace ROOT::Math;
 int process_Events = -1;
 //int process_Events = 2000000;
 
-float Ebeam = 7.564; //6.42313;    //7.546;//= 6.42313;
+float Ebeam = 10.594;///6.42313;    //7.546;//= 6.42313;
 //float Ebeam = 2.22193;
 //float Ebeam = 10.594;
 //float Ebeam = 2.221;//10.6;
@@ -84,12 +84,12 @@ float Ebeam = 7.564; //6.42313;    //7.546;//= 6.42313;
 /// select the field polarity (relevant for fiducial cuts, sampling fraction and vertex cuts)
 /// only set 1 as true!
 
-bool inbending  = false;//false;//true;
-bool outbending = true;//false;
+bool inbending  = true;//false;//true;
+bool outbending = false;//false;
 
 ///
 
-bool simulation  = true;
+bool simulation  = false;
 
 ///
 

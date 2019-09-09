@@ -1442,37 +1442,40 @@ Int_t selector_dis( Char_t *inFile, Char_t *outputfile, int run, std::string dat
 
 
 	  // adding bin migration information here
-	  for( int bg = 1; bg <= 20; bg++ ){
-	    //get bin numbers for a theta 
-	    int gen_bin =  h_mig_el_theta[bg-1]->FindBin(mc_ele[0].Theta()*180/Pival);
-	    int rec_bin =  h_mig_el_theta[bg-1]->FindBin(ele[select_ele].Theta()*180/Pival);
-	    // update current bin content value
-	    int current_bin_content = h_mig_recon_gen_el_theta[bg-1]->GetBinContent(gen_bin, rec_bin);
-	    h_mig_recon_gen_el_theta[bg-1]->SetBinContent(gen_bin, rec_bin, current_bin_content+1);
-	    double resolution_theta = ele[select_ele].Theta()*180/Pival - mc_ele[0].Theta()*180/Pival;
-	    p_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta, 1.0);
-	    h_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta);
+	  if (k < 10000 ){
+	    for( int bg = 1; bg <= 20; bg++ ){
+	      //get bin numbers for a theta 
+	      int gen_bin =  h_mig_el_theta[bg-1]->FindBin(mc_ele[0].Theta()*180/Pival);
+	      int rec_bin =  h_mig_el_theta[bg-1]->FindBin(ele[select_ele].Theta()*180/Pival);
+	      // update current bin content value
+	      int current_bin_content = h_mig_recon_gen_el_theta[bg-1]->GetBinContent(gen_bin, rec_bin);
+	      h_mig_recon_gen_el_theta[bg-1]->SetBinContent(gen_bin, rec_bin, current_bin_content+1);
+	      double resolution_theta = ele[select_ele].Theta()*180/Pival - mc_ele[0].Theta()*180/Pival;
+	      p_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta, 1.0);
+	      h_mig_resolution_gen[bg-1]->Fill( mc_ele[0].Theta()*180/Pival, resolution_theta);
 
 
 
-	    for( int xx = 0; xx < h_el_purity_wq2_num.size(); xx++ ){
-	      for( int yy = 0; yy < h_el_purity_wq2_denom[xx].size(); yy++ ){
- 		int gen_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(gen_W,gen_q2);
- 		int rec_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(kin_W(ele[select_ele]), kin_Q2(ele[select_ele]));
-		if( gen_bin_purity_q2w == rec_bin_purity_q2w ){
-		  h_el_purity_wq2_num[xx][yy]->SetBinContent( rec_bin_purity_q2w, h_el_purity_wq2_num[xx][yy]->GetBinContent(rec_bin_purity_q2w) + 1);
-		  //std::cout << " for bin config " << xx << " " << yy << " rec bin " << rec_bin_purity_q2w  << " gen bin " << gen_bin_purity_q2w << std::endl;
+	      for( int xx = 0; xx < h_el_purity_wq2_num.size(); xx++ ){
+		for( int yy = 0; yy < h_el_purity_wq2_denom[xx].size(); yy++ ){
+		  int gen_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(gen_W,gen_q2);
+		  int rec_bin_purity_q2w = h_el_purity_wq2_num[xx][yy]->FindBin(kin_W(ele[select_ele]), kin_Q2(ele[select_ele]));
+		  if( gen_bin_purity_q2w == rec_bin_purity_q2w ){
+		    h_el_purity_wq2_num[xx][yy]->SetBinContent( rec_bin_purity_q2w, h_el_purity_wq2_num[xx][yy]->GetBinContent(rec_bin_purity_q2w) + 1);
+		    //std::cout << " for bin config " << xx << " " << yy << " rec bin " << rec_bin_purity_q2w  << " gen bin " << gen_bin_purity_q2w << std::endl;
+		  }
+		  h_el_purity_wq2_denom[xx][yy]->SetBinContent( gen_bin_purity_q2w, h_el_purity_wq2_denom[xx][yy]->GetBinContent(gen_bin_purity_q2w) + 1);
 		}
-		h_el_purity_wq2_denom[xx][yy]->SetBinContent( gen_bin_purity_q2w, h_el_purity_wq2_denom[xx][yy]->GetBinContent(gen_bin_purity_q2w) + 1);
 	      }
-	    }
 	    
 	    
 
- 	    if( gen_bin == rec_bin ){
-	      h_mig_el_theta[bg-1]->SetBinContent(rec_bin, h_mig_el_theta[bg-1]->GetBinContent(rec_bin)+1);
+	      if( gen_bin == rec_bin ){
+		h_mig_el_theta[bg-1]->SetBinContent(rec_bin, h_mig_el_theta[bg-1]->GetBinContent(rec_bin)+1);
+	      }
+
 	    }
-	  }	      	  
+	  }
 	}
       }
     }

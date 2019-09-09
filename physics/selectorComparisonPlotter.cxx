@@ -738,6 +738,31 @@ int selectorComparisonPlotter( const char* inFileData, const char* inFileMC, con
     
 
   //
+  TCanvas *c_dif = new TCanvas("c_diff","c_diff",900,900);
+  c_dif->cd(0);  
+  //TH1D *h_data_phi2 = (TH1D*)fData->Get("particle_histograms_selected/hist_electron_phi");
+  TH1D *h_sim_phi2 = (TH1D*)fSim->Get("particle_histograms_selected/hist_electron_phi");
+  TH1D *h_mc_phi2 = (TH1D*)fMC->Get("mc/hist_mc_all_electron_phi");
+  
+  h_mc_phi2->Add(h_sim_phi2,-1.0);
+
+  double dif_phi_scale_factor = h_sim_phi->GetMaximum()/h_mc_phi2->GetMaximum();
+
+  //h_sim_phi2->Scale(dif_phi_scale_factor);
+
+  h_mc_phi2->SetLineColor(kBlack);
+  //h_sim_phi2->SetLineColor(kRed);
+  //h_mc_phi->SetLineColor(kBlue);
+  h_mc_phi2->Draw("HIST"); //diff
+  //h_mc_phi->Draw("HIST SAME");
+  //h_sim_phi2->Draw("HIST SAME");
+
+  TLegend *l9 = new TLegend(0.11,0.7,0.48,0.89);
+  l9->SetBorderSize(0);
+  l9->AddEntry(h_mc_phi2,"GEN-REC");
+  l9->Draw();
+
+  c_dif->SaveAs("difference_phi.pdf");
 
   return 0;
 }
